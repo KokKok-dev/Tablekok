@@ -36,6 +36,7 @@ ext {
 dependencies {
 	implementation 'com.github.KokKok-dev:Tablekok-common:1.0.1'
 
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 //	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 //	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
