@@ -34,7 +34,7 @@ public class CategoryControllerV1 {
 	) {
 		// category 생성
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-			.path("")
+			.path("/{categoryId}")
 			.buildAndExpand(UUID.randomUUID())
 			.toUri();
 
