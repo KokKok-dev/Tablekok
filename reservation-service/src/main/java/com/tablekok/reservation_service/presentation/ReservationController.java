@@ -49,7 +49,8 @@ public class ReservationController {
 
 	// 예약 인원수 변경
 	@PatchMapping("/{reservationId}")
-	public ResponseEntity<ApiResponse<Void>> updateHeadcount(@PathVariable("reservationId") UUID reservationId, @Valid @RequestBody UpdateHeadcountRequest request) {
+	public ResponseEntity<ApiResponse<Void>> updateHeadcount(@PathVariable("reservationId") UUID reservationId,
+		@Valid @RequestBody UpdateHeadcountRequest request) {
 		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
 
 		reservationService.updateHeadcount(userId, reservationId, request.headcount());
@@ -57,24 +58,15 @@ public class ReservationController {
 			ApiResponse.success("예약 인원 변경 성공", HttpStatus.OK));
 	}
 
-	// 예약 취소(고객)
+	// 예약 취소. 고객, 오너 전략패턴 적용
 	@PatchMapping("/{reservationId}/cancel")
 	public ResponseEntity<ApiResponse<Void>> cancelForCustomer(@PathVariable("reservationId") UUID reservationId) {
 		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
+		String userRole = "CUSTOMER";     //TODO 추후 유저id 구현
 
-		reservationService.cancelForCustomer(userId, reservationId);
+		reservationService.cancelForCustomer(userId, userRole, reservationId);
 		return ResponseEntity.ok(
 			ApiResponse.success("예약 취소(고객) 성공", HttpStatus.OK));
-	}
-
-	// 예약 취소(오너)
-	@PatchMapping("/owner/{reservationId}/cancel")
-	public ResponseEntity<ApiResponse<Void>> cancelForOwner(@PathVariable("reservationId") UUID reservationId) {
-		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
-
-		reservationService.cancelForOwner(userId, reservationId);
-		return ResponseEntity.ok(
-			ApiResponse.success("예약 취소(오너) 성공", HttpStatus.OK));
 	}
 
 	// 예약 노쇼(오너)
@@ -93,16 +85,21 @@ public class ReservationController {
 		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
 
 		return ResponseEntity.ok(
-			ApiResponse.success("예약 조회(고객) 성공", GetReservationsResponse.toPage(reservationService.getReservationsForCustomer(userId, pageable)), HttpStatus.OK));
+			ApiResponse.success("예약 조회(고객) 성공",
+				GetReservationsResponse.toPage(reservationService.getReservationsForCustomer(userId, pageable)),
+				HttpStatus.OK));
 	}
 
 	// 예약 조회(오너)
 	@GetMapping("/owner")
-	public ResponseEntity<ApiResponse<Page<GetReservationsResponse>>> getReservationsForOwner(@RequestParam UUID storeId, Pageable pageable) {
+	public ResponseEntity<ApiResponse<Page<GetReservationsResponse>>> getReservationsForOwner(
+		@RequestParam UUID storeId, Pageable pageable) {
 		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
 
 		return ResponseEntity.ok(
-			ApiResponse.success("예약 조회(오너) 성공", GetReservationsResponse.toPage(reservationService.getReservationsForOwner(userId, storeId, pageable)), HttpStatus.OK));
+			ApiResponse.success("예약 조회(오너) 성공",
+				GetReservationsResponse.toPage(reservationService.getReservationsForOwner(userId, storeId, pageable)),
+				HttpStatus.OK));
 	}
 
 }
