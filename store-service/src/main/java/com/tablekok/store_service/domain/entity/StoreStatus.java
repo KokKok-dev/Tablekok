@@ -6,11 +6,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum StoreStatus {
-	OPENING("OPENING"),
-	CLOSED("CLOSED"),
-	BREAK("BREAK"),
-	SHUTDOWN("SHUTDOWN");
+	OPENING("영업중"),
+	CLOSED("마감 (당일 영업 종료)"),
+	BREAK("휴업중 (일시적)"),
+	SHUTDOWN("폐업 (영구적)");
 
-	private final String value;
+	private final String description;
 
 }
