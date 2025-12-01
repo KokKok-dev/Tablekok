@@ -19,7 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.store_service.presentation.dto.request.CreateCategoryRequest;
-import com.tablekok.store_service.presentation.dto.response.CategoryResponse;
+import com.tablekok.store_service.presentation.dto.response.GetCategoryResponse;
 import com.tablekok.util.PageableUtils;
 
 import jakarta.validation.Valid;
@@ -43,21 +43,21 @@ public class CategoryController {
 	}
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<Page<CategoryResponse>>> getCategories(
+	public ResponseEntity<ApiResponse<Page<GetCategoryResponse>>> getCategories(
 		Pageable pageable
 	) {
 		// 모든 카테고리 조회
 		pageable = PageableUtils.normalize(pageable);
 
-		List<CategoryResponse> categories = new ArrayList<>();
+		List<GetCategoryResponse> categories = new ArrayList<>();
 		for (int i = 1; i <= 5; i++) {
-			categories.add(new CategoryResponse(
+			categories.add(new GetCategoryResponse(
 				UUID.randomUUID(),
 				"카테고리 " + i
 			));
 		}
 
-		Page<CategoryResponse> dummyPage = new PageImpl<>(
+		Page<GetCategoryResponse> dummyPage = new PageImpl<>(
 			categories,
 			pageable,
 			5
