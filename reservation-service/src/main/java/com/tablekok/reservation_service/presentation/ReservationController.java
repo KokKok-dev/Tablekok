@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
-import com.tablekok.dto.PageResponse;
 import com.tablekok.reservation_service.application.ReservationService;
 import com.tablekok.reservation_service.presentation.dto.request.CreateReservationRequest;
+import com.tablekok.reservation_service.presentation.dto.request.UpdateHeadcountRequest;
 import com.tablekok.reservation_service.presentation.dto.response.GetReservationsResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -49,10 +49,10 @@ public class ReservationController {
 
 	// 예약 인원수 변경
 	@PatchMapping("/{reservationId}")
-	public ResponseEntity<ApiResponse<Void>> updateHeadcount(@PathVariable("reservationId") UUID reservationId, @RequestParam Integer headcount) {
+	public ResponseEntity<ApiResponse<Void>> updateHeadcount(@PathVariable("reservationId") UUID reservationId, @Validated @RequestBody UpdateHeadcountRequest request) {
 		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
 
-		reservationService.updateHeadcount(userId, reservationId, headcount);
+		reservationService.updateHeadcount(userId, reservationId, request.headcount());
 		return ResponseEntity.ok(
 			ApiResponse.success("예약 인원 변경 성공", HttpStatus.OK));
 	}
@@ -97,8 +97,8 @@ public class ReservationController {
 	}
 
 	// 예약 조회(오너)
-	@GetMapping("/owner/{storeId}")
-	public ResponseEntity<ApiResponse<Page<GetReservationsResponse>>> getReservationsForOwner(@PathVariable("storeId") UUID storeId, Pageable pageable) {
+	@GetMapping("/owner")
+	public ResponseEntity<ApiResponse<Page<GetReservationsResponse>>> getReservationsForOwner(@RequestParam UUID storeId, Pageable pageable) {
 		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
 
 		return ResponseEntity.ok(
