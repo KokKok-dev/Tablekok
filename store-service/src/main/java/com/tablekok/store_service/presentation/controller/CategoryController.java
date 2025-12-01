@@ -26,7 +26,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/v1/categories")
-public class CategoryControllerV1 {
+public class CategoryController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<Void>> createCategory(
