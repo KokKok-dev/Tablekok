@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,22 +29,14 @@ public record UpdateStoreRequest(
 	String description,
 
 	@NotNull(message = "총 수용 인원수는 필수입니다.")
-	@Min(1)
+	@Min(value = 1, message = "최소 1명 이상입니다.")
 	Integer totalCapacity,
 
 	@NotNull(message = "식사 회전율은 필수입니다.")
-	@Min(1)
+	@Min(value = 1, message = "최소 1분 이상입니다.")
 	Integer turnoverRateMinutes,
 
 	String imageUrl,
-
-	@NotNull(message = "최소 인원수는 필수입니다.")
-	@Min(1)
-	Integer minHeadcount,
-
-	@NotNull(message = "최대 인원수는 필수입니다.")
-	@Max(200)
-	Integer maxHeadcount,
 
 	@NotNull(message = "운영 시간 정보는 필수입니다.")
 	@Size(min = 1, message = "최소 하나의 운영 시간 정보가 필요합니다.")
