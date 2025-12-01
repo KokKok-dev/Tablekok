@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,6 +59,16 @@ public class StoreController {
 		// 음식점 상태 변경
 		return ResponseEntity.ok(
 			ApiResponse.success("음식점 상태 수정 성공", HttpStatus.OK)
+		);
+	}
+
+	@DeleteMapping("/{storeId}")
+	public ResponseEntity<ApiResponse<Void>> deleteStore(
+		@PathVariable UUID storeId
+	) {
+		// 음식점 삭제
+		return ResponseEntity.ok(
+			ApiResponse.success("음식점 삭제 성공", HttpStatus.OK)
 		);
 	}
 
