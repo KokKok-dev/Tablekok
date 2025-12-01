@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +23,7 @@ import com.tablekok.reservation_service.presentation.dto.request.CreateReservati
 import com.tablekok.reservation_service.presentation.dto.request.UpdateHeadcountRequest;
 import com.tablekok.reservation_service.presentation.dto.response.GetReservationsResponse;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -34,7 +34,7 @@ public class ReservationController {
 
 	// 예약 생성(예약 접수)
 	@PostMapping
-	public ResponseEntity<ApiResponse<Void>> createReservation(@Validated @RequestBody CreateReservationRequest request) {
+	public ResponseEntity<ApiResponse<Void>> createReservation(@Valid @RequestBody CreateReservationRequest request) {
 		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
 
 		UUID reservationId = reservationService.createReservation(request.toParam(userId));
@@ -49,7 +49,7 @@ public class ReservationController {
 
 	// 예약 인원수 변경
 	@PatchMapping("/{reservationId}")
-	public ResponseEntity<ApiResponse<Void>> updateHeadcount(@PathVariable("reservationId") UUID reservationId, @Validated @RequestBody UpdateHeadcountRequest request) {
+	public ResponseEntity<ApiResponse<Void>> updateHeadcount(@PathVariable("reservationId") UUID reservationId, @Valid @RequestBody UpdateHeadcountRequest request) {
 		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
 
 		reservationService.updateHeadcount(userId, reservationId, request.headcount());
