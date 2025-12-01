@@ -5,11 +5,14 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 import com.tablekok.reservation_service.application.dto.param.CreateReservationParam;
+import com.tablekok.reservation_service.domain.vo.ReservationDateTime;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
+@Builder
 public record CreateReservationRequest(
 
 	@NotNull(message = "가게 ID는 필수입니다.")
@@ -29,7 +32,18 @@ public record CreateReservationRequest(
 	Integer deposit
 
 ) {
+	// 서비스로 전달할 파람으로
 	public CreateReservationParam toParam(UUID userId) {
-		return CreateReservationParam.of(userId, storeId, reservationDate, reservationTime, headcount, deposit);
+		return CreateReservationParam.builder()
+			.userId(userId)
+			.storeId(storeId)
+			.reservationDateTime(ReservationDateTime.builder()
+				.reservationDate(reservationDate)
+				.reservationTime(reservationTime)
+				.build()
+			)
+			.headcount(headcount)
+			.deposit(deposit)
+			.build();
 	}
 }

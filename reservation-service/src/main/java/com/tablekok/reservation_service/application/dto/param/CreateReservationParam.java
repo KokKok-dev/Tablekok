@@ -1,12 +1,13 @@
 package com.tablekok.reservation_service.application.dto.param;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.UUID;
 
 import com.tablekok.reservation_service.domain.entity.Reservation;
 import com.tablekok.reservation_service.domain.vo.ReservationDateTime;
 
+import lombok.Builder;
+
+@Builder
 public record CreateReservationParam(
 	UUID userId,
 	UUID storeId,
@@ -14,11 +15,7 @@ public record CreateReservationParam(
 	Integer headcount,
 	Integer deposit
 ) {
-	public static CreateReservationParam of(UUID userId, UUID storeId, LocalDate reservationDate, LocalTime reservationTime, Integer headcount, Integer deposit) {
-		return new CreateReservationParam(
-			userId, storeId, ReservationDateTime.of(reservationDate, reservationTime), headcount, deposit);
-	}
-
+	// Reservation 엔티티로
 	public Reservation toEntity() {
 		return Reservation.of(userId, storeId, reservationDateTime, headcount, deposit);
 	}

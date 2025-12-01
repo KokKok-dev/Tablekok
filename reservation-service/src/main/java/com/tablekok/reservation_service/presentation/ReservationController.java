@@ -93,7 +93,7 @@ public class ReservationController {
 		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
 
 		return ResponseEntity.ok(
-			ApiResponse.success("예약 인원 변경 성공", GetReservationsResponse.toPage(reservationService.getReservationsForCustomer(userId, pageable)), HttpStatus.OK));
+			ApiResponse.success("예약 조회(고객) 성공", GetReservationsResponse.toPage(reservationService.getReservationsForCustomer(userId, pageable)), HttpStatus.OK));
 	}
 
 	// 예약 조회(오너)
@@ -102,9 +102,7 @@ public class ReservationController {
 		UUID userId = UUID.randomUUID(); //TODO 추후 유저id 구현
 
 		return ResponseEntity.ok(
-			ApiResponse.success("예약 인원 변경 성공", GetReservationsResponse.toPage(reservationService.getReservationsForOwner(userId, storeId, pageable)), HttpStatus.OK));
+			ApiResponse.success("예약 조회(오너) 성공", GetReservationsResponse.toPage(reservationService.getReservationsForOwner(userId, storeId, pageable)), HttpStatus.OK));
 	}
-
-
 
 }

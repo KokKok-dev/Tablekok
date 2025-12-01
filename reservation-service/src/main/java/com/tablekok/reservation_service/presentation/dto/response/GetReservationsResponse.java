@@ -8,6 +8,9 @@ import org.springframework.data.domain.Page;
 
 import com.tablekok.reservation_service.domain.entity.Reservation;
 
+import lombok.Builder;
+
+@Builder
 public record GetReservationsResponse(
 	UUID storeId,
 	LocalDate reservationDate,
@@ -16,13 +19,14 @@ public record GetReservationsResponse(
 	String reservationStatus
 ) {
 	public static Page<GetReservationsResponse> toPage(Page<Reservation> reservations) {
-		return reservations.map(reservation -> new GetReservationsResponse(
-			reservation.getStoreId(),
-			reservation.getReservationDateTime().getReservationDate(),
-			reservation.getReservationDateTime().getReservationTime(),
-			reservation.getHeadcount(),
-			reservation.getReservationStatus().name()
-		));
+		return reservations.map(reservation -> GetReservationsResponse.builder()
+			.storeId(reservation.getStoreId())
+			.reservationDate(reservation.getReservationDateTime().getReservationDate())
+			.reservationTime(reservation.getReservationDateTime().getReservationTime())
+			.headcount(reservation.getHeadcount())
+			.reservationStatus(reservation.getReservationStatus().name())
+			.build()
+		);
 
 	}
 }
