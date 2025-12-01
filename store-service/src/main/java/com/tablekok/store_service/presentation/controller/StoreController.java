@@ -5,7 +5,9 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreRequest;
+import com.tablekok.store_service.presentation.dto.request.UpdateStoreRequest;
 
 import jakarta.validation.Valid;
 
@@ -33,4 +36,16 @@ public class StoreController {
 		return ResponseEntity.created(location)
 			.body(ApiResponse.success("음식점 생성 성공", HttpStatus.CREATED));
 	}
+
+	@PutMapping("/{storeId}")
+	public ResponseEntity<ApiResponse<Void>> updateStore(
+		@PathVariable UUID storeId,
+		@RequestBody UpdateStoreRequest requestDto
+	) {
+		// 음식점 정보 수정
+		return ResponseEntity.ok(
+			ApiResponse.success("음식점 정보 수정 성공", HttpStatus.OK)
+		);
+	}
+
 }
