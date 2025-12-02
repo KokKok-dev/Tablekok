@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import com.tablekok.store_service.domain.entity.Category;
 
 public interface CategoryRepository {
-	void save(Category category);
+	Category save(Category category);
 
 	boolean existsByName(String name);
 

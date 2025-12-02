@@ -21,11 +21,11 @@ public class CategoryService {
 	private final CategoryRepository categoryRepository;
 
 	@Transactional
-	public void createCategory(CreateCategoryParam param) {
+	public Category createCategory(CreateCategoryParam param) {
 		validateCategoryNameDuplicate(param);
 
 		Category category = param.toEntity();
-		categoryRepository.save(category);
+		return categoryRepository.save(category);
 	}
 
 	@Transactional(readOnly = true)
