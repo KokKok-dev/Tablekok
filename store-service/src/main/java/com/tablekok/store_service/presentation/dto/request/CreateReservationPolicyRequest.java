@@ -9,15 +9,17 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateReservationPolicyRequest(
+	@NotNull(message = "예약 오픈 날짜는 필수입니다.")
 	@Range(min = 1, max = 31, message = "예약 오픈 날짜는 1일부터 31일 사이여야 합니다.")
-	int monthlyOpenDay,
+	Integer monthlyOpenDay,
 
 	@NotNull(message = "예약 오픈 시간은 필수입니다.")
 	@DateTimeFormat(pattern = "HH:mm")
 	LocalTime openTime,
 
+	@NotNull(message = "예약 간격은 필수입니다.")
 	@Min(value = 1, message = "예약 간격은 최소 1분 이상이어야 합니다.")
-	int reservationInterval,
+	Integer reservationInterval,
 
 	@NotNull(message = "예약 받을 시작 시간은 필수입니다.")
 	@DateTimeFormat(pattern = "HH:mm")
@@ -27,18 +29,23 @@ public record CreateReservationPolicyRequest(
 	@DateTimeFormat(pattern = "HH:mm")
 	LocalTime dailyReservationEndTime,
 
+	@NotNull(message = "예약 최소 인원수는 필수입니다.")
 	@Min(value = 1, message = "예약 최소 인원수는 1명 이상이어야 합니다.")
-	int minHeadCount,
+	Integer minHeadCount,
 
+	@NotNull(message = "예약 최대 인원수는 필수입니다.")
 	@Min(value = 1, message = "예약 최대 인원수는 1명 이상이어야 합니다.")
-	int maxHeadcount,
+	Integer maxHeadcount,
 
-	boolean isDepositRequired,
+	@NotNull(message = "예약금 필수 여부는 필수입니다.")
+	Boolean isDepositRequired,
 
+	@NotNull(message = "예약금은 필수입니다.")
 	@Min(value = 0, message = "예약금은 0원 이상이어야 합니다.")
-	int depositAmount,
+	Integer depositAmount,
 
-	boolean isActive
+	@NotNull(message = "정책 활성화 여부는 필수입니다.")
+	Boolean isActive
 
 ) {
 }
