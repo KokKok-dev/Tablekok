@@ -8,5 +8,7 @@ import com.tablekok.store_service.domain.entity.Category;
 public interface CategoryRepository {
 	void save(Category category);
 
+	boolean existsByName(String name);
+
 	Page<Category> findAll(Pageable pageable);
 }

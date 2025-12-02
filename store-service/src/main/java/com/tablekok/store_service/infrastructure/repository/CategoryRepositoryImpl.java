@@ -20,6 +20,11 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	}
 
 	@Override
+	public boolean existsByName(String name) {
+		return categoryJpaRepository.existsByName(name);
+	}
+
+	@Override
 	public Page<Category> findAll(Pageable pageable) {
 		return categoryJpaRepository.findAll(pageable);
 	}
