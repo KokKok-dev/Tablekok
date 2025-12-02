@@ -1,7 +1,6 @@
 package com.tablekok.store_service.presentation.controller;
 
 import java.net.URI;
-import java.time.LocalTime;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -44,24 +43,7 @@ public class ReservationPolicyController {
 	public ResponseEntity<ApiResponse<GetReservationPolicyResponse>> getReservationPolicy(
 		@PathVariable UUID storeId
 	) {
-		LocalTime openTime = LocalTime.of(10, 0); // 10:00
-		LocalTime dailyStart = LocalTime.of(12, 0); // 12:00
-		LocalTime dailyEnd = LocalTime.of(21, 0); // 21:00
-
-		GetReservationPolicyResponse responseDto = new GetReservationPolicyResponse(
-			UUID.fromString("8b5182e7-9d7a-4c2f-b4c6-e6d8a7f9c2d1"),
-			storeId,
-			15,
-			openTime,
-			30,
-			dailyStart,
-			dailyEnd,
-			2,
-			8,
-			true,
-			15000,
-			true
-		);
+		GetReservationPolicyResponse responseDto = GetReservationPolicyResponse.from();
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("예약정책 조회 성공", responseDto, HttpStatus.OK));
 	}
