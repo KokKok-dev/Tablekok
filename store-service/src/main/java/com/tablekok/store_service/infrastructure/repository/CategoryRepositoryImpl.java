@@ -1,5 +1,7 @@
 package com.tablekok.store_service.infrastructure.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.tablekok.store_service.domain.entity.Category;
@@ -15,5 +17,10 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	@Override
 	public Category save(Category category) {
 		return categoryJpaRepository.save(category);
+	}
+
+	@Override
+	public Page<Category> findAll(Pageable pageable) {
+		return categoryJpaRepository.findAll(pageable);
 	}
 }

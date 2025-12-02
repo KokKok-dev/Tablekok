@@ -1,12 +1,9 @@
 package com.tablekok.store_service.presentation.controller;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +16,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.store_service.application.service.CategoryService;
+import com.tablekok.store_service.domain.entity.Category;
 import com.tablekok.store_service.presentation.dto.request.CreateCategoryRequest;
 import com.tablekok.store_service.presentation.dto.response.GetCategoryResponse;
-import com.tablekok.util.PageableUtils;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,25 +48,10 @@ public class CategoryController {
 	public ResponseEntity<ApiResponse<Page<GetCategoryResponse>>> getCategories(
 		Pageable pageable
 	) {
-		// 모든 카테고리 조회
-		pageable = PageableUtils.normalize(pageable);
-
-		List<GetCategoryResponse> categories = new ArrayList<>();
-		for (int i = 1; i <= 5; i++) {
-			categories.add(new GetCategoryResponse(
-				UUID.randomUUID(),
-				"카테고리 " + i
-			));
-		}
-
-		Page<GetCategoryResponse> dummyPage = new PageImpl<>(
-			categories,
-			pageable,
-			5
-		);
-
+		Page<Category> categoryPage = categoryService.findAllCategories(pageable);
+		Page<GetCategoryResponse> responsePage = categoryPage.map(GetCategoryResponse::from);
 		return ResponseEntity.ok(
-			ApiResponse.success("카테고리 목록 조회 성공", dummyPage, HttpStatus.OK)
+			ApiResponse.success("카테고리 목록 조회 성공", responsePage, HttpStatus.OK)
 		);
 	}
 
