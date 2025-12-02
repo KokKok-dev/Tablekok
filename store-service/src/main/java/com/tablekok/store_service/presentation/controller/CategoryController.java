@@ -18,21 +18,26 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.store_service.application.service.CategoryService;
 import com.tablekok.store_service.presentation.dto.request.CreateCategoryRequest;
 import com.tablekok.store_service.presentation.dto.response.GetCategoryResponse;
 import com.tablekok.util.PageableUtils;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/v1/categories")
 public class CategoryController {
+
+	private final CategoryService categoryService;
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<Void>> createCategory(
 		@Valid @RequestBody CreateCategoryRequest requestDto
 	) {
-		// category 생성
+		categoryService.createCategory(requestDto.toParam());
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{categoryId}")
 			.buildAndExpand(UUID.randomUUID())
