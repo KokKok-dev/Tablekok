@@ -2,7 +2,7 @@ package com.tablekok.store_service.presentation.dto.response;
 
 import java.util.UUID;
 
-import com.tablekok.store_service.domain.entity.Category;
+import com.tablekok.store_service.application.dto.result.FindCategoryResult;
 
 import lombok.Builder;
 
@@ -12,10 +12,10 @@ public record GetCategoryResponse(
 	String name
 ) {
 
-	public static GetCategoryResponse from(Category category) {
+	public static GetCategoryResponse from(FindCategoryResult result) {
 		return GetCategoryResponse.builder()
-			.categoryId(category.getId())
-			.name(category.getName())
+			.categoryId(result.categoryId())
+			.name(result.name())
 			.build();
 	}
 }

@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.exception.AppException;
 import com.tablekok.store_service.application.dto.param.CreateCategoryParam;
+import com.tablekok.store_service.application.dto.result.FindCategoryResult;
 import com.tablekok.store_service.application.exception.CategoryErrorCode;
 import com.tablekok.store_service.domain.entity.Category;
 import com.tablekok.store_service.domain.repository.CategoryRepository;
@@ -29,9 +30,10 @@ public class CategoryService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<Category> findAllCategories(Pageable pageable) {
+	public Page<FindCategoryResult> getCategories(Pageable pageable) {
 		pageable = PageableUtils.normalize(pageable);
-		return categoryRepository.findAll(pageable);
+		Page<Category> categoryPage = categoryRepository.findAll(pageable);
+		return categoryPage.map(FindCategoryResult::from);
 	}
 
 	private void validateCategoryNameDuplicate(CreateCategoryParam param) {

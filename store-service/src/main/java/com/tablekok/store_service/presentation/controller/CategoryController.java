@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.store_service.application.dto.result.FindCategoryResult;
 import com.tablekok.store_service.application.service.CategoryService;
 import com.tablekok.store_service.domain.entity.Category;
 import com.tablekok.store_service.presentation.dto.request.CreateCategoryRequest;
@@ -47,7 +48,7 @@ public class CategoryController {
 	public ResponseEntity<ApiResponse<Page<GetCategoryResponse>>> getCategories(
 		Pageable pageable
 	) {
-		Page<Category> categoryPage = categoryService.findAllCategories(pageable);
+		Page<FindCategoryResult> categoryPage = categoryService.getCategories(pageable);
 		Page<GetCategoryResponse> responsePage = categoryPage.map(GetCategoryResponse::from);
 		return ResponseEntity.ok(
 			ApiResponse.success("카테고리 목록 조회 성공", responsePage, HttpStatus.OK)
