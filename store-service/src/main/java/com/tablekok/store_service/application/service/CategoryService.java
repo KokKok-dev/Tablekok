@@ -3,6 +3,7 @@ package com.tablekok.store_service.application.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.exception.AppException;
 import com.tablekok.store_service.application.dto.param.CreateCategoryParam;
@@ -19,6 +20,7 @@ public class CategoryService {
 
 	private final CategoryRepository categoryRepository;
 
+	@Transactional
 	public void createCategory(CreateCategoryParam param) {
 		validateCategoryNameDuplicate(param);
 
@@ -26,6 +28,7 @@ public class CategoryService {
 		categoryRepository.save(category);
 	}
 
+	@Transactional(readOnly = true)
 	public Page<Category> findAllCategories(Pageable pageable) {
 		pageable = PageableUtils.normalize(pageable);
 		return categoryRepository.findAll(pageable);
