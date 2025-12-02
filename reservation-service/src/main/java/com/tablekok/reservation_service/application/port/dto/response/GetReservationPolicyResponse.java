@@ -12,7 +12,8 @@ public record GetReservationPolicyResponse(
 	LocalDate openDate,    // 다음 달 예약이 풀리는 일
 	LocalTime openTime  // 다음 달 예약이 풀리는 시간
 ) {
-	public ReservationPolicy toVo() {
-		return ReservationPolicy.of(enable, maxPeople, minPeople, openDate, openTime);
+	public static ReservationPolicy toVo(GetReservationPolicyResponse response) {
+		return ReservationPolicy.of(response.enable, response.maxPeople, response.minPeople, response.openDate,
+			response.openTime);
 	}
 }

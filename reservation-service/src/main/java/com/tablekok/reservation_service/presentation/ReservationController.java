@@ -21,7 +21,8 @@ import com.tablekok.dto.ApiResponse;
 import com.tablekok.reservation_service.application.service.ReservationService;
 import com.tablekok.reservation_service.presentation.dto.request.CreateReservationRequest;
 import com.tablekok.reservation_service.presentation.dto.request.UpdateHeadcountRequest;
-import com.tablekok.reservation_service.presentation.dto.response.GetReservationsResponse;
+import com.tablekok.reservation_service.presentation.dto.response.GetReservationsForCustomerResponse;
+import com.tablekok.reservation_service.presentation.dto.response.GetReservationsForOwnerResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -81,24 +82,27 @@ public class ReservationController {
 
 	// 예약 조회(고객)
 	@GetMapping
-	public ResponseEntity<ApiResponse<Page<GetReservationsResponse>>> getReservationsForCustomer(Pageable pageable) {
+	public ResponseEntity<ApiResponse<Page<GetReservationsForCustomerResponse>>> getReservationsForCustomer(
+		Pageable pageable) {
 
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
 		return ResponseEntity.ok(
 			ApiResponse.success("예약 조회(고객) 성공",
-				GetReservationsResponse.toPage(reservationService.getReservationsForCustomer(userId, pageable)),
+				GetReservationsForCustomerResponse.toPage(
+					reservationService.getReservationsForCustomer(userId, pageable)),
 				HttpStatus.OK));
 	}
 
 	// 예약 조회(오너)
 	@GetMapping("/owner")
-	public ResponseEntity<ApiResponse<Page<GetReservationsResponse>>> getReservationsForOwner(
+	public ResponseEntity<ApiResponse<Page<GetReservationsForOwnerResponse>>> getReservationsForOwner(
 		@RequestParam UUID storeId, Pageable pageable) {
 
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
 		return ResponseEntity.ok(
 			ApiResponse.success("예약 조회(오너) 성공",
-				GetReservationsResponse.toPage(reservationService.getReservationsForOwner(userId, storeId, pageable)),
+				GetReservationsForOwnerResponse.toPage(
+					reservationService.getReservationsForOwner(userId, storeId, pageable)),
 				HttpStatus.OK));
 	}
 
