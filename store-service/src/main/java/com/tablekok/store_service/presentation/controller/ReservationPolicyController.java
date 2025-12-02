@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -73,6 +74,15 @@ public class ReservationPolicyController {
 		// 날짜예약 정책 정보 수정
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("예약정책 정보 변경 성공", HttpStatus.OK));
+	}
+
+	@DeleteMapping
+	public ResponseEntity<ApiResponse<Void>> updateReservationPolicyStatus(
+		@PathVariable UUID storeId
+	) {
+		// 날짜예약 정책 삭제
+		return ResponseEntity.ok()
+			.body(ApiResponse.success("예약정책 삭제 성공", HttpStatus.OK));
 	}
 
 }
