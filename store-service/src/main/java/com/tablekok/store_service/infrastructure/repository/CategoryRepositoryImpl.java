@@ -15,8 +15,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	private final CategoryJpaRepository categoryJpaRepository;
 
 	@Override
-	public Category save(Category category) {
-		return categoryJpaRepository.save(category);
+	public void save(Category category) {
+		categoryJpaRepository.save(category);
 	}
 
 	@Override
