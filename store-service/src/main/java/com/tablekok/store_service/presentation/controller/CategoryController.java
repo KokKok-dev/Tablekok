@@ -1,6 +1,7 @@
 package com.tablekok.store_service.presentation.controller;
 
 import java.net.URI;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +17,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.store_service.application.dto.result.FindCategoryResult;
 import com.tablekok.store_service.application.service.CategoryService;
-import com.tablekok.store_service.domain.entity.Category;
 import com.tablekok.store_service.presentation.dto.request.CreateCategoryRequest;
 import com.tablekok.store_service.presentation.dto.response.GetCategoryResponse;
 
@@ -34,10 +34,10 @@ public class CategoryController {
 	public ResponseEntity<ApiResponse<Void>> createCategory(
 		@Valid @RequestBody CreateCategoryRequest requestDto
 	) {
-		Category newCategory = categoryService.createCategory(requestDto.toParam());
+		UUID categoryId = categoryService.createCategory(requestDto.toParam());
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{categoryId}")
-			.buildAndExpand(newCategory.getId())
+			.buildAndExpand(categoryId)
 			.toUri();
 
 		return ResponseEntity.created(location)

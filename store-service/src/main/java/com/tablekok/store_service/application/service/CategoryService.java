@@ -1,5 +1,7 @@
 package com.tablekok.store_service.application.service;
 
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,11 +24,12 @@ public class CategoryService {
 	private final CategoryRepository categoryRepository;
 
 	@Transactional
-	public Category createCategory(CreateCategoryParam param) {
+	public UUID createCategory(CreateCategoryParam param) {
 		validateCategoryNameDuplicate(param);
 
 		Category category = param.toEntity();
-		return categoryRepository.save(category);
+		categoryRepository.save(category);
+		return category.getId();
 	}
 
 	@Transactional(readOnly = true)
