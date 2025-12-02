@@ -6,6 +6,8 @@ import java.util.UUID;
 import com.tablekok.entity.BaseEntity;
 import com.tablekok.reservation_service.domain.vo.ReservationDateTime;
 
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -31,15 +33,23 @@ public class Reservation extends BaseEntity {
 	@Column(name = "reservation_id", columnDefinition = "uuid")
 	private UUID id;
 
+	@Column(name = "user_id", columnDefinition = "uuid", nullable = false)
 	private UUID userId;
 
+	@Column(name = "store_id", columnDefinition = "uuid", nullable = false)
 	private UUID storeId;
 
 	@Embedded
+	@AttributeOverrides({
+		@AttributeOverride(name = "reservationDate", column = @Column(name = "reservation_date", nullable = false)),
+		@AttributeOverride(name = "reservationTime", column = @Column(name = "reservation_time", nullable = false))
+	})
 	private ReservationDateTime reservationDateTime;
 
+	@Column(name = "headcount", nullable = false)
 	private Integer headcount;
 
+	@Column(name = "deposit")
 	private Integer deposit;
 
 	@Enumerated(EnumType.STRING)
