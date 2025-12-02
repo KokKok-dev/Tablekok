@@ -47,24 +47,28 @@ public class Reservation extends BaseEntity {
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private Reservation(
-		UUID userId, UUID storeId, ReservationDateTime reservationDateTime, Integer headcount, Integer deposit) {
+		UUID userId, UUID storeId, ReservationDateTime reservationDateTime, Integer headcount, Integer deposit,
+		ReservationStatus reservationStatus) {
 		this.userId = userId;
 		this.storeId = storeId;
 		this.reservationDateTime = reservationDateTime;
 		this.headcount = headcount;
 		this.deposit = deposit;
-		this.reservationStatus =
-			Reservation.hasDeposit(deposit) ? ReservationStatus.PENDING : ReservationStatus.RESERVED;
+		this.reservationStatus = reservationStatus;
+
 	}
 
 	public static Reservation of(
 		UUID userId, UUID storeId, ReservationDateTime reservationDateTime, Integer headcount, Integer deposit) {
+		ReservationStatus reservationStatus =
+			hasDeposit(deposit) ? ReservationStatus.PENDING : ReservationStatus.RESERVED;
 		return Reservation.builder()
 			.userId(userId)
 			.storeId(storeId)
 			.reservationDateTime(reservationDateTime)
 			.headcount(headcount)
 			.deposit(deposit)
+			.reservationStatus(reservationStatus)
 			.build();
 	}
 

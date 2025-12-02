@@ -23,5 +23,4 @@ public class ReservationDateTime {
 			.reservationTime(reservationTime)
 			.build();
 	}
-
 }
