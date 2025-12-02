@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
-import com.tablekok.reservation_service.application.ReservationService;
+import com.tablekok.reservation_service.application.service.ReservationService;
 import com.tablekok.reservation_service.presentation.dto.request.CreateReservationRequest;
 import com.tablekok.reservation_service.presentation.dto.request.UpdateHeadcountRequest;
 import com.tablekok.reservation_service.presentation.dto.response.GetReservationsResponse;

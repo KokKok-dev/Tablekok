@@ -37,11 +37,7 @@ public record CreateReservationRequest(
 		return CreateReservationParam.builder()
 			.userId(userId)
 			.storeId(storeId)
-			.reservationDateTime(ReservationDateTime.builder()
-				.reservationDate(reservationDate)
-				.reservationTime(reservationTime)
-				.build()
-			)
+			.reservationDateTime(ReservationDateTime.of(reservationDate, reservationTime))
 			.headcount(headcount)
 			.deposit(deposit)
 			.build();
