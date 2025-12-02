@@ -11,15 +11,15 @@ import com.tablekok.reservation_service.domain.entity.Reservation;
 import lombok.Builder;
 
 @Builder
-public record GetReservationsResponse(
+public record GetReservationsForCustomerResponse(
 	UUID storeId,
 	LocalDate reservationDate,
 	LocalTime reservationTime,
 	Integer headcount,
 	String reservationStatus
 ) {
-	public static Page<GetReservationsResponse> toPage(Page<Reservation> reservations) {
-		return reservations.map(reservation -> GetReservationsResponse.builder()
+	public static Page<GetReservationsForCustomerResponse> toPage(Page<Reservation> reservations) {
+		return reservations.map(reservation -> GetReservationsForCustomerResponse.builder()
 			.storeId(reservation.getStoreId())
 			.reservationDate(reservation.getReservationDateTime().getReservationDate())
 			.reservationTime(reservation.getReservationDateTime().getReservationTime())

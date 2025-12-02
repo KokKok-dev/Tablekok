@@ -10,9 +10,7 @@ import com.tablekok.reservation_service.domain.vo.ReservationDateTime;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
 
-@Builder
 public record CreateReservationRequest(
 
 	@NotNull(message = "가게 ID는 필수입니다.")
@@ -37,11 +35,7 @@ public record CreateReservationRequest(
 		return CreateReservationParam.builder()
 			.userId(userId)
 			.storeId(storeId)
-			.reservationDateTime(ReservationDateTime.builder()
-				.reservationDate(reservationDate)
-				.reservationTime(reservationTime)
-				.build()
-			)
+			.reservationDateTime(ReservationDateTime.of(reservationDate, reservationTime))
 			.headcount(headcount)
 			.deposit(deposit)
 			.build();
