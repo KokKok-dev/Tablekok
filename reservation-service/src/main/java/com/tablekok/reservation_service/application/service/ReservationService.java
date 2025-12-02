@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.reservation_service.application.dto.param.CreateReservationParam;
+import com.tablekok.reservation_service.application.port.SearchPort;
 import com.tablekok.reservation_service.application.port.dto.response.GetReservationPolicyResponse;
 import com.tablekok.reservation_service.domain.entity.Reservation;
 import com.tablekok.reservation_service.domain.repository.ReservationRepository;
@@ -20,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class ReservationService {
 	private final ReservationRepository reservationRepository;
 	private final ReservationDomainService reservationDomainService;
-	private final SearchService searchService;
+	private final SearchPort searchPort;
 
 	// 예약 생성(접수)
 	@Transactional
@@ -31,11 +32,11 @@ public class ReservationService {
 		reservationDomainService.checkDuplicateReservation(newReservation);
 
 		// 인기식당 리스트 조회
-		List<UUID> hotStoreList = searchService.getHotStores();
+		List<UUID> hotStoreList = searchPort.getHotStores();
 
 		// 음식점 정책 조회
 		ReservationPolicy policy = GetReservationPolicyResponse.toVo(
-			searchService.getReservationPolicy(newReservation.getStoreId()));
+			searchPort.getReservationPolicy(newReservation.getStoreId()));
 
 		// 예약 정책 검증 TODO 내부호출 구현 후 테스트
 		reservationDomainService.validateReservation(newReservation, hotStoreList, policy);
