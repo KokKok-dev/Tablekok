@@ -11,42 +11,42 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ReservationDomainErrorCode implements ErrorCode {
 	HOT_STORE_RESERVATION_NOT_ALLOWED(
-		"RESERVATION002",
+		"RESERVATION000",
 		"인기 음식점에서는 일반 예약이 불가능합니다.",
 		HttpStatus.BAD_REQUEST),
 
 	STORE_RESERVATION_DISABLED(
-		"RESERVATION003",
+		"RESERVATION001",
 		"해당 음식점은 현재 예약을 받을 수 없습니다.",
 		HttpStatus.BAD_REQUEST
 	),
 
 	RESERVATION_NOT_AVAILABLE_MONTH(
-		"RESERVATION005",
+		"RESERVATION002",
 		"예약 가능한 월이 아닙니다.",
 		HttpStatus.BAD_REQUEST
 	),
 
 	RESERVATION_NOT_OPENED_YET(
-		"RESERVATION006",
+		"RESERVATION003",
 		"아직 다음 달 예약이 열리지 않았습니다.",
 		HttpStatus.BAD_REQUEST
 	),
 
 	DUPLICATE_RESERVATION_TIME(
-		"RESERVATION007",
+		"RESERVATION004",
 		"이미 예약이 있는 시간입니다.",
 		HttpStatus.CONFLICT
 	),
 
 	INVALID_RESERVATION_POLICY(
-		"RESERVATION004",
+		"RESERVATION005",
 		"예약 조건이 정책에 맞지 않습니다.",
 		HttpStatus.BAD_REQUEST
 	),
 
 	PAST_RESERVATION_NOT_ALLOWED(
-		"RESERVATION008",
+		"RESERVATION006",
 		"과거 시간에는 예약할 수 없습니다.",
 		HttpStatus.BAD_REQUEST
 	);

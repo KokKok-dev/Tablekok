@@ -11,12 +11,12 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ReservationErrorCode implements ErrorCode {
 	RESERVATION_NOT_FOUND(
-		"RESERVATION000",
+		"RESERVATION100",
 		"예약을 찾을 수 없습니다.",
 		HttpStatus.NOT_FOUND),
 
 	FORBIDDEN_STORE_ACCESS(
-		"RESERVATION001",
+		"RESERVATION101",
 		"해당 음식점에 대한 권한이 없습니다.",
 		HttpStatus.FORBIDDEN);
 
