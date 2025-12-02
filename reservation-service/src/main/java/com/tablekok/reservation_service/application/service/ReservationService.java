@@ -1,6 +1,5 @@
 package com.tablekok.reservation_service.application.service;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -28,18 +27,20 @@ public class ReservationService {
 	public UUID createReservation(CreateReservationParam param) {
 		Reservation newReservation = param.toEntity();
 
+		// 과거 시간을 예약했는지
+		newReservation.validateNotPast();
+
 		// 그 시간대 예약이 있는지
 		reservationDomainService.checkDuplicateReservation(newReservation);
 
-		// 인기식당 리스트 조회
-		List<UUID> hotStoreList = searchPort.getHotStores();
+		// 인기 음식점 조회 후 확인
+		newReservation.validateHotStore(searchPort.getHotStores());
 
 		// 음식점 정책 조회
 		ReservationPolicy policy = GetReservationPolicyResponse.toVo(
 			searchPort.getReservationPolicy(newReservation.getStoreId()));
-
-		// 예약 정책 검증 TODO 내부호출 구현 후 테스트
-		reservationDomainService.validateReservation(newReservation, hotStoreList, policy);
+		// 예약 정책 검증			TODO 내부호출 구현 후 테스트
+		reservationDomainService.validateReservation(newReservation, policy);
 
 		// 저장
 		reservationRepository.save(newReservation);
