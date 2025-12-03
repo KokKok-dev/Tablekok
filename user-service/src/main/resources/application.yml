@@ -6,11 +6,6 @@ spring:
   config:
     import: "configserver:http://localhost:8888"
 
-# JWT 설정 (토큰 생성용 - Gateway와 동일한 설정 사용)
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}     # 1시간
-  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000} # 7일
 
   # 데이터베이스 설정 (Config Server에서 관리)
   datasource:
@@ -32,6 +27,12 @@ jwt:
           batch_size: 20
         order_inserts: true
         order_updates: true
+
+# JWT 설정 (토큰 생성용 - Gateway와 동일한 설정 사용)
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}     # 1시간
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000} # 7일
 
 # Spring Security 로그 레벨 설정
 logging:

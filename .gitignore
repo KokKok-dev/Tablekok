@@ -68,7 +68,9 @@ coverage/
 .env.dev
 .env.prod
 .env.*.local
-*.env
+env.*.v*
+env.user.v*
+env.gateway.v*
 
 # 🔧 IDE 설정 파일들
 .vscode/settings.json

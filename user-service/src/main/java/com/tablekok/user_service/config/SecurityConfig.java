@@ -17,11 +17,11 @@ import java.util.Arrays;
  *
  * 역할: 인증(Authentication) 서비스를 위한 보안 설정
  * - JWT 기반 Stateless 인증
- * - 회원가입/로그인 엔드포인트 공개 설정
+ * - 인증 관련 엔드포인트만 공개 설정
  * - CORS 설정
  * - CSRF 비활성화 (API 서버용)
  *
- * 인가(Authorization)는 Gateway에서 담당
+ * 🔒 인가(Authorization)는 Gateway에서 담당
  * User Service는 인증 로직에만 집중
  */
 @Configuration
@@ -29,11 +29,11 @@ import java.util.Arrays;
 public class SecurityConfig {
 
 	/**
-	 * 🛡Spring Security 필터 체인 설정
+	 * Spring Security 필터 체인 설정
 	 *
-	 * JWT 기반 API 서버를 위한 최적화된 설정:
+	 * JWT 기반 인증 서비스를 위한 최적화된 설정:
 	 * - Stateless 세션 정책
-	 * - 공개/보호 경로 구분
+	 * - 인증 관련 최소한의 공개 경로만 설정
 	 * - CORS 활성화
 	 * - CSRF 비활성화
 	 *
@@ -56,20 +56,17 @@ public class SecurityConfig {
 
 			// URL별 접근 권한 설정
 			.authorizeHttpRequests(auth -> auth
-				// 공개 경로 (인증 불필요)
+				// 🔐 인증 관련 공개 경로 (User Service 본연의 역할)
 				.requestMatchers(
-					"/v1/auth/login",                    // 로그인
-					"/v1/auth/signup/customer",          // 고객 회원가입
-					"/v1/auth/signup/owner",             // 사장님 회원가입
+					"/v1/auth/**",                       // 모든 인증 관련 엔드포인트
 					"/v1/users/findid",                  // ID 찾기
 					"/v1/users/findpassword",            // 비밀번호 찾기
-					"/actuator/health",                  // 헬스체크
-					"/actuator/info",                    // 서비스 정보
-					"/swagger-ui/**",                    // Swagger UI
-					"/v3/api-docs/**"                    // API 문서
+					"/actuator/health",                  // 헬스체크 (MSA 필수)
+					"/actuator/info"                     // 서비스 정보
 				).permitAll()
 
-				// 나머지 모든 요청은 Gateway에서 검증된 요청만 허용
+				// 🔒 나머지 모든 요청은 Gateway에서 검증된 요청만 허용
+				// Gateway가 인가를 담당하므로 이미 검증된 요청으로 간주
 				.anyRequest().authenticated()
 			)
 

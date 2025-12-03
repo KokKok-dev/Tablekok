@@ -6,11 +6,6 @@ spring:
   config:
     import: "configserver:http://localhost:8888"
 
-# JWT 설정 (토큰 검증용)
-jwt:
-  secret: ${JWT_SECRET}
-  header: ${JWT_HEADER:Authorization}
-  prefix: ${JWT_PREFIX:Bearer }
 
   # Spring Cloud Gateway 설정 (백엔드 개발용)
   cloud:
@@ -58,6 +53,12 @@ jwt:
       # 기본 필터
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+
+# JWT 설정 (토큰 검증용)
+jwt:
+  secret: ${JWT_SECRET}
+  header: ${JWT_HEADER:Authorization}
+  prefix: ${JWT_PREFIX:Bearer }
 
 # Eureka 클라이언트 설정
 eureka:
