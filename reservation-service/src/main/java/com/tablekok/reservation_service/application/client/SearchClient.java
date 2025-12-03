@@ -1,11 +1,11 @@
-package com.tablekok.reservation_service.application.port;
+package com.tablekok.reservation_service.application.client;
 
 import java.util.List;
 import java.util.UUID;
 
-import com.tablekok.reservation_service.application.port.dto.response.GetReservationPolicyResponse;
+import com.tablekok.reservation_service.application.client.dto.response.GetReservationPolicyResponse;
 
-public interface SearchPort {
+public interface SearchClient {
 	// 해당 음식점의 정책 조회
 	GetReservationPolicyResponse getReservationPolicy(UUID storeId);
 

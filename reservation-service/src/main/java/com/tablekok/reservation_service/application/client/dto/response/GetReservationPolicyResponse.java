@@ -1,4 +1,4 @@
-package com.tablekok.reservation_service.application.port.dto.response;
+package com.tablekok.reservation_service.application.client.dto.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

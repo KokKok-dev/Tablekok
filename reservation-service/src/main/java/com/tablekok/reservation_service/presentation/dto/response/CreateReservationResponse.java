@@ -1,5 +1,8 @@
 package com.tablekok.reservation_service.presentation.dto.response;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import com.tablekok.reservation_service.application.dto.result.CreateReservationResult;
 
 import lombok.Builder;
@@ -7,20 +10,14 @@ import lombok.Builder;
 @Builder
 public record CreateReservationResponse(
 	String reservationNumber,
-	String reservationDateTime
+	LocalDate reservationDate,
+	LocalTime reservationTime
 ) {
 	public static CreateReservationResponse fromResult(CreateReservationResult result) {
-		String dateTime = String.format("%s년 %s월 %s일 %s시 %s분",
-			result.reservationDate().getYear(),
-			result.reservationDate().getMonthValue(),
-			result.reservationDate().getDayOfMonth(),
-			result.reservationTime().getHour(),
-			result.reservationTime().getMinute()
-		);
-
 		return CreateReservationResponse.builder()
 			.reservationNumber(result.reservationNumber())
-			.reservationDateTime(dateTime)
+			.reservationDate(result.reservationDate())
+			.reservationTime(result.reservationTime())
 			.build();
 	}
 }
