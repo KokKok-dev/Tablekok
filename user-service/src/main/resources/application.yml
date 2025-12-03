@@ -6,16 +6,59 @@ spring:
   config:
     import: "configserver:http://localhost:8888"
 
-# 🔑 JWT 설정 (토큰 생성용 - Gateway와 동일한 설정 사용)
+# JWT 설정 (토큰 생성용 - Gateway와 동일한 설정 사용)
 jwt:
   secret: ${JWT_SECRET:tablekok-dev-secret-key-for-local-development-only}
   access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}     # 1시간
   refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000} # 7일
 
-# 🔍 Eureka 클라이언트 설정
+  # 데이터베이스 설정 (Config Server에서 관리)
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tablekok_user}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+
+  # JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}  # 개발: update, 운영: validate
+    show-sql: ${SHOW_SQL:false}     # 개발에서만 true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+# Spring Security 로그 레벨 설정
+logging:
+  level:
+    org.springframework.security: ${SECURITY_LOG_LEVEL:INFO}
+    com.tablekok.user_service: ${APP_LOG_LEVEL:INFO}
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:WARN}
+
+# Eureka 클라이언트 설정
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true
+    # 헬스체크 설정
+    health-check-url-path: /actuator/health
+
+# Actuator 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_ENDPOINTS:health,info,metrics}
+  endpoint:
+    health:
+      show-details: ${HEALTH_SHOW_DETAILS:when-authorized}
+  info:
+    env:
+      enabled: true
