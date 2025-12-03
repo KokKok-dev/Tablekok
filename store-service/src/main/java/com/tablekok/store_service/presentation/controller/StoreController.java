@@ -16,24 +16,32 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.store_service.application.service.StoreService;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStatusRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStoreRequest;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/v1/stores")
+@RequiredArgsConstructor
 public class StoreController {
+
+	private final StoreService storeService;
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<Void>> createStore(
 		@Valid @RequestBody CreateStoreRequest request
 	) {
 		// store 생성
+		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+
+		UUID storeId = storeService.createStore(request.toParam(ownerId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{storeId}")
-			.buildAndExpand(UUID.randomUUID())
+			.buildAndExpand(storeId)
 			.toUri();
 
 		return ResponseEntity.created(location)

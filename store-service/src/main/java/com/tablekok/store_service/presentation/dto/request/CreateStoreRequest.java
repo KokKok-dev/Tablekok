@@ -2,6 +2,9 @@ package com.tablekok.store_service.presentation.dto.request;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
+
+import com.tablekok.store_service.application.dto.param.CreateStoreParam;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -44,4 +47,19 @@ public record CreateStoreRequest(
 	List<CreateOperatingHourRequest> operatingHours
 ) {
 
+	public CreateStoreParam toParam(UUID ownerId) {
+		return CreateStoreParam.builder()
+			.ownerId(ownerId)
+			.name(name)
+			.phoneNumber(phoneNumber)
+			.address(address)
+			.latitude(latitude)
+			.longitude(longitude)
+			.description(description)
+			.totalCapacity(totalCapacity)
+			.turnoverRateMinutes(turnoverRateMinutes)
+			.imageUrl(imageUrl)
+			.operatingHours(operatingHours)
+			.build();
+	}
 }
