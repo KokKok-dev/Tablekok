@@ -13,6 +13,7 @@ import com.tablekok.reservation_service.application.client.SearchClient;
 import com.tablekok.reservation_service.application.client.dto.response.GetReservationPolicyResponse;
 import com.tablekok.reservation_service.application.dto.param.CreateReservationParam;
 import com.tablekok.reservation_service.application.dto.result.CreateReservationResult;
+import com.tablekok.reservation_service.application.dto.result.GetReservationResult;
 import com.tablekok.reservation_service.application.dto.result.GetReservationsForCustomerResult;
 import com.tablekok.reservation_service.application.dto.result.GetReservationsForOwnerResult;
 import com.tablekok.reservation_service.application.exception.ReservationErrorCode;
@@ -70,6 +71,12 @@ public class ReservationService {
 			searchClient.getReservationPolicy(reservation.getStoreId()));
 
 		reservationDomainService.validateReservationPolicy(reservation, policy);
+	}
+
+	// 단건 예약 조회(리뷰에서 호출 용도)
+	public GetReservationResult getReservation(UUID reservationId) {
+		Reservation findReservation = reservationRepository.findById(reservationId);
+		return GetReservationResult.of(findReservation);
 	}
 
 	// 예약 인원수 변경
