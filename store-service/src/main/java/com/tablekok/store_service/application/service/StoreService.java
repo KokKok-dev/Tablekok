@@ -95,6 +95,11 @@ public class StoreService {
 			if (!days.add(hour.dayOfWeek())) {
 				throw new AppException(StoreErrorCode.DUPLICATE_OPERATING_DAY);
 			}
+
+		}
+		if (days.size() != 7) {
+			// 7개 요일 중 하나라도 누락되었다면 예외 발생
+			throw new AppException(StoreErrorCode.MISSING_ALL_OPERATING_DAYS);
 		}
 	}
 
