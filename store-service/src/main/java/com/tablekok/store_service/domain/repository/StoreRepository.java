@@ -6,4 +6,5 @@ public interface StoreRepository {
 
 	void save(Store store);
 
+	boolean existsByNameAndAddress(String name, String address);
 }

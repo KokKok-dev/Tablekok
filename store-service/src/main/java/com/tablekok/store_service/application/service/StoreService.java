@@ -5,7 +5,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tablekok.exception.AppException;
 import com.tablekok.store_service.application.dto.param.CreateStoreParam;
+import com.tablekok.store_service.application.exception.StoreErrorCode;
 import com.tablekok.store_service.domain.entity.Store;
 import com.tablekok.store_service.domain.repository.StoreRepository;
 
@@ -19,6 +21,11 @@ public class StoreService {
 
 	@Transactional
 	public UUID createStore(CreateStoreParam param) {
+		// 음식점 중복확인
+		if (storeRepository.existsByNameAndAddress(param.name(), param.address())) {
+			throw new AppException(StoreErrorCode.DUPLICATE_STORE_ENTRY);
+		}
+
 		// 음식점 생성
 		Store store = param.toEntity();
 		storeRepository.save(store);

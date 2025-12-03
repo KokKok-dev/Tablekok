@@ -17,4 +17,9 @@ public class StoreRepositoryImpl implements StoreRepository {
 	public void save(Store store) {
 		storeJpaRepository.save(store);
 	}
+
+	@Override
+	public boolean existsByNameAndAddress(String name, String address) {
+		return storeJpaRepository.existsByNameAndAddress(name, address);
+	}
 }
