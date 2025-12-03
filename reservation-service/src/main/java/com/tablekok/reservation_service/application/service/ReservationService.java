@@ -50,7 +50,7 @@ public class ReservationService {
 		reservationDomainService.checkDuplicateReservation(newReservation);
 
 		// 예약할 음식점의 예약 정책에 준수하는지 		TODO 내부호출 구현 후 테스트
-		validateReservationPolicy(newReservation);
+		// validateReservationPolicy(newReservation);
 
 		// 저장
 		reservationRepository.save(newReservation);
@@ -123,7 +123,7 @@ public class ReservationService {
 		Pageable normalizedPageable = PageableUtils.normalize(pageable);
 		validateStoreOwner(userId, storeId);
 
-		Page<Reservation> reservations = reservationRepository.findByUserId(userId, normalizedPageable);
+		Page<Reservation> reservations = reservationRepository.findByStoreId(storeId, normalizedPageable);
 		return GetReservationsForOwnerResult.toPage(reservations);
 	}
 
