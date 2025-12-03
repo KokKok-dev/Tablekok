@@ -1,4 +1,4 @@
-package com.tablekok.reservation_service.domain.service;
+package com.tablekok.reservation_service.domain.exception;
 
 import org.springframework.http.HttpStatus;
 

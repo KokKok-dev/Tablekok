@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.exception.AppException;
 import com.tablekok.reservation_service.domain.entity.Reservation;
+import com.tablekok.reservation_service.domain.exception.ReservationDomainErrorCode;
 import com.tablekok.reservation_service.domain.repository.ReservationRepository;
 import com.tablekok.reservation_service.domain.vo.ReservationPolicy;
 
@@ -20,7 +21,7 @@ public class ReservationDomainService {
 	private final ReservationRepository reservationRepository;
 
 	// 예약 정책 검증
-	public void validateReservation(Reservation reservation, ReservationPolicy policy) {
+	public void validateReservationPolicy(Reservation reservation, ReservationPolicy policy) {
 
 		// 음식점이 예약을 허용하는지
 		if (!policy.getEnable()) {

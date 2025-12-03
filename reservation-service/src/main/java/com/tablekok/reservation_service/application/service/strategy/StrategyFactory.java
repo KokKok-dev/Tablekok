@@ -1,4 +1,4 @@
-package com.tablekok.reservation_service.application.strategy;
+package com.tablekok.reservation_service.application.service.strategy;
 
 import java.util.List;
 

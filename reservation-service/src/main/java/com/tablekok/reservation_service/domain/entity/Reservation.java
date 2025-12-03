@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.tablekok.entity.BaseEntity;
 import com.tablekok.exception.AppException;
-import com.tablekok.reservation_service.domain.service.ReservationDomainErrorCode;
+import com.tablekok.reservation_service.domain.exception.ReservationDomainErrorCode;
 import com.tablekok.reservation_service.domain.vo.ReservationDateTime;
 
 import jakarta.persistence.AttributeOverride;
@@ -92,13 +92,6 @@ public class Reservation extends BaseEntity {
 			.build();
 	}
 
-	// 인기 음식점의 예약이면 거절
-	public void validateHotStore(List<UUID> hotStoreList) {
-		if (hotStoreList.contains(storeId)) {
-			throw new AppException(ReservationDomainErrorCode.HOT_STORE_RESERVATION_NOT_ALLOWED);
-		}
-	}
-
 	// 인원수 변경
 	public void updateHeadcount(Integer headcount) {
 		this.headcount = headcount;
@@ -117,6 +110,13 @@ public class Reservation extends BaseEntity {
 	// 예약 노쇼
 	public void noShow() {
 		this.reservationStatus = ReservationStatus.NOSHOW;
+	}
+
+	// 인기 음식점의 예약이면 거절
+	public void validateHotStore(List<UUID> hotStoreList) {
+		if (hotStoreList.contains(storeId)) {
+			throw new AppException(ReservationDomainErrorCode.HOT_STORE_RESERVATION_NOT_ALLOWED);
+		}
 	}
 
 	// 과거 시간을 예약했는지 검증
