@@ -32,7 +32,7 @@ public class ReviewController {
 		 * @RequestHeader("XXX-USER-ROLE") String role) */
 	) {
 		// 임시로 id 지정
-		UUID userId = UUID.randomUUID();
+		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677");
 
 		UUID reviewId = reviewService.createReview(request.toParam(), userId);
 

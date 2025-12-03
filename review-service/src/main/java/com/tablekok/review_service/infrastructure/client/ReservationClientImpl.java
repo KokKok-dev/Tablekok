@@ -16,6 +16,6 @@ public class ReservationClientImpl implements ReservationClient {
 
 	@Override
 	public GetReservationResponse getReservation(UUID reservationId) {
-		return null;
+		return reservationFeignClient.getReservation(reservationId);
 	}
 }
