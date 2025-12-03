@@ -104,9 +104,14 @@ public class Reservation extends BaseEntity {
 		this.headcount = headcount;
 	}
 
-	// 예약 취소
+	// 예약 취소(고객)
 	public void cancel() {
 		this.reservationStatus = ReservationStatus.CANCELED;
+	}
+
+	// 예약 거절(오너)
+	public void reject() {
+		this.reservationStatus = ReservationStatus.REJECT;
 	}
 
 	// 예약 노쇼
