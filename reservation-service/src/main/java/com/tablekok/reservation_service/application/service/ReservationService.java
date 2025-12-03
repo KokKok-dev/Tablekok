@@ -13,6 +13,8 @@ import com.tablekok.reservation_service.application.client.SearchClient;
 import com.tablekok.reservation_service.application.client.dto.response.GetReservationPolicyResponse;
 import com.tablekok.reservation_service.application.dto.param.CreateReservationParam;
 import com.tablekok.reservation_service.application.dto.result.CreateReservationResult;
+import com.tablekok.reservation_service.application.dto.result.GetReservationsForCustomerResult;
+import com.tablekok.reservation_service.application.dto.result.GetReservationsForOwnerResult;
 import com.tablekok.reservation_service.application.exception.ReservationErrorCode;
 import com.tablekok.reservation_service.application.service.strategy.RoleStrategy;
 import com.tablekok.reservation_service.application.service.strategy.StrategyFactory;
@@ -98,21 +100,24 @@ public class ReservationService {
 		validateStoreOwner(userId, findReservation.getStoreId());
 		findReservation.noShow();
 	}
-	
+
 	// 예약 조회(고객)
 	@Transactional(readOnly = true)
-	public Page<Reservation> getReservationsForCustomer(UUID userId, Pageable pageable) {
+	public Page<GetReservationsForCustomerResult> getReservationsForCustomer(UUID userId, Pageable pageable) {
 		Pageable normalizedPageable = PageableUtils.normalize(pageable);
 
-		return reservationRepository.findByUserId(userId, normalizedPageable);
+		Page<Reservation> reservations = reservationRepository.findByUserId(userId, normalizedPageable);
+		return GetReservationsForCustomerResult.toPage(reservations);
 	}
 
 	// 예약 조회(오너)
 	@Transactional(readOnly = true)
-	public Page<Reservation> getReservationsForOwner(UUID userId, UUID storeId, Pageable pageable) {
+	public Page<GetReservationsForOwnerResult> getReservationsForOwner(UUID userId, UUID storeId, Pageable pageable) {
 		Pageable normalizedPageable = PageableUtils.normalize(pageable);
 		validateStoreOwner(userId, storeId);
-		return reservationRepository.findByStoreId(storeId, normalizedPageable);
+
+		Page<Reservation> reservations = reservationRepository.findByUserId(userId, normalizedPageable);
+		return GetReservationsForOwnerResult.toPage(reservations);
 	}
 
 	// 해당 예약의 음식점이 사용자 소유인지
