@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.reservation_service.application.dto.result.CreateReservationResult;
 import com.tablekok.reservation_service.application.service.ReservationService;
 import com.tablekok.reservation_service.presentation.dto.request.CreateReservationRequest;
 import com.tablekok.reservation_service.presentation.dto.request.UpdateHeadcountRequest;
+import com.tablekok.reservation_service.presentation.dto.response.CreateReservationResponse;
 import com.tablekok.reservation_service.presentation.dto.response.GetReservationsForCustomerResponse;
 import com.tablekok.reservation_service.presentation.dto.response.GetReservationsForOwnerResponse;
 
@@ -35,17 +37,20 @@ public class ReservationController {
 
 	// 예약 생성(예약 접수)
 	@PostMapping
-	public ResponseEntity<ApiResponse<Void>> createReservation(@Valid @RequestBody CreateReservationRequest request) {
+	public ResponseEntity<ApiResponse<CreateReservationResponse>> createReservation(
+		@Valid @RequestBody CreateReservationRequest request) {
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
 
-		UUID reservationId = reservationService.createReservation(request.toParam(userId));
+		CreateReservationResult result = reservationService.createReservation(request.toParam(userId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{reservationId}")
-			.buildAndExpand(reservationId)
+			.buildAndExpand(result.reservationId())
 			.toUri();
 
 		return ResponseEntity.created(location)
-			.body(ApiResponse.success("예약 성공", HttpStatus.CREATED));
+			.body(ApiResponse.success("예약 성공",
+				CreateReservationResponse.fromResult(result),
+				HttpStatus.CREATED));
 	}
 
 	// 예약 인원수 변경

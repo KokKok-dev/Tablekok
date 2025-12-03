@@ -42,9 +42,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'        // 스프링 웹
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client' // 유레카 클라이언트
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign' // 페인 클라이언트
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'  // 레디스
-
-    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:postgresql' // postgres
+    
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
