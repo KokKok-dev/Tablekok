@@ -1,5 +1,6 @@
 package com.tablekok.reservation_service.application.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -12,8 +13,9 @@ import com.tablekok.reservation_service.application.client.SearchClient;
 import com.tablekok.reservation_service.application.client.dto.response.GetReservationPolicyResponse;
 import com.tablekok.reservation_service.application.dto.param.CreateReservationParam;
 import com.tablekok.reservation_service.application.dto.result.CreateReservationResult;
-import com.tablekok.reservation_service.application.strategy.RoleStrategy;
-import com.tablekok.reservation_service.application.strategy.StrategyFactory;
+import com.tablekok.reservation_service.application.exception.ReservationErrorCode;
+import com.tablekok.reservation_service.application.service.strategy.RoleStrategy;
+import com.tablekok.reservation_service.application.service.strategy.StrategyFactory;
 import com.tablekok.reservation_service.domain.entity.Reservation;
 import com.tablekok.reservation_service.domain.repository.ReservationRepository;
 import com.tablekok.reservation_service.domain.service.ReservationDomainService;
@@ -35,8 +37,8 @@ public class ReservationService {
 	public CreateReservationResult createReservation(CreateReservationParam param) {
 		Reservation newReservation = param.toEntity();
 
-		// 인기 음식점 조회 후 확인
-		newReservation.validateHotStore(searchClient.getHotStores());
+		// 인기 음식점의 요청인지 확인
+		validateHotStore(newReservation);
 
 		// 과거 시간을 예약했는지
 		newReservation.validateNotPast();
@@ -44,16 +46,28 @@ public class ReservationService {
 		// 그 시간대 예약이 있는지
 		reservationDomainService.checkDuplicateReservation(newReservation);
 
-		// 음식점 정책 조회 		TODO 내부호출 구현 후 테스트
-		// ReservationPolicy policy = GetReservationPolicyResponse.toVo(
-		// 	searchClient.getReservationPolicy(newReservation.getStoreId()));
-		// 예약 정책 검증			TODO 내부호출 구현 후 테스트
-		// reservationDomainService.validateReservation(newReservation, policy);
+		// 예약할 음식점의 예약 정책에 준수하는지 		TODO 내부호출 구현 후 테스트
+		validateReservationPolicy(newReservation);
 
 		// 저장
 		reservationRepository.save(newReservation);
 
 		return CreateReservationResult.of(newReservation);
+	}
+
+	// 인기 음식점의 요청인지 확인
+	private void validateHotStore(Reservation reservation) {
+		List<UUID> hotStores = searchClient.getHotStores();
+
+		reservation.validateHotStore(hotStores);
+	}
+
+	// 예약할 음식점의 예약 정책에 준수하는지
+	private void validateReservationPolicy(Reservation reservation) {
+		ReservationPolicy policy = GetReservationPolicyResponse.toVo(
+			searchClient.getReservationPolicy(reservation.getStoreId()));
+
+		reservationDomainService.validateReservationPolicy(reservation, policy);
 	}
 
 	// 예약 인원수 변경
@@ -80,10 +94,16 @@ public class ReservationService {
 	@Transactional
 	public void noShow(UUID userId, UUID reservationId) {
 		Reservation findReservation = reservationRepository.findById(reservationId);
-		if (!searchClient.checkStoreOwner(userId, findReservation.getStoreId())) {
+		// 해당 예약의 음식점이 사용자 소유인지
+		validateStoreOwner(userId, findReservation);
+		findReservation.noShow();
+	}
+
+	// 해당 예약의 음식점이 사용자 소유인지
+	private void validateStoreOwner(UUID userId, Reservation reservation) {
+		if (!searchClient.checkStoreOwner(userId, reservation.getStoreId())) {
 			throw new AppException(ReservationErrorCode.FORBIDDEN_STORE_ACCESS);
 		}
-		findReservation.noShow();
 	}
 
 	// 예약 조회(고객)
