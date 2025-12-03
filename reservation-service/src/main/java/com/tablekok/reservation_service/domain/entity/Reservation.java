@@ -42,6 +42,9 @@ public class Reservation extends BaseEntity {
 	@Column(name = "store_id", columnDefinition = "uuid", nullable = false)
 	private UUID storeId;
 
+	@Column(name = "reservation_number", nullable = false)
+	private String reservationNumber;
+
 	@Embedded
 	@AttributeOverrides({
 		@AttributeOverride(name = "reservationDate", column = @Column(name = "reservation_date", nullable = false)),
@@ -60,10 +63,11 @@ public class Reservation extends BaseEntity {
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private Reservation(
-		UUID userId, UUID storeId, ReservationDateTime reservationDateTime, Integer headcount, Integer deposit,
-		ReservationStatus reservationStatus) {
+		UUID userId, UUID storeId, String reservationNumber, ReservationDateTime reservationDateTime, Integer headcount,
+		Integer deposit, ReservationStatus reservationStatus) {
 		this.userId = userId;
 		this.storeId = storeId;
+		this.reservationNumber = reservationNumber;
 		this.reservationDateTime = reservationDateTime;
 		this.headcount = headcount;
 		this.deposit = deposit;
@@ -72,11 +76,15 @@ public class Reservation extends BaseEntity {
 
 	public static Reservation of(
 		UUID userId, UUID storeId, ReservationDateTime reservationDateTime, Integer headcount, Integer deposit) {
+
+		String reservationNumber = "RSV-" + System.currentTimeMillis();
 		ReservationStatus reservationStatus =
 			hasDeposit(deposit) ? ReservationStatus.PENDING : ReservationStatus.RESERVED;
+
 		return Reservation.builder()
 			.userId(userId)
 			.storeId(storeId)
+			.reservationNumber(reservationNumber)
 			.reservationDateTime(reservationDateTime)
 			.headcount(headcount)
 			.deposit(deposit)
