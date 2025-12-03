@@ -1,8 +1,5 @@
 package com.tablekok.user_service.presentation.dto.request;
 
-import com.tablekok.user_service.domain.entity.Owner;
-import com.tablekok.user_service.domain.entity.User;
-import com.tablekok.user_service.domain.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
@@ -50,60 +47,5 @@ public class OwnerSignupRequest {
 		this.password = password;
 		this.phone = phone;
 		this.businessNumber = businessNumber;
-	}
-
-	// User 엔티티로 변환
-	public User toUserEntity(String encodedPassword) {
-		return User.builder()
-			.email(this.email)
-			.name(this.username)
-			.password(encodedPassword)
-			.phoneNumber(this.phone)
-			.role(UserRole.OWNER)
-			.build();
-	}
-
-	// Owner 엔티티로 변환
-	public Owner toOwnerEntity(User user) {
-		return Owner.builder()
-			.user(user)
-			.businessNumber(this.businessNumber)
-			.build();
-	}
-
-	// 휴대폰번호 정규화 (하이픈 제거)
-	public String getNormalizedPhoneNumber() {
-		return phone.replaceAll("-", "");
-	}
-
-	// 이메일 정규화 (소문자 변환)
-	public String getNormalizedEmail() {
-		return email.toLowerCase().trim();
-	}
-
-	// 사업자번호 정규화 (하이픈 제거)
-	public String getNormalizedBusinessNumber() {
-		return businessNumber.replaceAll("-", "");
-	}
-
-	// 사업자번호 유효성 검증
-	public boolean isValidBusinessNumber() {
-		if (businessNumber == null || !businessNumber.matches("^\\d{3}-\\d{2}-\\d{5}$")) {
-			return false;
-		}
-
-		// 실제 사업자번호 체크섬 검증 로직
-		String numbers = businessNumber.replaceAll("-", "");
-		int[] weights = {1, 3, 7, 1, 3, 7, 1, 3, 5};
-		int sum = 0;
-
-		for (int i = 0; i < 9; i++) {
-			sum += Character.getNumericValue(numbers.charAt(i)) * weights[i];
-		}
-
-		sum += (Character.getNumericValue(numbers.charAt(8)) * 5) / 10;
-		int checkDigit = (10 - (sum % 10)) % 10;
-
-		return checkDigit == Character.getNumericValue(numbers.charAt(9));
 	}
 }

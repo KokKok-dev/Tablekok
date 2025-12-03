@@ -29,18 +29,4 @@ public class LoginRequest {
 		this.email = email;
 		this.password = password;
 	}
-
-	// 이메일 정규화 (소문자 변환, 공백 제거)
-	public String getNormalizedEmail() {
-		return email.toLowerCase().trim();
-	}
-
-	// 보안을 위한 toString 오버라이드 (비밀번호 마스킹)
-	@Override
-	public String toString() {
-		return "LoginRequest{" +
-			"email='" + email + '\'' +
-			", password='***'" +
-			'}';
-	}
 }

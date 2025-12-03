@@ -1,6 +1,5 @@
 package com.tablekok.user_service.presentation.dto.response;
 
-import com.tablekok.user_service.domain.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -45,30 +44,5 @@ public class SignupResponse {
 		this.phone = phone;
 		this.role = role;
 		this.businessNumber = businessNumber;
-	}
-
-	// Customer 회원가입 응답 생성
-	public static SignupResponse fromCustomer(String accessToken, User user) {
-		return SignupResponse.builder()
-			.accessToken(accessToken)
-			.userId(user.getUserId())
-			.username(user.getName())
-			.email(user.getEmail())
-			.phone(user.getPhoneNumber())
-			.role(user.getRole().getValue())
-			.build();
-	}
-
-	// Owner 회원가입 응답 생성
-	public static SignupResponse fromOwner(String accessToken, User user) {
-		return SignupResponse.builder()
-			.accessToken(accessToken)
-			.userId(user.getUserId())
-			.username(user.getName())
-			.email(user.getEmail())
-			.phone(user.getPhoneNumber())
-			.role(user.getRole().getValue())
-			.businessNumber(user.getBusinessNumber())
-			.build();
 	}
 }

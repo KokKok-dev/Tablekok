@@ -1,7 +1,5 @@
 package com.tablekok.user_service.presentation.dto.request;
 
-import com.tablekok.user_service.domain.entity.User;
-import com.tablekok.user_service.domain.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
@@ -43,26 +41,5 @@ public class CustomerSignupRequest {
 		this.username = username;
 		this.password = password;
 		this.phone = phone;
-	}
-
-	// User 엔티티로 변환
-	public User toEntity(String encodedPassword) {
-		return User.builder()
-			.email(this.email)
-			.name(this.username)
-			.password(encodedPassword)
-			.phoneNumber(this.phone)
-			.role(UserRole.CUSTOMER)
-			.build();
-	}
-
-	// 휴대폰번호 정규화 (하이픈 제거)
-	public String getNormalizedPhoneNumber() {
-		return phone.replaceAll("-", "");
-	}
-
-	// 이메일 정규화 (소문자 변환)
-	public String getNormalizedEmail() {
-		return email.toLowerCase().trim();
 	}
 }

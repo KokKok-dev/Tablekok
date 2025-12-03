@@ -1,6 +1,5 @@
 package com.tablekok.user_service.presentation.dto.response;
 
-import com.tablekok.user_service.domain.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -59,73 +58,5 @@ public class LoginResponse {
 		this.lastLoginAt = lastLoginAt;
 		this.loginCount = loginCount;
 		this.isActive = isActive;
-	}
-
-	// Customer 로그인 응답 생성
-	public static LoginResponse fromCustomer(String accessToken, User user) {
-		return LoginResponse.builder()
-			.accessToken(accessToken)
-			.userId(user.getUserId())
-			.username(user.getName())
-			.email(user.getEmail())
-			.phone(user.getPhoneNumber())
-			.role(user.getRole().getValue())
-			.lastLoginAt(user.getLastLoginAt())
-			.loginCount(user.getLoginCount())
-			.isActive(user.getIsActive())
-			.build();
-	}
-
-	// Owner 로그인 응답 생성
-	public static LoginResponse fromOwner(String accessToken, User user) {
-		return LoginResponse.builder()
-			.accessToken(accessToken)
-			.userId(user.getUserId())
-			.username(user.getName())
-			.email(user.getEmail())
-			.phone(user.getPhoneNumber())
-			.role(user.getRole().getValue())
-			.businessNumber(user.getBusinessNumber())
-			.lastLoginAt(user.getLastLoginAt())
-			.loginCount(user.getLoginCount())
-			.isActive(user.getIsActive())
-			.build();
-	}
-
-	// Master 로그인 응답 생성
-	public static LoginResponse fromMaster(String accessToken, User user) {
-		return LoginResponse.builder()
-			.accessToken(accessToken)
-			.userId(user.getUserId())
-			.username(user.getName())
-			.email(user.getEmail())
-			.phone(user.getPhoneNumber())
-			.role(user.getRole().getValue())
-			.lastLoginAt(user.getLastLoginAt())
-			.loginCount(user.getLoginCount())
-			.isActive(user.getIsActive())
-			.build();
-	}
-
-	// 통합 로그인 응답 생성 (역할 자동 판별)
-	public static LoginResponse from(String accessToken, User user) {
-		switch (user.getRole()) {
-			case CUSTOMER:
-				return fromCustomer(accessToken, user);
-			case OWNER:
-				return fromOwner(accessToken, user);
-			case MASTER:
-				return fromMaster(accessToken, user);
-			default:
-				throw new IllegalArgumentException("지원하지 않는 사용자 역할입니다: " + user.getRole());
-		}
-	}
-
-	// JWT 토큰 마스킹 (로그용)
-	public String getMaskedAccessToken() {
-		if (accessToken == null || accessToken.length() <= 10) {
-			return "***";
-		}
-		return accessToken.substring(0, 10) + "...";
 	}
 }
