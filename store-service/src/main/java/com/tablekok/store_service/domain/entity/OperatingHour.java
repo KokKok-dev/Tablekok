@@ -18,6 +18,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -48,4 +49,27 @@ public class OperatingHour extends BaseEntity {
 
 	@Column(name = "is_closed", nullable = false)
 	private boolean isClosed;
+
+	@Builder(access = AccessLevel.PRIVATE)
+	private OperatingHour(
+		Store store, DayOfWeek dayOfWeek, LocalTime openTime, LocalTime closeTime, boolean isClosed
+	) {
+		this.store = store;
+		this.dayOfWeek = dayOfWeek;
+		this.openTime = openTime;
+		this.closeTime = closeTime;
+		this.isClosed = isClosed;
+	}
+
+	public static OperatingHour of(
+		Store store, DayOfWeek dayOfWeek, LocalTime openTime, LocalTime closeTime, boolean isClosed
+	) {
+		return OperatingHour.builder()
+			.store(store)
+			.dayOfWeek(dayOfWeek)
+			.openTime(openTime)
+			.closeTime(closeTime)
+			.isClosed(isClosed)
+			.build();
+	}
 }

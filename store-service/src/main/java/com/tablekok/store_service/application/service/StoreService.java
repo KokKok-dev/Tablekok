@@ -14,8 +14,10 @@ import com.tablekok.store_service.application.dto.param.CreateOperatingHourParam
 import com.tablekok.store_service.application.dto.param.CreateStoreParam;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
 import com.tablekok.store_service.domain.entity.Category;
+import com.tablekok.store_service.domain.entity.OperatingHour;
 import com.tablekok.store_service.domain.entity.Store;
 import com.tablekok.store_service.domain.repository.CategoryRepository;
+import com.tablekok.store_service.domain.repository.OperatingHourRepository;
 import com.tablekok.store_service.domain.repository.StoreRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class StoreService {
 
 	private final StoreRepository storeRepository;
 	private final CategoryRepository categoryRepository;
+	private final OperatingHourRepository operatingHourRepository;
 
 	@Transactional
 	public UUID createStore(CreateStoreParam param) {
@@ -43,9 +46,14 @@ public class StoreService {
 		// Category ID를 사용하여 Entity 조회 및 연결
 		linkCategoriesToStore(store, param.categoryIds());
 
-		// db 저장
+		// store db 저장
 		storeRepository.save(store);
+
+		// operatingHour db 저장
+		saveOperatingHours(store, param.operatingHours());
+
 		return store.getId();
+
 	}
 
 	private void linkCategoriesToStore(Store store, List<UUID> categoryIds) {
@@ -90,4 +98,13 @@ public class StoreService {
 		}
 	}
 
+	private void saveOperatingHours(Store store, List<CreateOperatingHourParam> hourParams) {
+		// Param 목록을 OperatingHour Entity 목록으로 변환
+		List<OperatingHour> hoursToSave = hourParams.stream()
+			.map(param -> param.toEntity(store))
+			.toList();
+
+		operatingHourRepository.saveAll(hoursToSave);
+
+	}
 }
