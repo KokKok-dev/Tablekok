@@ -22,31 +22,44 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io'}
 }
 
 ext {
 	set('springCloudVersion', "2025.0.0")
 }
 
-repositories {
-	mavenCentral()
-	maven { url 'https://jitpack.io'}
-}
-
 dependencies {
+	// 🌟 Tablekok 공통 모듈
 	implementation 'com.github.KokKok-dev:Tablekok-common:1.0.1'
 
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
-//	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
+	// 🌐 Spring Boot Starters
+	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+	// 🔑 JWT 라이브러리 (최적화된 의존성 스코프)
+	compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'      // 컴파일 시에만 인터페이스 필요
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'     // 런타임에만 구현체 필요
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'  // 런타임에만 JSON 처리 필요
+
+	// 🔍 Spring Cloud (Netflix 스택)
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	// implementation 'org.springframework.cloud:spring-cloud-starter-config'  // Config Server 사용 시 주석 해제
+
+	// 🛠️ Development Tools
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// 🐘 Database
 	runtimeOnly 'org.postgresql:postgresql'
+
+	// 🧪 Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

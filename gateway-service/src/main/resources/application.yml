@@ -2,6 +2,97 @@ spring:
   application:
     name: gateway-service
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   config:
     import: "configserver:http://localhost:8888"
+
+
+  # Spring Cloud Gateway 설정 (백엔드 개발용)
+  cloud:
+    gateway:
+      # 개발용 CORS 설정
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - ${CORS_ALLOWED_ORIGINS:*}
+            allowed-methods:
+              - "*"
+            allowed-headers:
+              - "*"
+            allow-credentials: true
+            max-age: 3600
+
+      # 라우팅 설정
+      routes:
+        # 👤 User Service 라우팅 - 인증 관련
+        - id: user-service-auth
+          uri: lb://user-service
+          predicates:
+            - Path=/v1/auth/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        # User Service 라우팅 - 사용자 정보
+        - id: user-service-users
+          uri: lb://user-service
+          predicates:
+            - Path=/v1/users/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        # 개발용 직접 접근
+        - id: user-service-direct
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/**
+          filters:
+            - StripPrefix=1
+            - name: JwtAuthenticationFilter
+
+      # 기본 필터
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+
+# JWT 설정 (토큰 검증용)
+jwt:
+  secret: ${JWT_SECRET}
+  header: ${JWT_HEADER:Authorization}
+  prefix: ${JWT_PREFIX:Bearer }
+
+# Eureka 클라이언트 설정
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+    health-check-url-path: /actuator/health
+
+# Actuator 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_ENDPOINTS:health,info,metrics,gateway,routes}
+  endpoint:
+    health:
+      show-details: ${HEALTH_SHOW_DETAILS:always}
+    gateway:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+# 로깅 설정
+logging:
+  level:
+    org.springframework.cloud.gateway: ${GATEWAY_LOG_LEVEL:DEBUG}
+    com.tablekok.gateway_service: ${APP_LOG_LEVEL:DEBUG}
+    org.springframework.web.cors: ${CORS_LOG_LEVEL:DEBUG}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"
+
+# Gateway 설정
+server:
+  port: ${SERVER_PORT:8080}
