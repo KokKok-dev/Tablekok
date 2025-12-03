@@ -32,6 +32,9 @@ public class Review extends BaseEntity {
 	private UUID storeId;
 
 	@Column(nullable = false)
+	private UUID reservationId;
+
+	@Column(nullable = false)
 	private Double rating;
 
 	@Column(nullable = false)
@@ -42,32 +45,32 @@ public class Review extends BaseEntity {
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private Review(
-		UUID id,
 		UUID userId,
 		UUID storeId,
+		UUID reservationId,
 		Double rating,
 		String content
 	) {
-		this.id = id;
 		this.userId = userId;
 		this.storeId = storeId;
+		this.reservationId = reservationId;
 		this.rating = rating;
 		this.content = content;
 	}
 
 	public static Review create(
-		UUID id,
 		UUID userId,
 		UUID storeId,
+		UUID reservationId,
 		Double rating,
 		String content
 	) {
-		return new Review(
-			id,
-			userId,
-			storeId,
-			rating,
-			content
-		);
+		return Review.builder()
+			.userId(userId)
+			.storeId(storeId)
+			.reservationId(reservationId)
+			.rating(rating)
+			.content(content)
+			.build();
 	}
 }
