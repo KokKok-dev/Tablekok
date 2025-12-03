@@ -8,7 +8,7 @@ spring:
 
 # JWT 설정 (토큰 생성용 - Gateway와 동일한 설정 사용)
 jwt:
-  secret: ${JWT_SECRET:tablekok-dev-secret-key-for-local-development-only}
+  secret: ${JWT_SECRET}
   access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}     # 1시간
   refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000} # 7일
 
