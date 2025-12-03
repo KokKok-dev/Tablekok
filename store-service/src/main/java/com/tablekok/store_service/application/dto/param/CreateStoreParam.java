@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.tablekok.store_service.domain.entity.Store;
-import com.tablekok.store_service.presentation.dto.request.CreateOperatingHourRequest;
 
 import lombok.Builder;
 
@@ -24,7 +23,7 @@ public record CreateStoreParam(
 	String imageUrl,
 
 	List<UUID> categoryIds,
-	List<CreateOperatingHourRequest> operatingHours
+	List<CreateOperatingHourParam> operatingHours
 ) {
 
 	public Store toEntity() {

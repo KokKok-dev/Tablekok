@@ -10,6 +10,7 @@ import org.hibernate.annotations.Comment;
 
 import com.tablekok.entity.BaseEntity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,6 +22,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -88,6 +90,9 @@ public class Store extends BaseEntity {
 		inverseJoinColumns = @JoinColumn(name = "category_id") // Category 엔티티의 FK
 	)
 	private List<Category> categories = new ArrayList<>();
+
+	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OperatingHour> operatingHours = new ArrayList<>();
 
 	public void addCategory(Category category) {
 		this.categories.add(category);

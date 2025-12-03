@@ -1,8 +1,11 @@
 package com.tablekok.store_service.presentation.dto.request;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.tablekok.store_service.application.dto.param.CreateOperatingHourParam;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,4 +23,15 @@ public record CreateOperatingHourRequest(
 	@NotNull(message = "휴무일 여부는 필수입니다.")
 	boolean isClosed
 ) {
+
+	public CreateOperatingHourParam toParam() {
+		DayOfWeek dayOfWeek = DayOfWeek.valueOf(day.toUpperCase());
+
+		return new CreateOperatingHourParam(
+			dayOfWeek,
+			openTime,
+			closeTime,
+			isClosed
+		);
+	}
 }

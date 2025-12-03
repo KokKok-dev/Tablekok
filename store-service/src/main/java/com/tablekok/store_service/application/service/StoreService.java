@@ -1,12 +1,16 @@
 package com.tablekok.store_service.application.service;
 
+import java.time.DayOfWeek;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.exception.AppException;
+import com.tablekok.store_service.application.dto.param.CreateOperatingHourParam;
 import com.tablekok.store_service.application.dto.param.CreateStoreParam;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
 import com.tablekok.store_service.domain.entity.Category;
@@ -25,18 +29,21 @@ public class StoreService {
 
 	@Transactional
 	public UUID createStore(CreateStoreParam param) {
-		// 1. 음식점 중복확인
+		// 음식점 중복확인
 		if (storeRepository.existsByNameAndAddress(param.name(), param.address())) {
 			throw new AppException(StoreErrorCode.DUPLICATE_STORE_ENTRY);
 		}
 
-		// 2. Store Entity 생성 (PENDING_APPROVAL 상태로)
+		// 운영시간 검증
+		validateOperatingHours(param.operatingHours());
+
+		// Store Entity 생성 (PENDING_APPROVAL 상태로)
 		Store store = param.toEntity();
 
-		// 3. Category ID를 사용하여 Entity 조회 및 연결
+		// Category ID를 사용하여 Entity 조회 및 연결
 		linkCategoriesToStore(store, param.categoryIds());
 
-		// 4. db 저장
+		// db 저장
 		storeRepository.save(store);
 		return store.getId();
 	}
@@ -53,6 +60,34 @@ public class StoreService {
 			store.addCategory(category);
 		}
 
+	}
+
+	private void validateOperatingHours(List<CreateOperatingHourParam> hours) {
+		Set<DayOfWeek> days = new HashSet<>();
+		for (CreateOperatingHourParam hour : hours) {
+
+			// 1. isClosed가 true일 경우 시간 필드는 반드시 null이어야 합니다.
+			if (hour.isClosed()) {
+				if (hour.openTime() != null || hour.closeTime() != null) {
+					throw new AppException(StoreErrorCode.INVALID_CLOSED_TIME);
+				}
+			}
+			// 2. isClosed가 false일 경우 시간 필드는 반드시 존재해야 합니다.
+			else {
+				if (hour.openTime() == null || hour.closeTime() == null) {
+					throw new AppException(StoreErrorCode.MISSING_OPERATING_TIME);
+				}
+				// 3. 시간 순서 검증
+				if (hour.openTime().isAfter(hour.closeTime())) {
+					throw new AppException(StoreErrorCode.INVALID_TIME_RANGE);
+				}
+			}
+
+			// 4. 요일 중복 검사
+			if (!days.add(hour.dayOfWeek())) {
+				throw new AppException(StoreErrorCode.DUPLICATE_OPERATING_DAY);
+			}
+		}
 	}
 
 }

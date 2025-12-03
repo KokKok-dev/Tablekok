@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import com.tablekok.store_service.application.dto.param.CreateOperatingHourParam;
 import com.tablekok.store_service.application.dto.param.CreateStoreParam;
 
 import jakarta.validation.Valid;
@@ -52,6 +53,11 @@ public record CreateStoreRequest(
 ) {
 
 	public CreateStoreParam toParam(UUID ownerId) {
+
+		List<CreateOperatingHourParam> operatingHourParams = this.operatingHours.stream()
+			.map(CreateOperatingHourRequest::toParam)
+			.toList();
+
 		return CreateStoreParam.builder()
 			.ownerId(ownerId)
 			.name(name)
@@ -64,7 +70,7 @@ public record CreateStoreRequest(
 			.turnoverRateMinutes(turnoverRateMinutes)
 			.imageUrl(imageUrl)
 			.categoryIds(categoryIds)
-			.operatingHours(operatingHours)
+			.operatingHours(operatingHourParams)
 			.build();
 	}
 }
