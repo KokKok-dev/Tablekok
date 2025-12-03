@@ -14,13 +14,13 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * 🔑 JWT 토큰 생성 유틸리티 클래스 (User Service용)
+ * JWT 토큰 생성 유틸리티 클래스 (User Service용)
  *
  * 📋 역할: 인증(Authentication) 담당
  * - 로그인 시 JWT 토큰 발급
  * - 회원가입 시 즉시 JWT 토큰 발급
  *
- * 🚫 JWT 검증/파싱은 Gateway Service에서 담당
+ * JWT 검증/파싱은 Gateway Service에서 담당
  * 인증과 인가의 명확한 책임 분리
  */
 @Slf4j
@@ -32,14 +32,14 @@ public class JwtUtil {
 
 	/**
 	 * JWT 서명에 사용할 비밀키 생성
-	 * ⚠️ Gateway와 동일한 비밀키 사용 필요 (Config Server에서 중앙 관리)
+	 * ⚠Gateway와 동일한 비밀키 사용 필요 (Config Server에서 중앙 관리)
 	 */
 	private SecretKey getSigningKey() {
 		return Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
 	}
 
 	/**
-	 * 🎯 액세스 토큰 생성
+	 * 액세스 토큰 생성
 	 *
 	 * 포함 정보:
 	 * - subject: 사용자 UUID
@@ -71,7 +71,7 @@ public class JwtUtil {
 	}
 
 	/**
-	 * 🔄 리프레시 토큰 생성
+	 * 리프레시 토큰 생성
 	 *
 	 * 액세스 토큰 갱신용으로 더 긴 만료 시간 설정
 	 * 최소한의 정보만 포함 (보안 강화)
@@ -96,7 +96,7 @@ public class JwtUtil {
 	}
 
 	/**
-	 * 📋 토큰 생성 로그용 정보 생성
+	 * 토큰 생성 로그용 정보 생성
 	 *
 	 * @param userId 사용자 ID
 	 * @param email 사용자 이메일

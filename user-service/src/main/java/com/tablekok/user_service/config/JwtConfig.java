@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import lombok.Getter;
 
 /**
- * 🔑 JWT 설정 클래스 (User Service용)
+ * JWT 설정 클래스 (User Service용)
  *
  * Config Server에서 JWT 설정을 중앙 관리
  * 토큰 생성에 필요한 설정만 포함

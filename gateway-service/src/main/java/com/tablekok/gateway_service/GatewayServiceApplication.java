@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * 🌐 Gateway Service 메인 애플리케이션 클래스
+ * Gateway Service 메인 애플리케이션 클래스
  *
  * 주요 기능:
  * - API 라우팅 및 로드 밸런싱
@@ -14,7 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  * 인가 담당: "누구에게 무엇을 허용할지" 결정
  *
- * ⚠️ Spring Cloud Gateway는 WebFlux 기반
+ * Spring Cloud Gateway는 WebFlux 기반
  * - @EnableFeignClients 불필요 (WebClient 사용)
  * - 리액티브 프로그래밍 모델 적용
  */
