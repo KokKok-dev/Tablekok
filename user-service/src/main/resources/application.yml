@@ -5,3 +5,17 @@ spring:
     active: dev
   config:
     import: "configserver:http://localhost:8888"
+
+# 🔑 JWT 설정 (토큰 생성용 - Gateway와 동일한 설정 사용)
+jwt:
+  secret: ${JWT_SECRET:tablekok-dev-secret-key-for-local-development-only}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}     # 1시간
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000} # 7일
+
+# 🔍 Eureka 클라이언트 설정
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true

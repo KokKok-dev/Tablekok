@@ -5,3 +5,45 @@ spring:
     active: dev
   config:
     import: "configserver:http://localhost:8888"
+
+# 🔑 JWT 설정 (토큰 검증용 - User Service와 동일한 설정 사용)
+jwt:
+  secret: ${JWT_SECRET:tablekok-dev-secret-key-for-local-development-only}
+  header: ${JWT_HEADER:Authorization}
+  prefix: ${JWT_PREFIX:Bearer }
+
+  # 🌐 Spring Cloud Gateway 라우팅 설정
+  cloud:
+    gateway:
+      routes:
+        # User Service 라우팅
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/v1/auth/**, /v1/users/**
+          filters:
+            - name: JwtAuthenticationFilter  # JWT 인가 필터 적용
+
+        # Store Service 라우팅 (향후 추가)
+        - id: store-service
+          uri: lb://store-service
+          predicates:
+            - Path=/v1/stores/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        # Reservation Service 라우팅 (향후 추가)
+        - id: reservation-service
+          uri: lb://reservation-service
+          predicates:
+            - Path=/v1/reservations/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+# 🔍 Eureka 클라이언트 설정
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true

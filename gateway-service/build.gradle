@@ -6,7 +6,6 @@ plugins {
 
 group = 'com.tablekok'
 version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
 
 java {
 	toolchain {
@@ -16,6 +15,7 @@ java {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io'}
 }
 
 ext {
@@ -23,12 +23,31 @@ ext {
 }
 
 dependencies {
-	implementation 'org.springframework.cloud:spring-cloud-starter-config'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	// 🌟 Tablekok 공통 모듈
+	implementation 'com.github.KokKok-dev:Tablekok-common:1.0.1'
+
+	// 🌐 Spring Cloud Gateway (WebFlux 기반)
 	implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
+	// ❌ 제거해야 할 의존성들
+	// implementation 'org.springframework.boot:spring-boot-starter-web'     // MVC와 Gateway 충돌
+	// implementation 'org.springframework.cloud:spring-cloud-starter-config' // 현재 사용 안함
+
+	// ✅ 유지할 의존성들
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'  // 모니터링용
+
+	// 🔑 JWT 라이브러리 (토큰 검증용)
+	compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+
+	// 🛠️ Development Tools
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// 🧪 Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
