@@ -6,39 +6,58 @@ spring:
   config:
     import: "configserver:http://localhost:8888"
 
-# 🔑 JWT 설정 (토큰 검증용 - User Service와 동일한 설정 사용)
+# 🔑 JWT 설정 (토큰 검증용)
 jwt:
   secret: ${JWT_SECRET:tablekok-dev-secret-key-for-local-development-only}
   header: ${JWT_HEADER:Authorization}
   prefix: ${JWT_PREFIX:Bearer }
 
-  # 🌐 Spring Cloud Gateway 라우팅 설정
+  # 🌐 Spring Cloud Gateway 설정 (백엔드 개발용)
   cloud:
     gateway:
+      # 🌍 개발용 CORS 설정 (Postman/Browser 테스트용)
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - "*"  # 개발 단계에서는 모든 Origin 허용
+            allowed-methods:
+              - "*"  # 모든 HTTP 메서드 허용
+            allowed-headers:
+              - "*"  # 모든 헤더 허용
+            allow-credentials: true
+            max-age: 3600
+
+      # 🛣️ 라우팅 설정 (현재 구현된 서비스만)
       routes:
-        # User Service 라우팅
-        - id: user-service
+        # 👤 User Service 라우팅 - 인증 관련 (공개)
+        - id: user-service-auth
           uri: lb://user-service
           predicates:
-            - Path=/v1/auth/**, /v1/users/**
-          filters:
-            - name: JwtAuthenticationFilter  # JWT 인가 필터 적용
-
-        # Store Service 라우팅 (향후 추가)
-        - id: store-service
-          uri: lb://store-service
-          predicates:
-            - Path=/v1/stores/**
+            - Path=/v1/auth/**
           filters:
             - name: JwtAuthenticationFilter
 
-        # Reservation Service 라우팅 (향후 추가)
-        - id: reservation-service
-          uri: lb://reservation-service
+        # 👤 User Service 라우팅 - 사용자 정보 (보호)
+        - id: user-service-users
+          uri: lb://user-service
           predicates:
-            - Path=/v1/reservations/**
+            - Path=/v1/users/**
           filters:
             - name: JwtAuthenticationFilter
+
+        # 🏥 User Service 직접 접근 (개발/테스트용)
+        - id: user-service-direct
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/**
+          filters:
+            - StripPrefix=1  # /user-service 제거
+            - name: JwtAuthenticationFilter
+
+      # 🌐 기본 필터 설정
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
 
 # 🔍 Eureka 클라이언트 설정
 eureka:
@@ -47,3 +66,33 @@ eureka:
       defaultZone: ${EUREKA_DEFAULT_ZONE:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true
+    health-check-url-path: /actuator/health
+
+# 📊 Actuator 설정 (개발용)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway,routes  # Gateway 라우팅 정보 포함
+  endpoint:
+    health:
+      show-details: always  # 개발 환경에서는 상세 정보 표시
+    gateway:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+# 🔒 개발용 로깅 설정
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG  # Gateway 상세 로그
+    com.tablekok.gateway_service: DEBUG       # 애플리케이션 상세 로그
+    org.springframework.web.cors: DEBUG       # CORS 상세 로그
+    org.springframework.security: INFO        # Security 로그
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"
+
+# ⚡ Gateway 개발용 설정
+server:
+  port: ${SERVER_PORT:8080}

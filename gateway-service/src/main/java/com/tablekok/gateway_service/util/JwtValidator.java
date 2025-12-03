@@ -9,19 +9,20 @@ import com.tablekok.gateway_service.config.JwtConfig;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.UUID;
 
 /**
- * 🛡️ JWT 토큰 검증 유틸리티 클래스 (Gateway Service용)
+ * 🛡️ JWT 토큰 검증 유틸리티 클래스 (Gateway Service용 - 백엔드 개발 버전)
  *
  * 📋 역할: 인가(Authorization) 담당
  * - JWT 토큰 유효성 검증
  * - 토큰에서 사용자 정보 추출
- * - 권한별 접근 제어 지원
+ * - 권한별 접근 제어 지원 (현재 구현된 기능만)
  *
  * 🚫 JWT 생성은 User Service에서 담당
  * 인증과 인가의 명확한 책임 분리
+ *
+ * 🟢 백엔드 개발 단계에서는 간소화된 권한 체크만 수행
  */
 @Slf4j
 @Component
@@ -132,35 +133,78 @@ public class JwtValidator {
 	}
 
 	/**
-	 * 🔒 경로별 권한 확인
+	 * 🔒 경로별 권한 확인 (백엔드 개발용 - 간소화)
+	 *
+	 * 현재 구현된 User Service 기능만 권한 확인
+	 * 추후 다른 마이크로서비스 추가 시 점진적으로 확장
 	 *
 	 * @param path 요청 경로
 	 * @param role 사용자 역할
 	 * @return 접근 허용 여부
 	 */
 	public boolean hasPermissionForPath(String path, String role) {
-		// 🌐 공통 접근 가능 경로
-		if (path.startsWith("/v1/auth/")) {
-			return true;  // 인증 관련 API는 모두 접근 가능
+		log.debug("🔍 [DEV] Checking permission - Path: {}, Role: {}", path, role);
+
+		// 🌐 공개 경로 (인증 불필요)
+		if (path.startsWith("/v1/auth/") ||
+			path.startsWith("/actuator/") ||
+			path.startsWith("/user-service/actuator/")) {
+			log.debug("✅ [DEV] Public path: {}", path);
+			return true;
 		}
 
-		// 🎭 역할별 접근 제어
+		// 🎭 역할별 접근 제어 (현재 구현된 기능만)
 		switch (role) {
 			case "CUSTOMER":
-				return path.startsWith("/v1/users/profile/customer") ||
-					path.startsWith("/v1/reservations/") ||
-					path.startsWith("/v1/reviews/") ||
-					path.startsWith("/v1/stores/search");  // 매장 검색은 고객도 가능
+				boolean customerAccess =
+					// 👤 고객 프로필 관리 (현재 구현 예정)
+					path.startsWith("/v1/users/profile/customer") ||
+						// 📊 내 정보 조회 (자기 자신만)
+						path.matches("/v1/users/\\d+") ||
+						// 🔧 개발용 직접 접근
+						path.startsWith("/user-service/v1/users/profile/customer");
+
+				log.debug("✅ [DEV] Customer access to {}: {}", path, customerAccess);
+				return customerAccess;
 
 			case "OWNER":
-				return path.startsWith("/v1/users/profile/owner") ||
-					path.startsWith("/v1/stores/") ||
-					path.startsWith("/v1/reservations/manage") ||
-					path.startsWith("/v1/reviews/manage");
+				boolean ownerAccess =
+					// 👤 사업자 프로필 관리 (현재 구현 예정)
+					path.startsWith("/v1/users/profile/owner") ||
+						// 📊 내 정보 조회 (자기 자신만)
+						path.matches("/v1/users/\\d+") ||
+						// 🔧 개발용 직접 접근
+						path.startsWith("/user-service/v1/users/profile/owner");
+
+				log.debug("✅ [DEV] Owner access to {}: {}", path, ownerAccess);
+				return ownerAccess;
 
 			default:
-				log.warn("🚫 Unknown role: {}", role);
+				log.warn("🚫 [DEV] Unknown role: {} for path: {}", role, path);
 				return false;
+		}
+	}
+
+	/**
+	 * 🔍 개발용 디버깅 - 토큰 정보 출력
+	 *
+	 * 개발 단계에서 토큰 내용 확인용
+	 * 운영에서는 제거 예정
+	 *
+	 * @param token JWT 토큰
+	 */
+	public void debugTokenInfo(String token) {
+		try {
+			Claims claims = getClaimsFromToken(token);
+			log.debug("🔍 [DEV] Token Debug Info:");
+			log.debug("  - Subject: {}", claims.getSubject());
+			log.debug("  - Email: {}", claims.get("email"));
+			log.debug("  - Role: {}", claims.get("role"));
+			log.debug("  - Type: {}", claims.get("type"));
+			log.debug("  - Issued: {}", claims.getIssuedAt());
+			log.debug("  - Expires: {}", claims.getExpiration());
+		} catch (Exception e) {
+			log.debug("🚫 [DEV] Token debug failed: {}", e.getMessage());
 		}
 	}
 }
