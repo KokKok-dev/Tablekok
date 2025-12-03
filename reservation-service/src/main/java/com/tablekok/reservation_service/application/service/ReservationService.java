@@ -95,17 +95,10 @@ public class ReservationService {
 	public void noShow(UUID userId, UUID reservationId) {
 		Reservation findReservation = reservationRepository.findById(reservationId);
 		// 해당 예약의 음식점이 사용자 소유인지
-		validateStoreOwner(userId, findReservation);
+		validateStoreOwner(userId, findReservation.getStoreId());
 		findReservation.noShow();
 	}
-
-	// 해당 예약의 음식점이 사용자 소유인지
-	private void validateStoreOwner(UUID userId, Reservation reservation) {
-		if (!searchClient.checkStoreOwner(userId, reservation.getStoreId())) {
-			throw new AppException(ReservationErrorCode.FORBIDDEN_STORE_ACCESS);
-		}
-	}
-
+	
 	// 예약 조회(고객)
 	@Transactional(readOnly = true)
 	public Page<Reservation> getReservationsForCustomer(UUID userId, Pageable pageable) {
@@ -118,10 +111,15 @@ public class ReservationService {
 	@Transactional(readOnly = true)
 	public Page<Reservation> getReservationsForOwner(UUID userId, UUID storeId, Pageable pageable) {
 		Pageable normalizedPageable = PageableUtils.normalize(pageable);
+		validateStoreOwner(userId, storeId);
+		return reservationRepository.findByStoreId(storeId, normalizedPageable);
+	}
+
+	// 해당 예약의 음식점이 사용자 소유인지
+	private void validateStoreOwner(UUID userId, UUID storeId) {
 		if (!searchClient.checkStoreOwner(userId, storeId)) {
 			throw new AppException(ReservationErrorCode.FORBIDDEN_STORE_ACCESS);
 		}
-		return reservationRepository.findByStoreId(storeId, normalizedPageable);
 	}
 
 }
