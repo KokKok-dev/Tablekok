@@ -2,6 +2,8 @@ package com.tablekok.store_service.domain.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.Comment;
@@ -12,9 +14,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -75,6 +81,21 @@ public class Store extends BaseEntity {
 	@Column(name = "waiting_open_time")
 	private LocalTime waitingOpenTime;
 
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(
+		name = "p_store_category_map", // JPA가 관리할 조인 테이블 이름
+		joinColumns = @JoinColumn(name = "store_id"), // Store 엔티티의 FK
+		inverseJoinColumns = @JoinColumn(name = "category_id") // Category 엔티티의 FK
+	)
+	private List<Category> categories = new ArrayList<>();
+
+	public void addCategory(Category category) {
+		this.categories.add(category);
+		if (!category.getStores().contains(this)) {
+			category.getStores().add(this);
+		}
+	}
+
 	@Builder(access = AccessLevel.PRIVATE)
 	private Store(
 		UUID ownerId, String name, String phoneNumber, String address,
@@ -89,7 +110,6 @@ public class Store extends BaseEntity {
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.description = description;
-		// 초기 생성 시 기본 상태를 지정하거나, 필수로 받은 status를 사용합니다.
 		this.status = status;
 		this.totalCapacity = totalCapacity;
 		this.turnoverRateMinutes = turnoverRateMinutes;
@@ -116,6 +136,8 @@ public class Store extends BaseEntity {
 			.totalCapacity(totalCapacity)
 			.turnoverRateMinutes(turnoverRateMinutes)
 			.imageUrl(imageUrl)
+			.reservationOpenTime(null)
+			.waitingOpenTime(null)
 			.build();
 	}
 

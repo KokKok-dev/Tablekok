@@ -1,5 +1,7 @@
 package com.tablekok.store_service.infrastructure.repository;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Repository;
 
 import com.tablekok.store_service.domain.entity.Store;
@@ -21,5 +23,10 @@ public class StoreRepositoryImpl implements StoreRepository {
 	@Override
 	public boolean existsByNameAndAddress(String name, String address) {
 		return storeJpaRepository.existsByNameAndAddress(name, address);
+	}
+
+	@Override
+	public Store getReferenceById(UUID storeId) {
+		return storeJpaRepository.getReferenceById(storeId);
 	}
 }

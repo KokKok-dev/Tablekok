@@ -23,6 +23,7 @@ public record CreateStoreParam(
 	Integer turnoverRateMinutes,
 	String imageUrl,
 
+	List<UUID> categoryIds,
 	List<CreateOperatingHourRequest> operatingHours
 ) {
 

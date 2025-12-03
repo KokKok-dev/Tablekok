@@ -1,5 +1,8 @@
 package com.tablekok.store_service.domain.repository;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,4 +14,7 @@ public interface CategoryRepository {
 	boolean existsByName(String name);
 
 	Page<Category> findAll(Pageable pageable);
+
+	List<Category> findAllById(List<UUID> categoryIds);
+
 }

@@ -1,5 +1,7 @@
 package com.tablekok.store_service.domain.entity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.tablekok.entity.BaseEntity;
@@ -9,6 +11,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -31,6 +34,16 @@ public class Category extends BaseEntity {
 	@Column(name = "name", nullable = false)
 	private String name;
 
+	@ManyToMany(mappedBy = "categories")
+	private List<Store> stores = new ArrayList<>();
+
+	public void addStore(Store store) {
+		this.stores.add(store);
+		if (!store.getCategories().contains(this)) {
+			store.getCategories().add(this);
+		}
+	}
+	
 	@Builder(access = AccessLevel.PRIVATE)
 	private Category(
 		String name) {

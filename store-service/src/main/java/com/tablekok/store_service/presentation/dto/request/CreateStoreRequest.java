@@ -41,6 +41,10 @@ public record CreateStoreRequest(
 
 	String imageUrl,
 
+	@NotNull(message = "카테고리 정보는 필수입니다.")
+	@Size(min = 1, max = 3, message = "카테고리는 최소 1개, 최대 3개까지 설정 가능합니다.")
+	List<UUID> categoryIds,
+
 	@NotNull(message = "운영 시간 정보는 필수입니다.")
 	@Size(min = 1, message = "최소 하나의 운영 시간 정보가 필요합니다.")
 	@Valid
@@ -59,6 +63,7 @@ public record CreateStoreRequest(
 			.totalCapacity(totalCapacity)
 			.turnoverRateMinutes(turnoverRateMinutes)
 			.imageUrl(imageUrl)
+			.categoryIds(categoryIds)
 			.operatingHours(operatingHours)
 			.build();
 	}
