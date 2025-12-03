@@ -109,6 +109,7 @@ public class ReservationService {
 	}
 
 	// 예약 확인(DONE, 오너)
+	@Transactional
 	public void done(UUID userId, UUID reservationId) {
 		Reservation findReservation = reservationRepository.findById(reservationId);
 		// 해당 예약의 음식점이 사용자 소유인지
