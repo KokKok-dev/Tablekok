@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.tablekok.exception.AppException;
-import com.tablekok.reservation_service.application.service.ReservationErrorCode;
+import com.tablekok.reservation_service.application.exception.ReservationErrorCode;
 import com.tablekok.reservation_service.domain.entity.Reservation;
 import com.tablekok.reservation_service.domain.repository.ReservationRepository;
 
