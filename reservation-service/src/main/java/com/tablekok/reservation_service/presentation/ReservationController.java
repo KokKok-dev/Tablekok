@@ -92,6 +92,16 @@ public class ReservationController {
 			ApiResponse.success("예약 노쇼(오너) 성공", HttpStatus.OK));
 	}
 
+	// 예약 확인(DONE, 오너)
+	@PatchMapping("/owner/{reservationId}/done")
+	public ResponseEntity<ApiResponse<Void>> done(@PathVariable("reservationId") UUID reservationId) {
+		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
+
+		reservationService.done(userId, reservationId);
+		return ResponseEntity.ok(
+			ApiResponse.success("예약 확인(오너) 성공", HttpStatus.OK));
+	}
+
 	// 예약 조회(고객)
 	@GetMapping
 	public ResponseEntity<ApiResponse<Page<GetReservationsForCustomerResponse>>> getReservationsForCustomer(
