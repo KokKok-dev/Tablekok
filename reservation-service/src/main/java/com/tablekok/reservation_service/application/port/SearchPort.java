@@ -12,6 +12,6 @@ public interface SearchPort {
 	// 유저가 해당 음식점의 오너가 맞는지
 	boolean checkStoreOwner(UUID userId, UUID storeId);
 
-	// 인기 음식점 리스트 캐시에서 가져오거나 없으면 내부 호출
+	// 인기 음식점 리스트 조회
 	List<UUID> getHotStores();
 }
