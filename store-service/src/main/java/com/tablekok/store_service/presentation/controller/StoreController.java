@@ -28,7 +28,7 @@ public class StoreController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<Void>> createStore(
-		@Valid @RequestBody CreateStoreRequest requestDto
+		@Valid @RequestBody CreateStoreRequest request
 	) {
 		// store 생성
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -43,7 +43,7 @@ public class StoreController {
 	@PutMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<Void>> updateStore(
 		@PathVariable UUID storeId,
-		@RequestBody UpdateStoreRequest requestDto
+		@RequestBody UpdateStoreRequest request
 	) {
 		// 음식점 정보 수정
 		return ResponseEntity.ok(
@@ -54,7 +54,7 @@ public class StoreController {
 	@PatchMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<Void>> updateStatus(
 		@PathVariable UUID storeId,
-		@RequestBody UpdateStatusRequest requestDto
+		@RequestBody UpdateStatusRequest request
 	) {
 		// 음식점 상태 변경
 		return ResponseEntity.ok(
