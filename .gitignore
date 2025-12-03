@@ -61,3 +61,22 @@ coverage/
 *.crt
 *.p12
 *.jks
+
+# 🔒 환경변수 파일들 (보안)
+.env
+.env.local
+.env.dev
+.env.prod
+.env.*.local
+env.*.v*
+env.user.v*
+env.gateway.v*
+
+# 🔧 IDE 설정 파일들
+.vscode/settings.json
+.idea/workspace.xml
+.idea/dataSources.xml
+
+# 🗄️ 데이터베이스 파일들 (로컬 개발용)
+*.db
+*.sqlite
