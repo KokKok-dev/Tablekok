@@ -13,6 +13,7 @@ import com.tablekok.reservation_service.application.client.SearchClient;
 import com.tablekok.reservation_service.application.client.dto.response.GetReservationPolicyResponse;
 import com.tablekok.reservation_service.application.dto.param.CreateReservationParam;
 import com.tablekok.reservation_service.application.dto.result.CreateReservationResult;
+import com.tablekok.reservation_service.application.dto.result.GetReservationResult;
 import com.tablekok.reservation_service.application.dto.result.GetReservationsForCustomerResult;
 import com.tablekok.reservation_service.application.dto.result.GetReservationsForOwnerResult;
 import com.tablekok.reservation_service.application.exception.ReservationErrorCode;
@@ -49,7 +50,7 @@ public class ReservationService {
 		reservationDomainService.checkDuplicateReservation(newReservation);
 
 		// 예약할 음식점의 예약 정책에 준수하는지 		TODO 내부호출 구현 후 테스트
-		validateReservationPolicy(newReservation);
+		// validateReservationPolicy(newReservation);
 
 		// 저장
 		reservationRepository.save(newReservation);
@@ -70,6 +71,12 @@ public class ReservationService {
 			searchClient.getReservationPolicy(reservation.getStoreId()));
 
 		reservationDomainService.validateReservationPolicy(reservation, policy);
+	}
+
+	// 단건 예약 조회(리뷰에서 호출 용도)
+	public GetReservationResult getReservation(UUID reservationId) {
+		Reservation findReservation = reservationRepository.findById(reservationId);
+		return GetReservationResult.of(findReservation);
 	}
 
 	// 예약 인원수 변경
@@ -116,7 +123,7 @@ public class ReservationService {
 		Pageable normalizedPageable = PageableUtils.normalize(pageable);
 		validateStoreOwner(userId, storeId);
 
-		Page<Reservation> reservations = reservationRepository.findByUserId(userId, normalizedPageable);
+		Page<Reservation> reservations = reservationRepository.findByStoreId(storeId, normalizedPageable);
 		return GetReservationsForOwnerResult.toPage(reservations);
 	}
 
