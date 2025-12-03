@@ -1,5 +1,7 @@
 package com.tablekok.store_service.presentation.dto.request;
 
+import com.tablekok.store_service.application.dto.param.CreateCategoryParam;
+
 import jakarta.validation.constraints.NotNull;
 
 public record CreateCategoryRequest(
@@ -7,5 +9,9 @@ public record CreateCategoryRequest(
 	String name
 
 ) {
-
+	public CreateCategoryParam toParam() {
+		return CreateCategoryParam.builder()
+			.name(name)
+			.build();
+	}
 }
