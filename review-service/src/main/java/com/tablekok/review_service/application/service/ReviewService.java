@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.review_service.application.client.ReservationClient;
 import com.tablekok.review_service.application.dto.param.CreateReviewParam;
+import com.tablekok.review_service.application.dto.result.CreateReviewResult;
 import com.tablekok.review_service.domain.entity.Review;
 import com.tablekok.review_service.domain.repository.ReviewRepository;
 import com.tablekok.review_service.domain.service.ReviewDomainService;
@@ -24,7 +25,7 @@ public class ReviewService {
 	private final ReviewDomainService reviewDomainService;
 
 	@Transactional
-	public UUID createReview(CreateReviewParam param, UUID userId) {
+	public CreateReviewResult createReview(CreateReviewParam param, UUID userId) {
 		// reservationClient로 storeId 가져와야함
 		UUID storeId = UUID.randomUUID();
 
@@ -41,6 +42,6 @@ public class ReviewService {
 
 		reviewRepository.save(newReview);
 
-		return newReview.getId();
+		return CreateReviewResult.fromEntity(newReview);
 	}
 }
