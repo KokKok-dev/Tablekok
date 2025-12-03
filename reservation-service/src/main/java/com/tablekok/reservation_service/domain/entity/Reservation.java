@@ -107,9 +107,14 @@ public class Reservation extends BaseEntity {
 		this.reservationStatus = ReservationStatus.REJECT;
 	}
 
-	// 예약 노쇼
+	// 예약 노쇼(오너)
 	public void noShow() {
 		this.reservationStatus = ReservationStatus.NOSHOW;
+	}
+
+	// 예약 확인(DONE, 오너)
+	public void done() {
+		this.reservationStatus = ReservationStatus.DONE;
 	}
 
 	// 인기 음식점의 예약이면 거절
