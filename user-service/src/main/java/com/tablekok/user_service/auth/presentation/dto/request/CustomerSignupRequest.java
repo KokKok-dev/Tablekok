@@ -11,6 +11,7 @@ import jakarta.validation.constraints.*;
  *
  * shipping-19man 스타일: Request → Param 변환 방식 적용
  * gashine20 피드백: record 방식 사용
+ * 순수 Validation만 담당 - 나머지 로직은 제거
  */
 @Schema(description = "고객 회원가입 요청")
 public record CustomerSignupRequest(
@@ -55,39 +56,8 @@ public record CustomerSignupRequest(
 			.build();
 	}
 
-	/**
-	 * API 요청 유효성 검증 추가 체크
-	 * Validation 어노테이션 외 커스텀 검증
-	 *
-	 * @return 유효하면 true
-	 */
-	public boolean isValidRequest() {
-		// 이메일 도메인 기본 체크
-		if (email != null && email.contains("@")) {
-			String domain = email.substring(email.lastIndexOf("@") + 1);
-			if (domain.length() < 2) {
-				return false;
-			}
-		}
-
-		// 휴대폰번호 길이 체크 (정확히 11자리)
-		if (phone != null && phone.length() != 11) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * 디버깅용 문자열 (비밀번호 마스킹)
-	 */
-	@Override
-	public String toString() {
-		return "CustomerSignupRequest{" +
-			"email='" + (email != null ? email.substring(0, Math.min(3, email.length())) + "***" : "null") + '\'' +
-			", username='" + username + '\'' +
-			", password='***'" +
-			", phone='" + (phone != null ? phone.substring(0, Math.min(3, phone.length())) + "***" : "null") + '\'' +
-			'}';
-	}
+	// ❌ 제거된 메서드들:
+	// - isValidRequest() → Service에서 처리
+	// - getNormalizedEmail() → Service에서 처리
+	// - toString() 오버라이드 → record 기본 toString 사용
 }

@@ -154,36 +154,4 @@ public record LoginResult(
 	public boolean isFirstLogin() {
 		return loginCount != null && loginCount == 1;
 	}
-
-	/**
-	 * 마스킹된 액세스 토큰 반환 (로깅용)
-	 */
-	public String getMaskedAccessToken() {
-		if (accessToken == null || accessToken.length() <= 10) {
-			return "***";
-		}
-
-		return accessToken.substring(0, 10) + "..." +
-			accessToken.substring(accessToken.length() - 4);
-	}
-
-	/**
-	 * 디버깅용 문자열 (민감정보 마스킹)
-	 */
-	@Override
-	public String toString() {
-		return "LoginResult{" +
-			"accessToken='" + getMaskedAccessToken() + '\'' +
-			", userId=" + userId +
-			", username='" + username + '\'' +
-			", email='" + (email != null ? email.substring(0, Math.min(3, email.length())) + "***" : "null") + '\'' +
-			", phone='" + (phone != null ? phone.substring(0, Math.min(3, phone.length())) + "***" : "null") + '\'' +
-			", role=" + role +
-			", businessNumber='" + (businessNumber != null ? businessNumber.substring(0, Math.min(3, businessNumber.length())) + "***" : "null") + '\'' +
-			", lastLoginAt=" + lastLoginAt +
-			", loginCount=" + loginCount +
-			", isActive=" + isActive +
-			", loginAt=" + loginAt +
-			'}';
-	}
 }

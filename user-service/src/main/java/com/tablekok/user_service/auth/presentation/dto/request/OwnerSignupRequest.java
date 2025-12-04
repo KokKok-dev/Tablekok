@@ -10,6 +10,7 @@ import jakarta.validation.constraints.*;
  * API 명세서: POST /v1/auth/signup/owner
  *
  * Customer 회원가입 + 사업자번호 검증 추가
+ * 순수 Validation만 담당 - 나머지 로직은 제거
  */
 @Schema(description = "사장님 회원가입 요청")
 public record OwnerSignupRequest(
@@ -60,53 +61,8 @@ public record OwnerSignupRequest(
 			.build();
 	}
 
-	/**
-	 * API 요청 유효성 검증 추가 체크
-	 *
-	 * @return 유효하면 true
-	 */
-	public boolean isValidRequest() {
-		// 이메일 도메인 기본 체크
-		if (email != null && email.contains("@")) {
-			String domain = email.substring(email.lastIndexOf("@") + 1);
-			if (domain.length() < 2) {
-				return false;
-			}
-		}
-
-		// 휴대폰번호 길이 체크 (정확히 11자리)
-		if (phone != null && phone.length() != 11) {
-			return false;
-		}
-
-		// 사업자번호 하이픈 포함 길이 체크 (정확히 12자리)
-		if (businessNumber != null && businessNumber.length() != 12) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * 사업자번호 정규화 (하이픈 제거)
-	 *
-	 * @return 하이픈이 제거된 10자리 숫자
-	 */
-	public String getNormalizedBusinessNumber() {
-		return businessNumber != null ? businessNumber.replaceAll("-", "") : null;
-	}
-
-	/**
-	 * 디버깅용 문자열 (민감정보 마스킹)
-	 */
-	@Override
-	public String toString() {
-		return "OwnerSignupRequest{" +
-			"email='" + (email != null ? email.substring(0, Math.min(3, email.length())) + "***" : "null") + '\'' +
-			", username='" + username + '\'' +
-			", password='***'" +
-			", phone='" + (phone != null ? phone.substring(0, Math.min(3, phone.length())) + "***" : "null") + '\'' +
-			", businessNumber='" + (businessNumber != null ? businessNumber.substring(0, Math.min(3, businessNumber.length())) + "***" : "null") + '\'' +
-			'}';
-	}
+	// ❌ 제거된 메서드들:
+	// - isValidRequest() → Service에서 처리
+	// - getNormalizedBusinessNumber() → Service에서 처리
+	// - toString() 오버라이드 → record 기본 toString 사용
 }

@@ -10,6 +10,7 @@ import jakarta.validation.constraints.*;
  * API 명세서: POST /v1/auth/login
  *
  * 모든 역할군(CUSTOMER, OWNER, MASTER) 공통 사용
+ * 순수 Validation만 담당 - 나머지 로직은 제거
  */
 @Schema(description = "로그인 요청")
 public record LoginRequest(
@@ -39,45 +40,9 @@ public record LoginRequest(
 			.build();
 	}
 
-	/**
-	 * API 요청 유효성 검증 추가 체크
-	 *
-	 * @return 유효하면 true
-	 */
-	public boolean isValidRequest() {
-		// 이메일 도메인 기본 체크
-		if (email != null && email.contains("@")) {
-			String domain = email.substring(email.lastIndexOf("@") + 1);
-			if (domain.length() < 2) {
-				return false;
-			}
-		}
-
-		// 비밀번호 기본 공백 체크
-		if (password != null && password.trim().isEmpty()) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * 이메일 정규화 (소문자 변환 + 공백 제거)
-	 *
-	 * @return 정규화된 이메일
-	 */
-	public String getNormalizedEmail() {
-		return email != null ? email.toLowerCase().trim() : null;
-	}
-
-	/**
-	 * 디버깅용 문자열 (비밀번호 마스킹)
-	 */
-	@Override
-	public String toString() {
-		return "LoginRequest{" +
-			"email='" + (email != null ? email.substring(0, Math.min(3, email.length())) + "***" : "null") + '\'' +
-			", password='***'" +
-			'}';
-	}
+	// ❌ 제거된 메서드들:
+	// - isValidRequest() → Service에서 처리
+	// - getNormalizedEmail() → Service에서 처리
+	// - getEmailDomain(), getEmailLocalPart() → Service에서 필요시 처리
+	// - toString() 오버라이드 → record 기본 toString 사용
 }
