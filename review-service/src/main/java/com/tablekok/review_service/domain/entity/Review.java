@@ -2,6 +2,7 @@ package com.tablekok.review_service.domain.entity;
 
 import java.util.UUID;
 
+import org.hibernate.annotations.Check;
 import org.hibernate.annotations.SQLRestriction;
 
 import com.tablekok.entity.BaseEntity;
@@ -28,22 +29,23 @@ public class Review extends BaseEntity {
 	@Column(name = "review_id", columnDefinition = "uuid")
 	private UUID id;
 
-	@Column(nullable = false)
+	@Column(name = "user_id", nullable = false)
 	private UUID userId;
 
-	@Column(nullable = false)
+	@Column(name = "store_id", nullable = false)
 	private UUID storeId;
 
-	@Column(nullable = false)
+	@Column(name = "reservation_id", nullable = false)
 	private UUID reservationId;
 
-	@Column(nullable = false)
+	@Column(name = "rating", nullable = false)
+	@Check(constraints = "rating >= 0 AND rating <= 5")
 	private Double rating;
 
-	@Column(nullable = false)
+	@Column(name = "content", nullable = false, columnDefinition = "TEXT")
 	private String content;
 
-	// @Column(nullable = false)
+	// @Column(name = "image_url", nullable = false)
 	// private String imageUrl;
 
 	@Builder(access = AccessLevel.PRIVATE)
