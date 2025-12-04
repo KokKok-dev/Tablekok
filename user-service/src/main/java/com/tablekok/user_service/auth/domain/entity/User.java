@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Entity
 @Table(name = "p_user", indexes = {
@@ -20,7 +21,7 @@ import java.util.UUID;
 	@Index(name = "idx_user_role", columnList = "role")
 })
 @Getter
-@Builder(access = AccessLevel.PRIVATE)  // ← PRIVATE으로 변경 (gyoseok17 피드백)
+@Builder(access = AccessLevel.PRIVATE)  // gyoseok17 피드백: PRIVATE
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
@@ -55,19 +56,25 @@ public class User extends BaseEntity {
 	@Column(name = "login_count", nullable = false)
 	private Integer loginCount;
 
-	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private Owner owner;
+	@Column(name = "business_number", length = 12)
+	private String businessNumber;  // Owner인 경우만 사용
 
-	// ========== 정적 팩토리 메서드들 ==========
+	// ========== Domain 정적 팩토리 메서드 (기존) ==========
 
 	/**
-	 * Customer 사용자 생성
+	 * Customer 생성 정적 팩토리 메서드
 	 */
-	public static User createCustomer(String email, String name, String encodedPassword, String phoneNumber) {
+	public static User createCustomer(String email, String name, String password, String phoneNumber) {
+		// Domain 검증 적용
+		validateEmail(email);
+		validateName(name);
+		validatePassword(password);
+		validatePhoneNumber(phoneNumber);
+
 		return User.builder()
 			.email(normalizeEmail(email))
-			.name(name)
-			.password(encodedPassword)
+			.name(name.trim())
+			.password(password)
 			.phoneNumber(normalizePhoneNumber(phoneNumber))
 			.role(UserRole.CUSTOMER)
 			.isActive(true)
@@ -76,13 +83,19 @@ public class User extends BaseEntity {
 	}
 
 	/**
-	 * Owner 사용자 생성
+	 * Owner 생성 정적 팩토리 메서드
 	 */
-	public static User createOwner(String email, String name, String encodedPassword, String phoneNumber) {
+	public static User createOwner(String email, String name, String password, String phoneNumber) {
+		// Domain 검증 적용
+		validateEmail(email);
+		validateName(name);
+		validatePassword(password);
+		validatePhoneNumber(phoneNumber);
+
 		return User.builder()
 			.email(normalizeEmail(email))
-			.name(name)
-			.password(encodedPassword)
+			.name(name.trim())
+			.password(password)
 			.phoneNumber(normalizePhoneNumber(phoneNumber))
 			.role(UserRole.OWNER)
 			.isActive(true)
@@ -91,13 +104,19 @@ public class User extends BaseEntity {
 	}
 
 	/**
-	 * Master 사용자 생성
+	 * Master 생성 정적 팩토리 메서드
 	 */
-	public static User createMaster(String email, String name, String encodedPassword, String phoneNumber) {
+	public static User createMaster(String email, String name, String password, String phoneNumber) {
+		// Domain 검증 적용
+		validateEmail(email);
+		validateName(name);
+		validatePassword(password);
+		validatePhoneNumber(phoneNumber);
+
 		return User.builder()
 			.email(normalizeEmail(email))
-			.name(name)
-			.password(encodedPassword)
+			.name(name.trim())
+			.password(password)
 			.phoneNumber(normalizePhoneNumber(phoneNumber))
 			.role(UserRole.MASTER)
 			.isActive(true)
@@ -105,29 +124,131 @@ public class User extends BaseEntity {
 			.build();
 	}
 
-	// ========== 비즈니스 메서드들 ==========
+	// ========== Domain 정규화 메서드들 (Application Service에서 이동) ==========
 
 	/**
-	 * 비밀번호 변경
+	 * 이메일 정규화 (Domain 규칙)
+	 * - 소문자 변환
+	 * - 앞뒤 공백 제거
+	 *
+	 * @param email 원본 이메일
+	 * @return 정규화된 이메일
 	 */
-	public void updatePassword(String encodedNewPassword) {
-		this.password = encodedNewPassword;
+	public static String normalizeEmail(String email) {
+		if (email == null) {
+			return null;
+		}
+		return email.toLowerCase().trim();
 	}
 
 	/**
-	 * 프로필 업데이트 (Customer용)
+	 * 휴대폰번호 정규화 (Domain 규칙)
+	 * - 하이픈 제거
+	 * - 공백 제거
+	 *
+	 * @param phoneNumber 원본 휴대폰번호
+	 * @return 정규화된 휴대폰번호
 	 */
-	public void updateCustomerProfile(String name, String phoneNumber) {
-		this.name = name;
-		this.phoneNumber = normalizePhoneNumber(phoneNumber);
+	public static String normalizePhoneNumber(String phoneNumber) {
+		if (phoneNumber == null) {
+			return null;
+		}
+		return phoneNumber.replaceAll("-", "").replaceAll("\\s", "");
+	}
+
+	// ========== Domain 검증 메서드들 (Application Service에서 이동) ==========
+
+	/**
+	 * 이메일 도메인 검증
+	 *
+	 * @param email 검증할 이메일
+	 * @throws IllegalArgumentException 유효하지 않은 이메일인 경우
+	 */
+	public static void validateEmail(String email) {
+		if (email == null || email.trim().isEmpty()) {
+			throw new IllegalArgumentException("이메일은 필수 입력 값입니다.");
+		}
+
+		String normalized = normalizeEmail(email);
+
+		// 기본 이메일 형식 검증
+		if (!Pattern.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", normalized)) {
+			throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다.");
+		}
+
+		// 이메일 길이 검증
+		if (normalized.length() > 100) {
+			throw new IllegalArgumentException("이메일은 100자를 초과할 수 없습니다.");
+		}
 	}
 
 	/**
-	 * 프로필 업데이트 (Owner용 - 사업자번호는 Owner 엔티티에서 처리)
+	 * 이름 도메인 검증
+	 *
+	 * @param name 검증할 이름
+	 * @throws IllegalArgumentException 유효하지 않은 이름인 경우
 	 */
-	public void updateOwnerProfile(String name, String phoneNumber) {
-		this.name = name;
-		this.phoneNumber = normalizePhoneNumber(phoneNumber);
+	public static void validateName(String name) {
+		if (name == null || name.trim().isEmpty()) {
+			throw new IllegalArgumentException("이름은 필수 입력 값입니다.");
+		}
+
+		String trimmed = name.trim();
+
+		if (trimmed.length() < 2 || trimmed.length() > 50) {
+			throw new IllegalArgumentException("이름은 2자 이상 50자 이하로 입력해주세요.");
+		}
+
+		if (!Pattern.matches("^[가-힣a-zA-Z\\s]+$", trimmed)) {
+			throw new IllegalArgumentException("이름은 한글, 영문, 공백만 허용됩니다.");
+		}
+	}
+
+	/**
+	 * 비밀번호 도메인 검증
+	 *
+	 * @param password 검증할 비밀번호
+	 * @throws IllegalArgumentException 유효하지 않은 비밀번호인 경우
+	 */
+	public static void validatePassword(String password) {
+		if (password == null || password.trim().isEmpty()) {
+			throw new IllegalArgumentException("비밀번호는 필수 입력 값입니다.");
+		}
+
+		if (password.length() < 8 || password.length() > 20) {
+			throw new IllegalArgumentException("비밀번호는 8자 이상 20자 이하로 입력해주세요.");
+		}
+
+		if (!Pattern.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", password)) {
+			throw new IllegalArgumentException("비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다.");
+		}
+	}
+
+	/**
+	 * 휴대폰번호 도메인 검증
+	 *
+	 * @param phoneNumber 검증할 휴대폰번호
+	 * @throws IllegalArgumentException 유효하지 않은 휴대폰번호인 경우
+	 */
+	public static void validatePhoneNumber(String phoneNumber) {
+		if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+			throw new IllegalArgumentException("휴대폰번호는 필수 입력 값입니다.");
+		}
+
+		String normalized = normalizePhoneNumber(phoneNumber);
+
+		if (!Pattern.matches("^01[0-9]{8,9}$", normalized)) {
+			throw new IllegalArgumentException("올바른 휴대폰번호 형식이 아닙니다. (01X + 8~9자리 숫자)");
+		}
+	}
+
+	// ========== Domain 비즈니스 메서드들 (기존) ==========
+
+	/**
+	 * 계정 활성 여부 확인
+	 */
+	public boolean isAccountActive() {
+		return Boolean.TRUE.equals(this.isActive) && this.getDeletedAt() == null;
 	}
 
 	/**
@@ -135,7 +256,17 @@ public class User extends BaseEntity {
 	 */
 	public void updateLoginInfo() {
 		this.lastLoginAt = LocalDateTime.now();
-		this.loginCount = this.loginCount + 1;
+		this.loginCount = (this.loginCount == null) ? 1 : this.loginCount + 1;
+	}
+
+	/**
+	 * 비밀번호 업데이트
+	 */
+	public void updatePassword(String newEncodedPassword) {
+		if (newEncodedPassword == null || newEncodedPassword.trim().isEmpty()) {
+			throw new IllegalArgumentException("비밀번호는 필수입니다.");
+		}
+		this.password = newEncodedPassword;
 	}
 
 	/**
@@ -152,99 +283,36 @@ public class User extends BaseEntity {
 		this.isActive = true;
 	}
 
-	/**
-	 * 계정 활성 상태 확인
-	 */
-	public boolean isAccountActive() {
-		return this.isActive && this.getDeletedAt() == null;
-	}
+	// ========== Domain 역할 확인 메서드들 ==========
 
-	// ========== 권한 체크 메서드들 ==========
-
-	/**
-	 * 고객인지 확인
-	 */
 	public boolean isCustomer() {
-		return this.role == UserRole.CUSTOMER;
+		return UserRole.CUSTOMER == this.role;
 	}
 
-	/**
-	 * 사장님인지 확인
-	 */
 	public boolean isOwner() {
-		return this.role == UserRole.OWNER;
+		return UserRole.OWNER == this.role;
 	}
 
-	/**
-	 * 마스터 관리자인지 확인
-	 */
 	public boolean isMaster() {
-		return this.role == UserRole.MASTER;
+		return UserRole.MASTER == this.role;
 	}
 
-	// ========== Owner 연관관계 메서드들 ==========
+	// ========== Owner 전용 메서드 ==========
 
 	/**
-	 * Owner 엔티티 연결
+	 * Owner 사업자번호 설정 (연관관계 편의 메서드)
 	 */
-	public void assignOwner(Owner owner) {
-		this.owner = owner;
-		if (owner != null && owner.getUser() != this) {
-			owner.assignUser(this);
+	public void assignBusinessNumber(String businessNumber) {
+		if (!isOwner()) {
+			throw new IllegalStateException("Owner 역할만 사업자번호를 가질 수 있습니다.");
 		}
+		this.businessNumber = businessNumber;
 	}
 
 	/**
 	 * 사업자번호 조회 (Owner인 경우만)
 	 */
 	public String getBusinessNumber() {
-		return this.owner != null ? this.owner.getBusinessNumber() : null;
-	}
-
-	/**
-	 * Owner 정보 존재 여부 확인
-	 */
-	public boolean hasOwnerInfo() {
-		return this.owner != null;
-	}
-
-	// ========== 내부 유틸리티 메서드들 ==========
-
-	/**
-	 * 이메일 정규화 (소문자 변환 + 공백 제거)
-	 */
-	private static String normalizeEmail(String email) {
-		return email != null ? email.toLowerCase().trim() : null;
-	}
-
-	/**
-	 * 휴대폰번호 정규화 (하이픈 제거)
-	 */
-	private static String normalizePhoneNumber(String phoneNumber) {
-		return phoneNumber != null ? phoneNumber.replaceAll("-", "") : null;
-	}
-
-	// ========== 도메인 검증 메서드들 ==========
-
-	/**
-	 * 이메일 형식 간단 검증 (더 정교한 검증은 Validation 어노테이션에서)
-	 */
-	public boolean isValidEmail() {
-		return this.email != null && this.email.contains("@") && this.email.contains(".");
-	}
-
-	/**
-	 * 휴대폰번호 형식 간단 검증
-	 */
-	public boolean isValidPhoneNumber() {
-		return this.phoneNumber != null &&
-			this.phoneNumber.matches("^01[0-9]{8,9}$");
-	}
-
-	/**
-	 * 비밀번호 존재 여부 확인 (실제 검증은 PasswordEncoder에서)
-	 */
-	public boolean hasPassword() {
-		return this.password != null && !this.password.trim().isEmpty();
+		return isOwner() ? this.businessNumber : null;
 	}
 }
