@@ -3,12 +3,12 @@ package com.tablekok.review_service.presentation.dto.response;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.tablekok.review_service.application.dto.result.CreateReviewResult;
+import com.tablekok.review_service.application.dto.result.GetReviewResult;
 
 import lombok.Builder;
 
 @Builder
-public record CreateReviewResponse(
+public record GetReviewResponse(
 	UUID reviewId,
 	UUID userId,
 	UUID storeId,
@@ -16,10 +16,12 @@ public record CreateReviewResponse(
 	Double rating,
 	String content,
 	LocalDateTime createdAt,
-	UUID createdBy
+	UUID createdBy,
+	LocalDateTime updatedAt,
+	UUID updatedBy
 ) {
-	public static CreateReviewResponse from(CreateReviewResult result) {
-		return CreateReviewResponse.builder()
+	public static GetReviewResponse from(GetReviewResult result) {
+		return GetReviewResponse.builder()
 			.reviewId(result.reviewId())
 			.userId(result.userId())
 			.storeId(result.storeId())
@@ -28,6 +30,8 @@ public record CreateReviewResponse(
 			.content(result.content())
 			.createdAt(result.createdAt())
 			.createdBy(result.createdBy())
+			.updatedAt(result.updatedAt())
+			.updatedBy(result.updatedBy())
 			.build();
 	}
 }

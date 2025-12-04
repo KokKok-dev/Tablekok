@@ -8,7 +8,7 @@ import com.tablekok.review_service.domain.entity.Review;
 import lombok.Builder;
 
 @Builder
-public record CreateReviewResult(
+public record GetReviewResult(
 	UUID reviewId,
 	UUID userId,
 	UUID storeId,
@@ -16,10 +16,12 @@ public record CreateReviewResult(
 	Double rating,
 	String content,
 	LocalDateTime createdAt,
-	UUID createdBy
+	UUID createdBy,
+	LocalDateTime updatedAt,
+	UUID updatedBy
 ) {
-	public static CreateReviewResult fromEntity(Review review) {
-		return CreateReviewResult.builder()
+	public static GetReviewResult fromResult(Review review) {
+		return GetReviewResult.builder()
 			.reviewId(review.getId())
 			.userId(review.getUserId())
 			.storeId(review.getStoreId())
@@ -28,6 +30,8 @@ public record CreateReviewResult(
 			.content(review.getContent())
 			.createdAt(review.getCreatedAt())
 			.createdBy(review.getCreatedBy())
+			.updatedAt(review.getUpdatedAt())
+			.updatedBy(review.getUpdatedBy())
 			.build();
 	}
 }
