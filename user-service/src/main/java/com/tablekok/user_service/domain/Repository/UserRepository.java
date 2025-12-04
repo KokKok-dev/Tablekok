@@ -1,7 +1,7 @@
 package com.tablekok.user_service.domain.repository;
 
-import com.tablekok.user_service.domain.entity.User;
-import com.tablekok.user_service.domain.enums.UserRole;
+import com.tablekok.user_service.auth.domain.entity.User;
+import com.tablekok.user_service.auth.domain.enums.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

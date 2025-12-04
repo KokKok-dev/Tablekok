@@ -1,6 +1,6 @@
 package com.tablekok.user_service.domain.repository;
 
-import com.tablekok.user_service.domain.entity.Owner;
+import com.tablekok.user_service.auth.domain.entity.Owner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

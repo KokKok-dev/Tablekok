@@ -1,8 +1,8 @@
 package com.tablekok.user_service.infrastructure.mapper;
 
-import com.tablekok.user_service.domain.entity.Owner;
-import com.tablekok.user_service.domain.entity.User;
-import com.tablekok.user_service.domain.enums.UserRole;
+import com.tablekok.user_service.auth.domain.entity.Owner;
+import com.tablekok.user_service.auth.domain.entity.User;
+import com.tablekok.user_service.auth.domain.enums.UserRole;
 import com.tablekok.user_service.presentation.dto.request.CustomerSignupRequest;
 import com.tablekok.user_service.presentation.dto.request.OwnerSignupRequest;
 import com.tablekok.user_service.presentation.dto.response.LoginResponse;
