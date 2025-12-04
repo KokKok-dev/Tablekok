@@ -2,9 +2,10 @@ package com.tablekok.review_service.domain.vo;
 
 import java.util.UUID;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 public record Reservation(
 	UUID reservationId,
 	UUID storeId,
