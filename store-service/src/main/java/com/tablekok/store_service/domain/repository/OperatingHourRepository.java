@@ -6,5 +6,5 @@ import com.tablekok.store_service.domain.entity.OperatingHour;
 
 public interface OperatingHourRepository {
 
-	void saveAll(List<OperatingHour> operatingHours);
+	List<OperatingHour> saveAll(List<OperatingHour> operatingHours);
 }

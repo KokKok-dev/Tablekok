@@ -15,7 +15,7 @@ public class OperatingHourRepositoryImpl implements OperatingHourRepository {
 	private final OperatingHourJpaRepository operatingHourJpaRepository;
 
 	@Override
-	public void saveAll(List<OperatingHour> operatingHours) {
-		operatingHourJpaRepository.saveAll(operatingHours);
+	public List<OperatingHour> saveAll(List<OperatingHour> operatingHours) {
+		return operatingHourJpaRepository.saveAll(operatingHours);
 	}
 }

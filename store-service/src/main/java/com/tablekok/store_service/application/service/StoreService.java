@@ -1,7 +1,6 @@
 package com.tablekok.store_service.application.service;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,10 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tablekok.exception.AppException;
 import com.tablekok.store_service.application.dto.param.CreateOperatingHourParam;
 import com.tablekok.store_service.application.dto.param.CreateStoreParam;
+import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
 import com.tablekok.store_service.domain.entity.OperatingHour;
 import com.tablekok.store_service.domain.entity.Store;
-import com.tablekok.store_service.domain.repository.OperatingHourRepository;
 import com.tablekok.store_service.domain.repository.StoreRepository;
 import com.tablekok.store_service.domain.service.CategoryLinker;
 import com.tablekok.store_service.domain.service.OperatingHourValidator;
@@ -25,12 +24,12 @@ import lombok.RequiredArgsConstructor;
 public class StoreService {
 
 	private final StoreRepository storeRepository;
-	private final OperatingHourRepository operatingHourRepository;
+	private final OperatingHourService operatingHourService;
 	private final CategoryLinker categoryDomainService;
 	private final OperatingHourValidator operatingHourValidator;
 
 	@Transactional
-	public UUID createStore(CreateStoreParam param) {
+	public CreateStoreResult createStore(CreateStoreParam param) {
 		// 음식점 중복확인
 		if (storeRepository.existsByNameAndAddress(param.name(), param.address())) {
 			throw new AppException(StoreErrorCode.DUPLICATE_STORE_ENTRY);
@@ -53,19 +52,9 @@ public class StoreService {
 		storeRepository.save(store);
 
 		// operatingHour db 저장
-		saveOperatingHours(store, param.operatingHours());
+		List<OperatingHour> savedHours = operatingHourService.saveOperatingHours(store, param.operatingHours());
 
-		return store.getId();
-
+		return CreateStoreResult.of(store, savedHours);
 	}
 
-	private void saveOperatingHours(Store store, List<CreateOperatingHourParam> hourParams) {
-		// Param 목록을 OperatingHour Entity 목록으로 변환
-		List<OperatingHour> hoursToSave = hourParams.stream()
-			.map(param -> param.toEntity(store))
-			.toList();
-
-		operatingHourRepository.saveAll(hoursToSave);
-
-	}
 }

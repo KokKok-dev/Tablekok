@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 import com.tablekok.entity.BaseEntity;
+import com.tablekok.store_service.domain.vo.OperatingHourData;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -70,6 +71,18 @@ public class OperatingHour extends BaseEntity {
 			.openTime(openTime)
 			.closeTime(closeTime)
 			.isClosed(isClosed)
+			.build();
+	}
+
+	public static OperatingHour of(
+		Store store, OperatingHourData vo
+	) {
+		return OperatingHour.builder()
+			.store(store)
+			.dayOfWeek(vo.getDayOfWeek())
+			.openTime(vo.getOpenTime())
+			.closeTime(vo.getCloseTime())
+			.isClosed(vo.isClosed())
 			.build();
 	}
 }
