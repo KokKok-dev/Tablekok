@@ -11,17 +11,15 @@ import org.hibernate.annotations.Comment;
 import com.tablekok.entity.BaseEntity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -83,22 +81,16 @@ public class Store extends BaseEntity {
 	@Column(name = "waiting_open_time")
 	private LocalTime waitingOpenTime;
 
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(
-		name = "p_store_category_map", // JPA가 관리할 조인 테이블 이름
-		joinColumns = @JoinColumn(name = "store_id"), // Store 엔티티의 FK
-		inverseJoinColumns = @JoinColumn(name = "category_id") // Category 엔티티의 FK
-	)
-	private List<Category> categories = new ArrayList<>();
+	@ElementCollection
+	@CollectionTable(name = "p_store_category_map") // 중간 테이블을 별도로 정의하지 않고 JPA의 @ElementCollection 사용
+	private List<UUID> categoryIds = new ArrayList<>();
 
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OperatingHour> operatingHours = new ArrayList<>();
 
-	public void addCategory(Category category) {
-		this.categories.add(category);
-		if (!category.getStores().contains(this)) {
-			category.getStores().add(this);
-		}
+	public void updateCategoryIds(List<UUID> newCategoryIds) {
+		this.categoryIds.clear();
+		this.categoryIds.addAll(newCategoryIds);
 	}
 
 	@Builder(access = AccessLevel.PRIVATE)

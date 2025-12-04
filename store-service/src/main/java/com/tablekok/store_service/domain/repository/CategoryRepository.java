@@ -15,6 +15,6 @@ public interface CategoryRepository {
 
 	Page<Category> findAll(Pageable pageable);
 
-	List<Category> findAllById(List<UUID> categoryIds);
+	Long countByIdIn(List<UUID> categoryIds);
 
 }

@@ -33,8 +33,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	}
 
 	@Override
-	public List<Category> findAllById(List<UUID> categoryIds) {
-		return categoryJpaRepository.findAllById(categoryIds);
+	public Long countByIdIn(List<UUID> categoryIds) {
+		return categoryJpaRepository.countByIdIn(categoryIds);
 	}
 
 }
