@@ -24,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 public class StoreService {
 
 	private final StoreRepository storeRepository;
-	private final OperatingHourService operatingHourService;
 	private final CategoryLinker categoryDomainService;
 	private final OperatingHourValidator operatingHourValidator;
 
@@ -48,13 +47,20 @@ public class StoreService {
 		// Category ID를 사용하여 Entity 조회 및 연결
 		categoryDomainService.linkCategoriesToStore(store, param.categoryIds());
 
+		// OperatingHour Entity 생성 및 Store 컬렉션에 추가
+		List<OperatingHour> hoursToSave = param.operatingHours().stream()
+			.map(p -> {
+				OperatingHourData vo = p.toVo();
+				// Store를 인자로 넘겨서 OperatingHour Entity 생성
+				return OperatingHour.of(store, vo);
+			})
+			.toList();
+		store.getOperatingHours().addAll(hoursToSave);
+
 		// store db 저장
 		storeRepository.save(store);
 
-		// operatingHour db 저장
-		List<OperatingHour> savedHours = operatingHourService.saveOperatingHours(store, param.operatingHours());
-
-		return CreateStoreResult.of(store, savedHours);
+		return CreateStoreResult.of(store, hoursToSave);
 	}
 
 }
