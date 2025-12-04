@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,10 +17,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
+import com.tablekok.review_service.application.dto.result.GetReviewResult;
 import com.tablekok.review_service.application.service.ReviewService;
 import com.tablekok.review_service.presentation.dto.request.CreateReviewRequest;
 import com.tablekok.review_service.presentation.dto.request.UpdateReviewRequest;
 import com.tablekok.review_service.presentation.dto.response.CreateReviewResponse;
+import com.tablekok.review_service.presentation.dto.response.GetReviewResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +62,7 @@ public class ReviewController {
 	public ResponseEntity<ApiResponse<Void>> updateReview(
 		@PathVariable("reviewId") UUID reviewId,
 		@RequestBody @Valid UpdateReviewRequest request
-		) {
+	) {
 		reviewService.updateReview(reviewId, request.toParam());
 		return ResponseEntity.ok(
 			ApiResponse.success("리뷰 수정이 완료되었습니다.", HttpStatus.OK));
@@ -67,8 +70,21 @@ public class ReviewController {
 
 	@DeleteMapping("/{reviewId}")
 	public ResponseEntity<ApiResponse<Void>> deleteReview(@PathVariable("reviewId") UUID reviewId) {
-		reviewService.deleteReview(reviewId);
+		// 임시로 id 지정
+		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677");
+		reviewService.deleteReview(reviewId, userId);
 		return ResponseEntity.ok(
 			ApiResponse.success("리뷰 삭제가 완료되었습니다.", HttpStatus.OK));
+	}
+
+	@GetMapping("/{reviewId}")
+	public ResponseEntity<ApiResponse<GetReviewResponse>> findReview(@PathVariable("reviewId") UUID reviewId) {
+		GetReviewResult result = reviewService.getReview(reviewId);
+		return ResponseEntity.ok(
+			ApiResponse.success(
+				"리뷰 조회 성공",
+				GetReviewResponse.from(result),
+				HttpStatus.OK
+			));
 	}
 }
