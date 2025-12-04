@@ -1,5 +1,6 @@
 package com.tablekok.review_service.presentation.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
@@ -13,7 +14,9 @@ public record CreateReviewResponse(
 	UUID storeId,
 	UUID reservationId,
 	Double rating,
-	String content
+	String content,
+	LocalDateTime createdAt,
+	UUID createdBy
 ) {
 	public static CreateReviewResponse from(CreateReviewResult result) {
 		return CreateReviewResponse.builder()
@@ -23,6 +26,8 @@ public record CreateReviewResponse(
 			.reservationId(result.reservationId())
 			.rating(result.rating())
 			.content(result.content())
+			.createdAt(result.createdAt())
+			.createdBy(result.createdBy())
 			.build();
 	}
 }
