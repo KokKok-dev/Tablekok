@@ -74,6 +74,7 @@ public class ReservationService {
 	}
 
 	// 단건 예약 조회(리뷰에서 호출 용도)
+	@Transactional
 	public GetReservationResult getReservation(UUID reservationId) {
 		Reservation findReservation = reservationRepository.findById(reservationId);
 		return GetReservationResult.of(findReservation);
@@ -129,8 +130,8 @@ public class ReservationService {
 	// 예약 조회(오너)
 	@Transactional(readOnly = true)
 	public Page<GetReservationsForOwnerResult> getReservationsForOwner(UUID userId, UUID storeId, Pageable pageable) {
-		Pageable normalizedPageable = PageableUtils.normalize(pageable);
 		validateStoreOwner(userId, storeId);
+		Pageable normalizedPageable = PageableUtils.normalize(pageable);
 
 		Page<Reservation> reservations = reservationRepository.findByStoreId(storeId, normalizedPageable);
 		return GetReservationsForOwnerResult.toPage(reservations);
