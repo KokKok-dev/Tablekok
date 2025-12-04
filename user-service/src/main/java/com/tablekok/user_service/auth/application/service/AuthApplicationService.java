@@ -1,4 +1,3 @@
-// auth/application/service/AuthApplicationService.java
 package com.tablekok.user_service.auth.application.service;
 
 import com.tablekok.user_service.auth.application.dto.*;
@@ -27,7 +26,8 @@ import java.util.UUID;
  * 3. 트랜잭션 관리
  * 4. DTO 변환 관리 (Entity 직접 노출 방지)
  *
- * 피드백: Service → Controller는 DTO로만 반환
+ * gyoseok17 피드백: Service → Controller는 DTO로만 반환
+ * gyoseok17 피드백: param.toEntity() 메서드 활용
  */
 @Slf4j
 @Service
@@ -44,6 +44,10 @@ public class AuthApplicationService {
 
 	// ========== 고객 회원가입 ==========
 
+	/**
+	 * 고객 회원가입
+	 * gyoseok17 피드백: param.toEntity() 메서드 활용
+	 */
 	@Transactional
 	public SignupResult signupCustomer(CustomerSignupParam param) {
 		log.info("Starting customer signup process for email: {}", param.email());
@@ -55,13 +59,8 @@ public class AuthApplicationService {
 		String encodedPassword = passwordEncoder.encode(param.password());
 		log.debug("Password encoded for customer signup");
 
-		// 3. Domain Entity: 정적 팩토리로 생성
-		User customer = User.createCustomer(
-			param.email(),
-			param.username(),
-			encodedPassword,
-			param.phone()
-		);
+		// 3. DTO → Entity 변환 (gyoseok17 피드백: param.toEntity() 활용)
+		User customer = param.toEntity(encodedPassword);
 		log.debug("Created customer entity with role: {}", customer.getRole());
 
 		// 4. Infrastructure: DB 저장
@@ -85,6 +84,10 @@ public class AuthApplicationService {
 
 	// ========== 사장님 회원가입 ==========
 
+	/**
+	 * 사장님 회원가입
+	 * gyoseok17 피드백: param.toUserEntity() 메서드 활용
+	 */
 	@Transactional
 	public SignupResult signupOwner(OwnerSignupParam param) {
 		log.info("Starting owner signup process for email: {}", param.email());
@@ -96,21 +99,16 @@ public class AuthApplicationService {
 		String encodedPassword = passwordEncoder.encode(param.password());
 		log.debug("Password encoded for owner signup");
 
-		// 3. Domain Entity: Owner User 생성
-		User ownerUser = User.createOwner(
-			param.email(),
-			param.username(),
-			encodedPassword,
-			param.phone()
-		);
+		// 3. DTO → Entity 변환 (gyoseok17 피드백: param.toUserEntity() 활용)
+		User ownerUser = param.toUserEntity(encodedPassword);
 		log.debug("Created owner user entity with role: {}", ownerUser.getRole());
 
 		// 4. Infrastructure: User 저장
 		User savedOwnerUser = userRepository.save(ownerUser);
 		log.info("Successfully saved owner user with ID: {}", savedOwnerUser.getUserId());
 
-		// 5. Domain Entity: Owner 생성
-		Owner owner = Owner.create(savedOwnerUser, param.businessNumber());
+		// 5. Domain Entity: Owner 생성 (양방향 연관관계 자동 설정)
+		Owner owner = param.toOwnerEntity(savedOwnerUser);
 		log.debug("Created owner entity with business number");
 
 		// 6. Infrastructure: Owner 저장
@@ -134,6 +132,10 @@ public class AuthApplicationService {
 
 	// ========== 로그인 ==========
 
+	/**
+	 * 로그인 (모든 역할 공통)
+	 * UserDomainService 활용으로 Optional 처리 자동화
+	 */
 	@Transactional
 	public LoginResult login(LoginParam param) {
 		log.info("Starting login process for email: {}", param.email());
@@ -181,7 +183,7 @@ public class AuthApplicationService {
 
 	/**
 	 * 이메일로 사용자 조회 (DTO 반환)
-	 * 피드백: Controller에서 Entity 직접 참조 방지
+	 * gyoseok17 피드백: Controller에서 Entity 직접 참조 방지
 	 */
 	public UserDto findUserByEmail(String email) {
 		log.debug("Finding user by email: {}", email);
@@ -191,7 +193,7 @@ public class AuthApplicationService {
 
 	/**
 	 * 사용자 ID로 조회 (DTO 반환)
-	 * 피드백: Controller에서 Entity 직접 참조 방지
+	 * gyoseok17 피드백: Controller에서 Entity 직접 참조 방지
 	 */
 	public UserDto findUserById(UUID userId) {
 		log.debug("Finding user by ID: {}", userId);
@@ -201,7 +203,7 @@ public class AuthApplicationService {
 
 	/**
 	 * 사용자 ID 문자열로 조회 (DTO 반환)
-	 * 피드백: Controller에서 Entity 직접 참조 방지
+	 * gyoseok17 피드백: Controller에서 Entity 직접 참조 방지
 	 */
 	public UserDto findUserByIdString(String userIdStr) {
 		log.debug("Finding user by ID string: {}", userIdStr);
