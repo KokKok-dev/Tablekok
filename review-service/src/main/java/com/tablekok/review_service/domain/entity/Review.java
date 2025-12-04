@@ -2,6 +2,8 @@ package com.tablekok.review_service.domain.entity;
 
 import java.util.UUID;
 
+import org.hibernate.annotations.SQLRestriction;
+
 import com.tablekok.entity.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -18,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SQLRestriction("deleted_at is NULL")
 @Table(name = "p_review")
 public class Review extends BaseEntity {
 	@Id
@@ -72,5 +75,14 @@ public class Review extends BaseEntity {
 			.rating(rating)
 			.content(content)
 			.build();
+	}
+
+	public void updateReview(Double rating, String content) {
+		this.rating = rating != null ? rating : this.rating;
+		this.content = content != null ? content : this.content;
+	}
+
+	public void softDelete(UUID deleterId) {
+		super.delete(deleterId);
 	}
 }
