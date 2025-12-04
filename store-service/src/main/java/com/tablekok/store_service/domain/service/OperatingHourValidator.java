@@ -20,14 +20,15 @@ public class OperatingHourValidator {
 
 			hour.validate();
 
-			// 4. 요일 중복 검사
+			// 요일 중복 검사
 			if (!days.add(hour.getDayOfWeek())) {
 				throw new AppException(StoreDomainErrorCode.DUPLICATE_OPERATING_DAY);
 			}
 
 		}
+
+		// 7개 요일 중 하나라도 누락되었다면 예외 발생
 		if (days.size() != 7) {
-			// 7개 요일 중 하나라도 누락되었다면 예외 발생
 			throw new AppException(StoreDomainErrorCode.MISSING_ALL_OPERATING_DAYS);
 		}
 	}
