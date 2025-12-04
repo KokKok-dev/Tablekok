@@ -7,7 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.review_service.application.client.ReservationClient;
 import com.tablekok.review_service.application.dto.param.CreateReviewParam;
+import com.tablekok.review_service.application.dto.param.UpdateReviewParam;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
+import com.tablekok.review_service.application.dto.result.GetReviewResult;
 import com.tablekok.review_service.domain.entity.Review;
 import com.tablekok.review_service.domain.repository.ReviewRepository;
 import com.tablekok.review_service.domain.service.ReviewDomainService;
@@ -43,5 +45,26 @@ public class ReviewService {
 		reviewRepository.save(newReview);
 
 		return CreateReviewResult.fromEntity(newReview);
+	}
+
+	@Transactional
+	public void updateReview(UUID reviewId, UpdateReviewParam param) {
+		Review foundReview = findReview(reviewId);
+		foundReview.updateReview(param.rating(), param.content());
+	}
+
+	@Transactional
+	public void deleteReview(UUID reviewId, UUID userId) {
+		Review foundReview = findReview(reviewId);
+		foundReview.softDelete(userId);
+	}
+
+	private Review findReview(UUID reviewId) {
+		return reviewRepository.findById(reviewId);
+	}
+
+	public GetReviewResult getReview(UUID reviewId) {
+		Review foundReview = findReview(reviewId);
+		return GetReviewResult.fromResult(foundReview);
 	}
 }
