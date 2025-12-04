@@ -4,7 +4,8 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 import com.tablekok.entity.BaseEntity;
-import com.tablekok.store_service.domain.vo.OperatingHourData;
+import com.tablekok.exception.AppException;
+import com.tablekok.store_service.application.exception.StoreErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -74,15 +75,22 @@ public class OperatingHour extends BaseEntity {
 			.build();
 	}
 
-	public static OperatingHour of(
-		Store store, OperatingHourData vo
-	) {
-		return OperatingHour.builder()
-			.store(store)
-			.dayOfWeek(vo.getDayOfWeek())
-			.openTime(vo.getOpenTime())
-			.closeTime(vo.getCloseTime())
-			.isClosed(vo.isClosed())
-			.build();
+	public void validate() {
+		// 1. isClosed가 true일 경우 시간 필드는 반드시 null이어야 합니다.
+		if (isClosed) {
+			if (openTime != null || closeTime != null) {
+				throw new AppException(StoreErrorCode.INVALID_CLOSED_TIME); // TODO: StoreDomainErrorCode로 변경해야함
+			}
+		}
+		// 2. isClosed가 false일 경우 시간 필드는 반드시 존재해야 합니다.
+		else {
+			if (openTime == null || closeTime == null) {
+				throw new AppException(StoreErrorCode.MISSING_OPERATING_TIME);
+			}
+			// 3. closeTime 이 openTime 이후인지 검증
+			if (openTime.isAfter(closeTime)) {
+				throw new AppException(StoreErrorCode.INVALID_TIME_RANGE);
+			}
+		}
 	}
 }

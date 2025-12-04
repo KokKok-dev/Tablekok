@@ -5,7 +5,6 @@ import java.time.LocalTime;
 
 import com.tablekok.store_service.domain.entity.OperatingHour;
 import com.tablekok.store_service.domain.entity.Store;
-import com.tablekok.store_service.domain.vo.OperatingHourData;
 
 public record CreateOperatingHourParam(
 	DayOfWeek dayOfWeek,
@@ -18,12 +17,4 @@ public record CreateOperatingHourParam(
 		return OperatingHour.of(store, dayOfWeek, openTime, closeTime, isClosed);
 	}
 
-	public OperatingHourData toVo() {
-		return OperatingHourData.of(
-			this.dayOfWeek,
-			this.openTime,
-			this.closeTime,
-			this.isClosed
-		);
-	}
 }
