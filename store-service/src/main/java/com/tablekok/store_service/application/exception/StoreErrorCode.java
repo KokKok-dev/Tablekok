@@ -5,8 +5,10 @@ import org.springframework.http.HttpStatus;
 import com.tablekok.exception.ErrorCode;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum StoreErrorCode implements ErrorCode {
 
 	DUPLICATE_STORE_ENTRY("STORE100", "중복된 음식점입니다.", HttpStatus.BAD_REQUEST),
@@ -24,9 +26,4 @@ public enum StoreErrorCode implements ErrorCode {
 	private final String message;
 	private final HttpStatus status;
 
-	StoreErrorCode(String code, String message, HttpStatus status) {
-		this.code = code;
-		this.message = message;
-		this.status = status;
-	}
 }

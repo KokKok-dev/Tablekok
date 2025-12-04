@@ -5,8 +5,10 @@ import org.springframework.http.HttpStatus;
 import com.tablekok.exception.ErrorCode;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
+@RequiredArgsConstructor
 public enum StoreDomainErrorCode implements ErrorCode {
 	INVALID_CATEGORY_ID("STORE000", "유효하지 않은 카테고리 ID입니다.", HttpStatus.BAD_REQUEST),
 	DUPLICATE_OPERATING_DAY("STORE001", "하나의 요일에 대해 두 개 이상의 영업 시간 정보가 존재합니다.", HttpStatus.BAD_REQUEST),
@@ -16,11 +18,5 @@ public enum StoreDomainErrorCode implements ErrorCode {
 	private final String code;
 	private final String message;
 	private final HttpStatus status;
-
-	StoreDomainErrorCode(String code, String message, HttpStatus status) {
-		this.code = code;
-		this.message = message;
-		this.status = status;
-	}
 
 }
