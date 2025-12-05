@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.exception.AppException;
+import com.tablekok.store_service.application.dto.command.CreateOperatingHourCommand;
 import com.tablekok.store_service.application.dto.command.CreateStoreCommand;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
@@ -37,7 +38,7 @@ public class StoreService {
 
 		// OperatingHourCommand -> OperatingHour Entity 생성
 		List<OperatingHour> hoursToSave = command.operatingHours().stream()
-			.map(p -> p.toEntity(store))
+			.map(CreateOperatingHourCommand::toEntity)
 			.toList();
 
 		// 운영시간 검증

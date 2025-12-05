@@ -11,12 +11,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -35,10 +32,6 @@ public class OperatingHour extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "store_id", nullable = false)
-	private Store store;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "day_of_week", nullable = false)
 	private DayOfWeek dayOfWeek;
@@ -56,7 +49,6 @@ public class OperatingHour extends BaseEntity {
 	private OperatingHour(
 		Store store, DayOfWeek dayOfWeek, LocalTime openTime, LocalTime closeTime, boolean isClosed
 	) {
-		this.store = store;
 		this.dayOfWeek = dayOfWeek;
 		this.openTime = openTime;
 		this.closeTime = closeTime;
@@ -64,10 +56,9 @@ public class OperatingHour extends BaseEntity {
 	}
 
 	public static OperatingHour of(
-		Store store, DayOfWeek dayOfWeek, LocalTime openTime, LocalTime closeTime, boolean isClosed
+		DayOfWeek dayOfWeek, LocalTime openTime, LocalTime closeTime, boolean isClosed
 	) {
 		return OperatingHour.builder()
-			.store(store)
 			.dayOfWeek(dayOfWeek)
 			.openTime(openTime)
 			.closeTime(closeTime)
