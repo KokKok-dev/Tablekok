@@ -23,6 +23,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -90,6 +91,10 @@ public class Store extends BaseEntity {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn(name = "store_id")
 	private List<OperatingHour> operatingHours = new ArrayList<>();
+
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_id")
+	private ReservationPolicy reservationPolicy;
 
 	public void updateCategoryIds(List<UUID> newCategoryIds) {
 		this.categoryIds.clear();
