@@ -1,8 +1,7 @@
-// auth/domain/entity/User.java
 package com.tablekok.user_service.auth.domain.entity;
 
 import com.tablekok.entity.BaseEntity;
-import com.tablekok.user_service.auth.domain.enums.UserRole;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

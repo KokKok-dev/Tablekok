@@ -1,5 +1,4 @@
-// auth/domain/validator/BusinessNumberValidator.java
-package com.tablekok.user_service.auth.domain.validator;
+package com.tablekok.user_service.auth.domain.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

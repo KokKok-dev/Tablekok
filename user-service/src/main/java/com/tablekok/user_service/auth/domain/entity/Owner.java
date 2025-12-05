@@ -1,4 +1,3 @@
-// auth/domain/entity/Owner.java
 package com.tablekok.user_service.auth.domain.entity;
 
 import com.tablekok.entity.BaseEntity;

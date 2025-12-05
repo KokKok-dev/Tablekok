@@ -1,8 +1,7 @@
-// auth/domain/service/UserDomainService.java
 package com.tablekok.user_service.auth.domain.service;
 
 import com.tablekok.user_service.auth.domain.entity.User;
-import com.tablekok.user_service.auth.domain.enums.UserRole;
+import com.tablekok.user_service.auth.domain.entity.UserRole;
 import com.tablekok.user_service.auth.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

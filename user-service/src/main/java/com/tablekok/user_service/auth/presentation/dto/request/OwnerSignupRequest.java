@@ -1,7 +1,6 @@
-// auth/presentation/dto/request/OwnerSignupRequest.java
 package com.tablekok.user_service.auth.presentation.dto.request;
 
-import com.tablekok.user_service.auth.application.dto.OwnerSignupParam;
+import com.tablekok.user_service.auth.application.dto.command.OwnerSignupCommand;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
@@ -51,8 +50,8 @@ public record OwnerSignupRequest(
 	 *
 	 * @return OwnerSignupParam (Application Layer DTO)
 	 */
-	public OwnerSignupParam toParam() {
-		return OwnerSignupParam.builder()
+	public OwnerSignupCommand toParam() {
+		return OwnerSignupCommand.builder()
 			.email(email)
 			.username(username)
 			.password(password)

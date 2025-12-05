@@ -1,7 +1,6 @@
-// auth/presentation/dto/request/LoginRequest.java
 package com.tablekok.user_service.auth.presentation.dto.request;
 
-import com.tablekok.user_service.auth.application.dto.LoginParam;
+import com.tablekok.user_service.auth.application.dto.command.LoginCommand;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
@@ -33,8 +32,8 @@ public record LoginRequest(
 	 *
 	 * @return LoginParam (Application Layer DTO)
 	 */
-	public LoginParam toParam() {
-		return LoginParam.builder()
+	public LoginCommand toParam() {
+		return LoginCommand.builder()
 			.email(email)
 			.password(password)
 			.build();

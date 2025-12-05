@@ -1,4 +1,3 @@
-// auth/infrastructure/repository/OwnerRepositoryAdapter.java
 package com.tablekok.user_service.auth.infrastructure.repository;
 
 import com.tablekok.user_service.auth.domain.entity.Owner;
@@ -18,7 +17,7 @@ import java.util.UUID;
 /**
  * OwnerRepository 구현체
  * Domain Repository 인터페이스를 Infrastructure에서 구현
- * gashine20 피드백: Repository 계층 분리 적용
+ * 피드백: Repository layer separation
  */
 @Slf4j
 @Repository
@@ -55,7 +54,7 @@ public class OwnerRepositoryAdapter implements OwnerRepository {
 
 	@Override
 	public void delete(Owner owner) {
-		log.debug("Deleting owner with user ID: {}", owner.getUserId());
+		log.debug("Deleting owner with user ID: {}", owner.getUser().getUserId());
 		ownerJpaRepository.delete(owner);
 	}
 

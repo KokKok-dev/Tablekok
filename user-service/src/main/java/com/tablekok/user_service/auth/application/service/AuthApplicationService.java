@@ -1,9 +1,14 @@
 package com.tablekok.user_service.auth.application.service;
 
-import com.tablekok.user_service.auth.application.dto.*;
+import com.tablekok.user_service.auth.application.dto.command.CustomerSignupCommand;
+import com.tablekok.user_service.auth.application.dto.command.OwnerSignupCommand;
+import com.tablekok.user_service.auth.application.dto.command.LoginCommand;
+import com.tablekok.user_service.auth.application.dto.result.SignupResult;
+import com.tablekok.user_service.auth.application.dto.result.LoginResult;
+import com.tablekok.user_service.auth.application.dto.result.UserDto;
 import com.tablekok.user_service.auth.domain.entity.Owner;
 import com.tablekok.user_service.auth.domain.entity.User;
-import com.tablekok.user_service.auth.domain.enums.UserRole;
+import com.tablekok.user_service.auth.domain.entity.UserRole;
 import com.tablekok.user_service.auth.domain.repository.OwnerRepository;
 import com.tablekok.user_service.auth.domain.repository.UserRepository;
 import com.tablekok.user_service.auth.domain.service.AuthDomainService;
@@ -26,8 +31,8 @@ import java.util.UUID;
  * 3. 트랜잭션 관리
  * 4. DTO 변환 관리 (Entity 직접 노출 방지)
  *
- * gyoseok17 피드백: Service → Controller는 DTO로만 반환
- * gyoseok17 피드백: param.toEntity() 메서드 활용
+ * 팀 피드백: Service → Controller는 DTO로만 반환
+ * 팀 피드백: Command/Result 구조로 변경 완료
  */
 @Slf4j
 @Service
@@ -46,21 +51,21 @@ public class AuthApplicationService {
 
 	/**
 	 * 고객 회원가입
-	 * gyoseok17 피드백: param.toEntity() 메서드 활용
+	 * 팀 피드백: command.toEntity() 메서드 활용
 	 */
 	@Transactional
-	public SignupResult signupCustomer(CustomerSignupParam param) {
-		log.info("Starting customer signup process for email: {}", param.email());
+	public SignupResult signupCustomer(CustomerSignupCommand command) {
+		log.info("Starting customer signup process for email: {}", command.email());
 
 		// 1. Domain Service에서 자격 검증
-		authDomainService.validateCustomerSignupEligibility(param);
+		authDomainService.validateCustomerSignupEligibility(command);
 
 		// 2. Infrastructure: 비밀번호 암호화
-		String encodedPassword = passwordEncoder.encode(param.password());
+		String encodedPassword = passwordEncoder.encode(command.password());
 		log.debug("Password encoded for customer signup");
 
-		// 3. DTO → Entity 변환 (gyoseok17 피드백: param.toEntity() 활용)
-		User customer = param.toEntity(encodedPassword);
+		// 3. DTO → Entity 변환 (팀 피드백: command.toEntity() 활용)
+		User customer = command.toEntity(encodedPassword);
 		log.debug("Created customer entity with role: {}", customer.getRole());
 
 		// 4. Infrastructure: DB 저장
@@ -86,21 +91,21 @@ public class AuthApplicationService {
 
 	/**
 	 * 사장님 회원가입
-	 * gyoseok17 피드백: param.toUserEntity() 메서드 활용
+	 * 팀 피드백: command.toUserEntity() 메서드 활용
 	 */
 	@Transactional
-	public SignupResult signupOwner(OwnerSignupParam param) {
-		log.info("Starting owner signup process for email: {}", param.email());
+	public SignupResult signupOwner(OwnerSignupCommand command) {
+		log.info("Starting owner signup process for email: {}", command.email());
 
 		// 1. Domain Service에서 자격 검증
-		authDomainService.validateOwnerSignupEligibility(param);
+		authDomainService.validateOwnerSignupEligibility(command);
 
 		// 2. Infrastructure: 비밀번호 암호화
-		String encodedPassword = passwordEncoder.encode(param.password());
+		String encodedPassword = passwordEncoder.encode(command.password());
 		log.debug("Password encoded for owner signup");
 
-		// 3. DTO → Entity 변환 (gyoseok17 피드백: param.toUserEntity() 활용)
-		User ownerUser = param.toUserEntity(encodedPassword);
+		// 3. DTO → Entity 변환 (팀 피드백: command.toUserEntity() 활용)
+		User ownerUser = command.toUserEntity(encodedPassword);
 		log.debug("Created owner user entity with role: {}", ownerUser.getRole());
 
 		// 4. Infrastructure: User 저장
@@ -108,7 +113,7 @@ public class AuthApplicationService {
 		log.info("Successfully saved owner user with ID: {}", savedOwnerUser.getUserId());
 
 		// 5. Domain Entity: Owner 생성 (양방향 연관관계 자동 설정)
-		Owner owner = param.toOwnerEntity(savedOwnerUser);
+		Owner owner = command.toOwnerEntity(savedOwnerUser);
 		log.debug("Created owner entity with business number");
 
 		// 6. Infrastructure: Owner 저장
@@ -137,21 +142,21 @@ public class AuthApplicationService {
 	 * UserDomainService 활용으로 Optional 처리 자동화
 	 */
 	@Transactional
-	public LoginResult login(LoginParam param) {
-		log.info("Starting login process for email: {}", param.email());
+	public LoginResult login(LoginCommand command) {
+		log.info("Starting login process for email: {}", command.email());
 
 		// 1. Domain Service: 기본 검증
-		authDomainService.validateLoginEligibility(param);
+		authDomainService.validateLoginEligibility(command);
 
 		// 2. UserDomainService: 사용자 조회 (Optional 처리 자동)
-		User user = userDomainService.getUserByEmail(param.email());
+		User user = userDomainService.getUserByEmail(command.email());
 		log.debug("Found user with ID: {} for login", user.getUserId());
 
 		// 3. UserDomainService: 계정 상태 검증
 		userDomainService.validateAccountActive(user);
 
 		// 4. Infrastructure: 비밀번호 검증
-		if (!passwordEncoder.matches(param.password(), user.getPassword())) {
+		if (!passwordEncoder.matches(command.password(), user.getPassword())) {
 			log.warn("Login failed - password mismatch for user: {}", user.getUserId());
 			throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
 		}
@@ -183,7 +188,7 @@ public class AuthApplicationService {
 
 	/**
 	 * 이메일로 사용자 조회 (DTO 반환)
-	 * gyoseok17 피드백: Controller에서 Entity 직접 참조 방지
+	 * 팀 피드백: Controller에서 Entity 직접 참조 방지
 	 */
 	public UserDto findUserByEmail(String email) {
 		log.debug("Finding user by email: {}", email);
@@ -193,7 +198,7 @@ public class AuthApplicationService {
 
 	/**
 	 * 사용자 ID로 조회 (DTO 반환)
-	 * gyoseok17 피드백: Controller에서 Entity 직접 참조 방지
+	 * 팀 피드백: Controller에서 Entity 직접 참조 방지
 	 */
 	public UserDto findUserById(UUID userId) {
 		log.debug("Finding user by ID: {}", userId);
@@ -203,7 +208,7 @@ public class AuthApplicationService {
 
 	/**
 	 * 사용자 ID 문자열로 조회 (DTO 반환)
-	 * gyoseok17 피드백: Controller에서 Entity 직접 참조 방지
+	 * 팀 피드백: Controller에서 Entity 직접 참조 방지
 	 */
 	public UserDto findUserByIdString(String userIdStr) {
 		log.debug("Finding user by ID string: {}", userIdStr);

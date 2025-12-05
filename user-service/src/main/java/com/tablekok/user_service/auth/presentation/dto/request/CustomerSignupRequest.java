@@ -1,7 +1,6 @@
-// auth/presentation/dto/request/CustomerSignupRequest.java
 package com.tablekok.user_service.auth.presentation.dto.request;
 
-import com.tablekok.user_service.auth.application.dto.CustomerSignupParam;
+import com.tablekok.user_service.auth.application.dto.command.CustomerSignupCommand;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
@@ -47,8 +46,8 @@ public record CustomerSignupRequest(
 	 *
 	 * @return CustomerSignupParam (Application Layer DTO)
 	 */
-	public CustomerSignupParam toParam() {
-		return CustomerSignupParam.builder()
+	public CustomerSignupCommand toParam() {
+		return CustomerSignupCommand.builder()
 			.email(email)
 			.username(username)
 			.password(password)
