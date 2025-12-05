@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.exception.AppException;
-import com.tablekok.store_service.application.dto.param.CreateStoreParam;
+import com.tablekok.store_service.application.dto.command.CreateStoreCommand;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
 import com.tablekok.store_service.domain.entity.OperatingHour;
@@ -26,17 +26,17 @@ public class StoreService {
 	private final OperatingHourValidator operatingHourValidator;
 
 	@Transactional
-	public CreateStoreResult createStore(CreateStoreParam param) {
+	public CreateStoreResult createStore(CreateStoreCommand command) {
 		// 음식점 중복확인
-		if (storeRepository.existsByNameAndAddress(param.name(), param.address())) {
+		if (storeRepository.existsByNameAndAddress(command.name(), command.address())) {
 			throw new AppException(StoreErrorCode.DUPLICATE_STORE_ENTRY);
 		}
 
 		// Store Entity 생성 (PENDING_APPROVAL 상태로)
-		Store store = param.toEntity();
+		Store store = command.toEntity();
 
-		// OperatingHourParam -> OperatingHour Entity 생성
-		List<OperatingHour> hoursToSave = param.operatingHours().stream()
+		// OperatingHourCommand -> OperatingHour Entity 생성
+		List<OperatingHour> hoursToSave = command.operatingHours().stream()
 			.map(p -> p.toEntity(store))
 			.toList();
 
@@ -44,7 +44,7 @@ public class StoreService {
 		operatingHourValidator.validateOperatingHours(hoursToSave);
 
 		// Category ID를 사용하여 Entity 조회 및 연결
-		categoryDomainService.linkCategoriesToStore(store, param.categoryIds());
+		categoryDomainService.linkCategoriesToStore(store, command.categoryIds());
 
 		// OperatingHour Entity를 Store 컬렉션에 추가
 		store.getOperatingHours().addAll(hoursToSave);

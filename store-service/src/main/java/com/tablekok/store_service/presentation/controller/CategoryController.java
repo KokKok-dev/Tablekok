@@ -34,7 +34,7 @@ public class CategoryController {
 	public ResponseEntity<ApiResponse<Void>> createCategory(
 		@Valid @RequestBody CreateCategoryRequest request
 	) {
-		UUID categoryId = categoryService.createCategory(request.toParam());
+		UUID categoryId = categoryService.createCategory(request.toCommand());
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{categoryId}")
 			.buildAndExpand(categoryId)

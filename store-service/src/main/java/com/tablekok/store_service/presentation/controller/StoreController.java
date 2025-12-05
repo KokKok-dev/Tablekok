@@ -40,7 +40,7 @@ public class StoreController {
 		// store 생성
 		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
 
-		CreateStoreResult result = storeService.createStore(request.toParam(ownerId));
+		CreateStoreResult result = storeService.createStore(request.toCommand(ownerId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{storeId}")
 			.buildAndExpand(result.storeId())

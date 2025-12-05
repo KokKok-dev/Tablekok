@@ -1,4 +1,4 @@
-package com.tablekok.store_service.application.dto.param;
+package com.tablekok.store_service.application.dto.command;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import com.tablekok.store_service.domain.entity.OperatingHour;
 import com.tablekok.store_service.domain.entity.Store;
 
-public record CreateOperatingHourParam(
+public record CreateOperatingHourCommand(
 	DayOfWeek dayOfWeek,
 	LocalTime openTime,
 	LocalTime closeTime,

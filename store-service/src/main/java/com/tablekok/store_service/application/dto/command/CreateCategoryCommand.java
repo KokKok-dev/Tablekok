@@ -1,11 +1,11 @@
-package com.tablekok.store_service.application.dto.param;
+package com.tablekok.store_service.application.dto.command;
 
 import com.tablekok.store_service.domain.entity.Category;
 
 import lombok.Builder;
 
 @Builder
-public record CreateCategoryParam(
+public record CreateCategoryCommand(
 	String name
 ) {
 	public Category toEntity() {
