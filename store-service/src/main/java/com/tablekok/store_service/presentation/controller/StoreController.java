@@ -16,34 +16,44 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.store_service.application.dto.result.CreateStoreResult;
+import com.tablekok.store_service.application.service.StoreService;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStatusRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStoreRequest;
+import com.tablekok.store_service.presentation.dto.response.CreateStoreResponse;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/v1/stores")
+@RequiredArgsConstructor
 public class StoreController {
 
+	private final StoreService storeService;
+
 	@PostMapping
-	public ResponseEntity<ApiResponse<Void>> createStore(
-		@Valid @RequestBody CreateStoreRequest requestDto
+	public ResponseEntity<ApiResponse<CreateStoreResponse>> createStore(
+		@Valid @RequestBody CreateStoreRequest request
 	) {
 		// store 생성
+		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+
+		CreateStoreResult result = storeService.createStore(request.toCommand(ownerId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{storeId}")
-			.buildAndExpand(UUID.randomUUID())
+			.buildAndExpand(result.storeId())
 			.toUri();
 
 		return ResponseEntity.created(location)
-			.body(ApiResponse.success("음식점 생성 성공", HttpStatus.CREATED));
+			.body(ApiResponse.success("음식점 생성 성공", CreateStoreResponse.from(result), HttpStatus.CREATED));
 	}
 
 	@PutMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<Void>> updateStore(
 		@PathVariable UUID storeId,
-		@RequestBody UpdateStoreRequest requestDto
+		@RequestBody UpdateStoreRequest request
 	) {
 		// 음식점 정보 수정
 		return ResponseEntity.ok(
@@ -54,7 +64,7 @@ public class StoreController {
 	@PatchMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<Void>> updateStatus(
 		@PathVariable UUID storeId,
-		@RequestBody UpdateStatusRequest requestDto
+		@RequestBody UpdateStatusRequest request
 	) {
 		// 음식점 상태 변경
 		return ResponseEntity.ok(

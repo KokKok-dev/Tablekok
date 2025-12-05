@@ -1,5 +1,8 @@
 package com.tablekok.store_service.infrastructure.repository;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -11,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class CategoryRepositoryImpl implements CategoryRepository {
+public class CategoryRepositoryAdapter implements CategoryRepository {
 	private final CategoryJpaRepository categoryJpaRepository;
 
 	@Override
@@ -28,4 +31,10 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	public Page<Category> findAll(Pageable pageable) {
 		return categoryJpaRepository.findAll(pageable);
 	}
+
+	@Override
+	public Long countByIdIn(List<UUID> categoryIds) {
+		return categoryJpaRepository.countByIdIn(categoryIds);
+	}
+
 }

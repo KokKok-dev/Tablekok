@@ -9,9 +9,9 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum CategoryErrorCode implements ErrorCode {
-	DUPLICATE_CATEGORY_NAME("CATEGORY100", "카테고리 이름이 중복입니다.", HttpStatus.BAD_REQUEST),
-	;
+public enum StoreErrorCode implements ErrorCode {
+
+	DUPLICATE_STORE_ENTRY("STORE100", "중복된 음식점입니다.", HttpStatus.BAD_REQUEST);
 
 	private final String code;
 	private final String message;

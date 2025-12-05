@@ -28,7 +28,7 @@ public class ReservationPolicyController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<Void>> createReservationPolicy(
-		@Valid @RequestBody CreateReservationPolicyRequest requestDto
+		@Valid @RequestBody CreateReservationPolicyRequest request
 	) {
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{reservationPolicyId}")
@@ -51,7 +51,7 @@ public class ReservationPolicyController {
 	@PutMapping
 	public ResponseEntity<ApiResponse<Void>> updateReservationPolicy(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody UpdateReservationPolicyRequest requestDto
+		@Valid @RequestBody UpdateReservationPolicyRequest request
 	) {
 		// 날짜예약 정책 정보 수정
 		return ResponseEntity.ok()
