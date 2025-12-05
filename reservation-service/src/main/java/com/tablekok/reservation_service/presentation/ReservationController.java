@@ -42,7 +42,7 @@ public class ReservationController {
 		@Valid @RequestBody CreateReservationRequest request) {
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
 
-		CreateReservationResult result = reservationService.createReservation(request.toParam(userId));
+		CreateReservationResult result = reservationService.createReservation(request.toCommand(userId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{reservationId}")
 			.buildAndExpand(result.reservationId())

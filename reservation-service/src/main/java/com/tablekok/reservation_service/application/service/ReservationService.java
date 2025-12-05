@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tablekok.exception.AppException;
 import com.tablekok.reservation_service.application.client.SearchClient;
 import com.tablekok.reservation_service.application.client.dto.response.GetReservationPolicyResponse;
-import com.tablekok.reservation_service.application.dto.param.CreateReservationParam;
+import com.tablekok.reservation_service.application.dto.command.CreateReservationCommand;
 import com.tablekok.reservation_service.application.dto.result.CreateReservationResult;
 import com.tablekok.reservation_service.application.dto.result.GetReservationResult;
 import com.tablekok.reservation_service.application.dto.result.GetReservationsForCustomerResult;
@@ -37,8 +37,8 @@ public class ReservationService {
 
 	// 예약 생성(접수)
 	@Transactional
-	public CreateReservationResult createReservation(CreateReservationParam param) {
-		Reservation newReservation = param.toEntity();
+	public CreateReservationResult createReservation(CreateReservationCommand command) {
+		Reservation newReservation = command.toEntity();
 
 		// 인기 음식점의 요청인지 확인
 		validateHotStore(newReservation);
