@@ -43,7 +43,7 @@ public class ReviewController {
 		// 임시로 id 지정
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677");
 
-		CreateReviewResult result = reviewService.createReview(request.toParam(), userId);
+		CreateReviewResult result = reviewService.createReview(request.toCommand(), userId);
 
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{reviewId}")
@@ -63,7 +63,7 @@ public class ReviewController {
 		@PathVariable("reviewId") UUID reviewId,
 		@RequestBody @Valid UpdateReviewRequest request
 	) {
-		reviewService.updateReview(reviewId, request.toParam());
+		reviewService.updateReview(reviewId, request.toCommand());
 		return ResponseEntity.ok(
 			ApiResponse.success("리뷰 수정이 완료되었습니다.", HttpStatus.OK));
 	}

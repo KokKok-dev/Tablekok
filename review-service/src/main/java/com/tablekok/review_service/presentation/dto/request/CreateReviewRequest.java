@@ -2,7 +2,7 @@ package com.tablekok.review_service.presentation.dto.request;
 
 import java.util.UUID;
 
-import com.tablekok.review_service.application.dto.param.CreateReviewParam;
+import com.tablekok.review_service.application.dto.param.CreateReviewCommand;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -21,8 +21,8 @@ public record CreateReviewRequest(
 	@Size(min = 10, max = 1000, message = "리뷰는 10자 이상, 1000자 이하로 작성해야합니다.")
 	String content
 ) {
-	public CreateReviewParam toParam() {
-		return CreateReviewParam.builder()
+	public CreateReviewCommand toCommand() {
+		return CreateReviewCommand.builder()
 			.reservationId(reservationId)
 			.rating(rating)
 			.content(content)

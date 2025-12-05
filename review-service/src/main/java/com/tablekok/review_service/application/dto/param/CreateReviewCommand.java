@@ -7,7 +7,7 @@ import com.tablekok.review_service.domain.entity.Review;
 import lombok.Builder;
 
 @Builder
-public record CreateReviewParam(
+public record CreateReviewCommand(
 	UUID reservationId,
 	double rating,
 	String content

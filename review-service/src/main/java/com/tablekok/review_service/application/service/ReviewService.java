@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.review_service.application.client.ReservationClient;
-import com.tablekok.review_service.application.dto.param.CreateReviewParam;
-import com.tablekok.review_service.application.dto.param.UpdateReviewParam;
+import com.tablekok.review_service.application.dto.param.CreateReviewCommand;
+import com.tablekok.review_service.application.dto.param.UpdateReviewCommand;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
 import com.tablekok.review_service.application.dto.result.GetReviewResult;
 import com.tablekok.review_service.domain.entity.Review;
@@ -27,20 +27,20 @@ public class ReviewService {
 	private final ReviewDomainService reviewDomainService;
 
 	@Transactional
-	public CreateReviewResult createReview(CreateReviewParam param, UUID userId) {
+	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId) {
 		// reservationClient로 storeId 가져와야함
 		UUID storeId = UUID.randomUUID();
 
 		// 이미 작성된 리뷰인지 검증
-		reviewDomainService.validReview(param.reservationId());
+		reviewDomainService.validReview(command.reservationId());
 
 		Reservation reservation = reservationClient.getReservation(
-			param.reservationId()).toVo();
+			command.reservationId()).toVo();
 
 		// 예약 검증(예약 확인, 본인 확인, 예약 상태 확인)
 		reviewDomainService.validReservation(reservation, userId);
 
-		Review newReview = param.toEntity(userId, reservation.storeId());
+		Review newReview = command.toEntity(userId, reservation.storeId());
 
 		reviewRepository.save(newReview);
 
@@ -48,9 +48,9 @@ public class ReviewService {
 	}
 
 	@Transactional
-	public void updateReview(UUID reviewId, UpdateReviewParam param) {
+	public void updateReview(UUID reviewId, UpdateReviewCommand command) {
 		Review foundReview = findReview(reviewId);
-		foundReview.updateReview(param.rating(), param.content());
+		foundReview.updateReview(command.rating(), command.content());
 	}
 
 	@Transactional
