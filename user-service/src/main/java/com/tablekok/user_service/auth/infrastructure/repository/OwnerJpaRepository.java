@@ -7,100 +7,111 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Owner JPA Repository 인터페이스
- * Spring Data JPA 기술에 의존하는 Infrastructure 계층
- */
+@Repository
 public interface OwnerJpaRepository extends JpaRepository<Owner, UUID> {
 
-	// ========== 기본 조회 메서드 ==========
+	// ===============================
+	// 기본 조회 메서드들
+	// ===============================
 
-	Optional<Owner> findByUser(User user);
 	Optional<Owner> findByBusinessNumber(String businessNumber);
 
-	// ========== 존재 여부 확인 메서드 ==========
+	/**
+	 * ✅ User 객체를 받는 메서드 (OwnerRepositoryAdapter에서 실제 사용)
+	 */
+	@Query("SELECT o FROM Owner o WHERE o.user = :user")
+	Optional<Owner> findByUser(@Param("user") User user);
 
 	boolean existsByBusinessNumber(String businessNumber);
-	boolean existsByBusinessNumberAndUserIdNot(String businessNumber, UUID userId);
-
-	// ========== 사업자번호 검색 메서드 ==========
-
-	Page<Owner> findByBusinessNumberContaining(String businessNumberPart, Pageable pageable);
-	List<Owner> findByBusinessNumberStartingWith(String prefix);
-
-	// ========== 기간별 조회 메서드 ==========
-
-	List<Owner> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
-
-	// ========== User 연관관계 기반 조회 메서드 ==========
-
-	Page<Owner> findByUserIsActive(Boolean isActive, Pageable pageable);
-	Page<Owner> findByUserNameContainingIgnoreCase(String ownerName, Pageable pageable);
-	Page<Owner> findByUserEmailContainingIgnoreCase(String email, Pageable pageable);
-	Page<Owner> findByUserNameContainingIgnoreCaseOrUserEmailContainingIgnoreCase(
-		String name, String email, Pageable pageable);
-
-	// ========== 정렬 메서드 ==========
-
-	Page<Owner> findAllByOrderByCreatedAtDesc(Pageable pageable);
-	Page<Owner> findAllByOrderByUserNameAsc(Pageable pageable);
-	Page<Owner> findAllByOrderByBusinessNumberAsc(Pageable pageable);
-
-	// ========== 커스텀 쿼리 메서드 ==========
 
 	/**
-	 * 최근 등록된 Owner 조회
+	 * ✅ 핵심 문제 해결: User ID로 중복 체크
+	 */
+	@Query("SELECT COUNT(o) > 0 FROM Owner o WHERE o.businessNumber = :businessNumber AND o.user.userId != :userId")
+	boolean existsByBusinessNumberAndUserIdNot(@Param("businessNumber") String businessNumber, @Param("userId") UUID userId);
+
+	// ===============================
+	// 사업자번호 검색 메서드들
+	// ===============================
+
+	@Query("SELECT o FROM Owner o WHERE o.businessNumber LIKE %:businessNumber%")
+	Page<Owner> findByBusinessNumberContaining(@Param("businessNumber") String businessNumber, Pageable pageable);
+
+	@Query("SELECT o FROM Owner o WHERE o.businessNumber LIKE :prefix%")
+	List<Owner> findByBusinessNumberStartingWith(@Param("prefix") String prefix);
+
+	// ===============================
+	// 날짜 관련 메서드들
+	// ===============================
+
+	@Query("SELECT o FROM Owner o WHERE o.createdAt BETWEEN :startDate AND :endDate")
+	List<Owner> findByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+	/**
+	 * ✅ 최근 Owner 조회 (LocalDateTime 매개변수 버전)
 	 */
 	@Query("SELECT o FROM Owner o WHERE o.createdAt >= :cutoffDate ORDER BY o.createdAt DESC")
 	List<Owner> findRecentOwners(@Param("cutoffDate") LocalDateTime cutoffDate);
 
-	/**
-	 * 최근 로그인한 Owner들 조회
-	 */
-	@Query("SELECT o FROM Owner o WHERE o.user.lastLoginAt > :cutoffDate ORDER BY o.user.lastLoginAt DESC")
+	// ===============================
+	// User 관련 메서드들
+	// ===============================
+
+	@Query("SELECT o FROM Owner o WHERE o.user.isActive = :isActive")
+	Page<Owner> findByUserIsActive(@Param("isActive") Boolean isActive, Pageable pageable);
+
+	@Query("SELECT o FROM Owner o WHERE UPPER(o.user.name) LIKE UPPER(CONCAT('%', :name, '%'))")
+	Page<Owner> findByUserNameContainingIgnoreCase(@Param("name") String name, Pageable pageable);
+
+	@Query("SELECT o FROM Owner o WHERE UPPER(o.user.email) LIKE UPPER(CONCAT('%', :email, '%'))")
+	Page<Owner> findByUserEmailContainingIgnoreCase(@Param("email") String email, Pageable pageable);
+
+	@Query("SELECT o FROM Owner o WHERE UPPER(o.user.name) LIKE UPPER(CONCAT('%', :name, '%')) OR UPPER(o.user.email) LIKE UPPER(CONCAT('%', :email, '%'))")
+	Page<Owner> findByUserNameContainingIgnoreCaseOrUserEmailContainingIgnoreCase(@Param("name") String name, @Param("email") String email, Pageable pageable);
+
+	@Query("SELECT o FROM Owner o WHERE o.user.lastLoginAt >= :cutoffDate")
 	List<Owner> findByUserLastLoginAtAfter(@Param("cutoffDate") LocalDateTime cutoffDate);
 
 	/**
-	 * 비활성 Owner들 조회 (오랫동안 로그인하지 않은)
+	 * ✅ 비활성 Owner 조회
 	 */
-	@Query("SELECT o FROM Owner o WHERE o.user.lastLoginAt < :cutoffDate OR o.user.lastLoginAt IS NULL")
+	@Query("SELECT o FROM Owner o WHERE o.user.isActive = false OR o.user.lastLoginAt < :cutoffDate")
 	List<Owner> findInactiveOwners(@Param("cutoffDate") LocalDateTime cutoffDate);
 
-	/**
-	 * Owner와 User 정보를 함께 조회 (Fetch Join 최적화)
-	 */
-	@Query("SELECT o FROM Owner o JOIN FETCH o.user ORDER BY o.createdAt DESC")
+	// ===============================
+	// 정렬 메서드들
+	// ===============================
+
+	@Query("SELECT o FROM Owner o ORDER BY o.createdAt DESC")
+	Page<Owner> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+	@Query("SELECT o FROM Owner o ORDER BY o.user.name ASC")
+	Page<Owner> findAllByOrderByUserNameAsc(Pageable pageable);
+
+	@Query("SELECT o FROM Owner o ORDER BY o.businessNumber ASC")
+	Page<Owner> findAllByOrderByBusinessNumberAsc(Pageable pageable);
+
+	// ===============================
+	// JOIN FETCH 메서드들
+	// ===============================
+
+	@Query("SELECT o FROM Owner o JOIN FETCH o.user")
 	Page<Owner> findAllWithUser(Pageable pageable);
 
-	/**
-	 * 사업자번호 형식 검증용 조회
-	 */
-	@Query("SELECT o FROM Owner o WHERE o.businessNumber REGEXP :regex")
-	List<Owner> findByBusinessNumberRegex(@Param("regex") String regex);
+	// ===============================
+	// 정규식 검색 (LIKE로 대체)
+	// ===============================
 
 	/**
-	 * 활성 Owner만 조회 (삭제되지 않고 활성 상태)
+	 * ✅ 정규식 대신 LIKE 패턴 검색 사용 (PostgreSQL 호환)
 	 */
-	@Query("SELECT o FROM Owner o WHERE o.user.isActive = true AND o.deletedAt IS NULL")
-	Page<Owner> findActiveOwners(Pageable pageable);
-
-	/**
-	 * 특정 기간 동안 활동한 Owner 수
-	 */
-	@Query("SELECT COUNT(o) FROM Owner o WHERE o.user.lastLoginAt BETWEEN :startDate AND :endDate")
-	long countActiveOwnersByPeriod(@Param("startDate") LocalDateTime startDate,
-		@Param("endDate") LocalDateTime endDate);
-
-	/**
-	 * 사업자번호 앞자리별 통계 (지역별 분석용)
-	 */
-	@Query("SELECT SUBSTRING(o.businessNumber, 1, 3) as prefix, COUNT(o) " +
-		"FROM Owner o GROUP BY SUBSTRING(o.businessNumber, 1, 3) ORDER BY COUNT(o) DESC")
-	List<Object[]> countByBusinessNumberPrefix();
+	@Query("SELECT o FROM Owner o WHERE o.businessNumber LIKE :pattern")
+	List<Owner> findByBusinessNumberRegex(@Param("pattern") String pattern);
 }

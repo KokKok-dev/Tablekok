@@ -49,7 +49,7 @@ dependencies {
 	// 🔍 Spring Cloud (Netflix 스택)
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-	// implementation 'org.springframework.cloud:spring-cloud-starter-config'  // Config Server 사용 시 주석 해제
+	 implementation 'org.springframework.cloud:spring-cloud-starter-config'  // Config Server 사용 시 주석 해제
 
 	// 🛠️ Development Tools
 	compileOnly 'org.projectlombok:lombok'

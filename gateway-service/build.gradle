@@ -31,8 +31,8 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
 	// ❌ 제거해야 할 의존성들
-	// implementation 'org.springframework.boot:spring-boot-starter-web'     // MVC와 Gateway 충돌
-	// implementation 'org.springframework.cloud:spring-cloud-starter-config' // 현재 사용 안함
+//	 implementation 'org.springframework.boot:spring-boot-starter-web'     // MVC와 Gateway 충돌
+	 implementation 'org.springframework.cloud:spring-cloud-starter-config' // 현재 사용 안함
 
 	// ✅ 유지할 의존성들
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'  // 모니터링용

@@ -58,22 +58,23 @@ public class User extends BaseEntity {
 	@Column(name = "business_number", length = 12)
 	private String businessNumber;  // Owner인 경우만 사용
 
-	// ========== Domain 정적 팩토리 메서드 (기존) ==========
+	// ========== Domain 정적 팩토리 메서드 (수정됨) ==========
 
 	/**
 	 * Customer 생성 정적 팩토리 메서드
+	 * ✅ 수정: 이미 암호화된 비밀번호를 받으므로 password 검증 제거
 	 */
-	public static User createCustomer(String email, String name, String password, String phoneNumber) {
-		// Domain 검증 적용
+	public static User createCustomer(String email, String name, String encodedPassword, String phoneNumber) {
+		// Domain 검증 (암호화된 비밀번호 제외)
 		validateEmail(email);
 		validateName(name);
-		validatePassword(password);
+		// validatePassword(encodedPassword); ← 제거: 이미 암호화된 비밀번호
 		validatePhoneNumber(phoneNumber);
 
 		return User.builder()
 			.email(normalizeEmail(email))
 			.name(name.trim())
-			.password(password)
+			.password(encodedPassword)  // 이미 암호화된 비밀번호
 			.phoneNumber(normalizePhoneNumber(phoneNumber))
 			.role(UserRole.CUSTOMER)
 			.isActive(true)
@@ -83,18 +84,19 @@ public class User extends BaseEntity {
 
 	/**
 	 * Owner 생성 정적 팩토리 메서드
+	 * ✅ 수정: 이미 암호화된 비밀번호를 받으므로 password 검증 제거
 	 */
-	public static User createOwner(String email, String name, String password, String phoneNumber) {
-		// Domain 검증 적용
+	public static User createOwner(String email, String name, String encodedPassword, String phoneNumber) {
+		// Domain 검증 (암호화된 비밀번호 제외)
 		validateEmail(email);
 		validateName(name);
-		validatePassword(password);
+		// validatePassword(encodedPassword); ← 제거: 이미 암호화된 비밀번호
 		validatePhoneNumber(phoneNumber);
 
 		return User.builder()
 			.email(normalizeEmail(email))
 			.name(name.trim())
-			.password(password)
+			.password(encodedPassword)  // 이미 암호화된 비밀번호
 			.phoneNumber(normalizePhoneNumber(phoneNumber))
 			.role(UserRole.OWNER)
 			.isActive(true)
@@ -104,18 +106,19 @@ public class User extends BaseEntity {
 
 	/**
 	 * Master 생성 정적 팩토리 메서드
+	 * ✅ 수정: 이미 암호화된 비밀번호를 받으므로 password 검증 제거
 	 */
-	public static User createMaster(String email, String name, String password, String phoneNumber) {
-		// Domain 검증 적용
+	public static User createMaster(String email, String name, String encodedPassword, String phoneNumber) {
+		// Domain 검증 (암호화된 비밀번호 제외)
 		validateEmail(email);
 		validateName(name);
-		validatePassword(password);
+		// validatePassword(encodedPassword); ← 제거: 이미 암호화된 비밀번호
 		validatePhoneNumber(phoneNumber);
 
 		return User.builder()
 			.email(normalizeEmail(email))
 			.name(name.trim())
-			.password(password)
+			.password(encodedPassword)  // 이미 암호화된 비밀번호
 			.phoneNumber(normalizePhoneNumber(phoneNumber))
 			.role(UserRole.MASTER)
 			.isActive(true)
@@ -123,7 +126,7 @@ public class User extends BaseEntity {
 			.build();
 	}
 
-	// ========== Domain 정규화 메서드들 (Application Service에서 이동) ==========
+	// ========== Domain 정규화 메서드들 (기존 유지) ==========
 
 	/**
 	 * 이메일 정규화 (Domain 규칙)
@@ -155,7 +158,7 @@ public class User extends BaseEntity {
 		return phoneNumber.replaceAll("-", "").replaceAll("\\s", "");
 	}
 
-	// ========== Domain 검증 메서드들 (Application Service에서 이동) ==========
+	// ========== Domain 검증 메서드들 (기존 유지) ==========
 
 	/**
 	 * 이메일 도메인 검증
@@ -204,9 +207,9 @@ public class User extends BaseEntity {
 	}
 
 	/**
-	 * 비밀번호 도메인 검증
+	 * 비밀번호 도메인 검증 (원본 비밀번호용 - Application Service에서 사용)
 	 *
-	 * @param password 검증할 비밀번호
+	 * @param password 검증할 원본 비밀번호
 	 * @throws IllegalArgumentException 유효하지 않은 비밀번호인 경우
 	 */
 	public static void validatePassword(String password) {
@@ -241,7 +244,7 @@ public class User extends BaseEntity {
 		}
 	}
 
-	// ========== Domain 비즈니스 메서드들 (기존) ==========
+	// ========== Domain 비즈니스 메서드들 (기존 유지) ==========
 
 	/**
 	 * 계정 활성 여부 확인
@@ -259,7 +262,7 @@ public class User extends BaseEntity {
 	}
 
 	/**
-	 * 비밀번호 업데이트
+	 * 비밀번호 업데이트 (이미 암호화된 비밀번호)
 	 */
 	public void updatePassword(String newEncodedPassword) {
 		if (newEncodedPassword == null || newEncodedPassword.trim().isEmpty()) {
