@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class CategoryRepositoryImpl implements CategoryRepository {
+public class CategoryRepositoryAdapter implements CategoryRepository {
 	private final CategoryJpaRepository categoryJpaRepository;
 
 	@Override

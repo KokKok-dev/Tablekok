@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class StoreRepositoryImpl implements StoreRepository {
+public class StoreRepositoryAdapter implements StoreRepository {
 
 	private final StoreJpaRepository storeJpaRepository;
 
