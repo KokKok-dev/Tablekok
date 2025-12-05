@@ -84,6 +84,10 @@ public class Store extends BaseEntity {
 	@Column(name = "waiting_open_time")
 	private LocalTime waitingOpenTime;
 
+	// 인기 음식점
+	@Column(name = "is_hot")
+	private boolean isHot;
+
 	@ElementCollection
 	@CollectionTable(name = "p_store_category_map") // 중간 테이블을 별도로 정의하지 않고 JPA의 @ElementCollection 사용
 	private List<UUID> categoryIds = new ArrayList<>();
