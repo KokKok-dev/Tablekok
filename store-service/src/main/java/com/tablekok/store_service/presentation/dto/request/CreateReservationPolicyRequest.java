@@ -1,9 +1,12 @@
 package com.tablekok.store_service.presentation.dto.request;
 
 import java.time.LocalTime;
+import java.util.UUID;
 
 import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.tablekok.store_service.application.dto.command.CreateReservationPolicyCommand;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -48,4 +51,20 @@ public record CreateReservationPolicyRequest(
 	Boolean isActive
 
 ) {
+
+	public CreateReservationPolicyCommand toCommand(UUID storeId) {
+		return CreateReservationPolicyCommand.builder()
+			.storeId(storeId)
+			.monthlyOpenDay(monthlyOpenDay)
+			.openTime(openTime)
+			.reservationInterval(reservationInterval)
+			.dailyReservationStartTime(dailyReservationStartTime)
+			.dailyReservationEndTime(dailyReservationEndTime)
+			.minHeadCount(minHeadCount)
+			.maxHeadcount(maxHeadcount)
+			.isDepositRequired(isDepositRequired)
+			.depositAmount(depositAmount)
+			.isActive(isActive)
+			.build();
+	}
 }

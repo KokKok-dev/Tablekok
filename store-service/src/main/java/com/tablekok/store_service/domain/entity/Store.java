@@ -85,8 +85,8 @@ public class Store extends BaseEntity {
 	private LocalTime waitingOpenTime;
 
 	// 인기 음식점
-	@Column(name = "is_hot")
-	private boolean isHot;
+	@Column(name = "is_hot", nullable = false)
+	private Boolean isHot;
 
 	@ElementCollection
 	@CollectionTable(name = "p_store_category_map") // 중간 테이블을 별도로 정의하지 않고 JPA의 @ElementCollection 사용
@@ -96,13 +96,20 @@ public class Store extends BaseEntity {
 	@JoinColumn(name = "store_id")
 	private List<OperatingHour> operatingHours = new ArrayList<>();
 
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "store_id")
+	@OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private ReservationPolicy reservationPolicy;
 
 	public void updateCategoryIds(List<UUID> newCategoryIds) {
 		this.categoryIds.clear();
 		this.categoryIds.addAll(newCategoryIds);
+	}
+
+	public void setReservationPolicy(ReservationPolicy reservationPolicy) {
+		this.reservationPolicy = reservationPolicy;
+	}
+	
+	public void setReservationOpenTime(LocalTime reservationOpenTime) {
+		this.reservationOpenTime = reservationOpenTime;
 	}
 
 	@Builder(access = AccessLevel.PRIVATE)

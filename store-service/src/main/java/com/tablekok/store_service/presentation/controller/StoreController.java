@@ -89,8 +89,10 @@ public class StoreController {
 	/* =================== 날짜 예약 정책 ================ **/
 	@PostMapping("/{storeId}/reservation-policy")
 	public ResponseEntity<ApiResponse<Void>> createReservationPolicy(
+		@PathVariable UUID storeId,
 		@Valid @RequestBody CreateReservationPolicyRequest request
 	) {
+		storeService.createReservationPolicy(storeId, request.toCommand(storeId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{reservationPolicyId}")
 			.buildAndExpand(UUID.randomUUID())

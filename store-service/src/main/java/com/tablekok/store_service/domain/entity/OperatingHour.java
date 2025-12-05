@@ -47,7 +47,7 @@ public class OperatingHour extends BaseEntity {
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private OperatingHour(
-		Store store, DayOfWeek dayOfWeek, LocalTime openTime, LocalTime closeTime, boolean isClosed
+		DayOfWeek dayOfWeek, LocalTime openTime, LocalTime closeTime, boolean isClosed
 	) {
 		this.dayOfWeek = dayOfWeek;
 		this.openTime = openTime;

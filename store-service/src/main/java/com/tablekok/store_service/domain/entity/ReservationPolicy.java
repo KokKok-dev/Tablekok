@@ -7,12 +7,16 @@ import com.tablekok.entity.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,6 +30,10 @@ public class ReservationPolicy extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "id", updatable = false, nullable = false)
 	private UUID id;
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_id")
+	private Store store;
 
 	// 예약 오픈 정책
 	@Column(name = "monthly_open_day", nullable = false)
@@ -61,4 +69,44 @@ public class ReservationPolicy extends BaseEntity {
 	@Column(name = "is_active", nullable = false)
 	private boolean isActive;
 
+	@Builder(access = AccessLevel.PRIVATE)
+	private ReservationPolicy(
+		Store store, int monthlyOpenDay, LocalTime openTime, int reservationInterval,
+		LocalTime dailyReservationStartTime,
+		LocalTime dailyReservationEndTime,
+		int minHeadcount, int maxHeadcount, boolean isDepositRequired, int depositAmount, boolean isActive
+	) {
+		this.store = store;
+		this.monthlyOpenDay = monthlyOpenDay;
+		this.openTime = openTime;
+		this.reservationInterval = reservationInterval;
+		this.dailyReservationStartTime = dailyReservationStartTime;
+		this.dailyReservationEndTime = dailyReservationEndTime;
+		this.minHeadcount = minHeadcount;
+		this.maxHeadcount = maxHeadcount;
+		this.isDepositRequired = isDepositRequired;
+		this.depositAmount = depositAmount;
+		this.isActive = isActive;
+	}
+
+	public static ReservationPolicy of(
+		Store store, int monthlyOpenDay, LocalTime openTime, int reservationInterval,
+		LocalTime dailyReservationStartTime,
+		LocalTime dailyReservationEndTime,
+		int minHeadcount, int maxHeadcount, boolean isDepositRequired, int depositAmount, boolean isActive
+	) {
+		return ReservationPolicy.builder()
+			.store(store)
+			.monthlyOpenDay(monthlyOpenDay)
+			.openTime(openTime)
+			.reservationInterval(reservationInterval)
+			.dailyReservationStartTime(dailyReservationStartTime)
+			.dailyReservationEndTime(dailyReservationEndTime)
+			.minHeadcount(minHeadcount)
+			.maxHeadcount(maxHeadcount)
+			.isDepositRequired(isDepositRequired)
+			.depositAmount(depositAmount)
+			.isActive(isActive)
+			.build();
+	}
 }
