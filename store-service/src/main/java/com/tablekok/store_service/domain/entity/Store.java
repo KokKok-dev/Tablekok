@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.hibernate.annotations.Comment;
 
 import com.tablekok.entity.BaseEntity;
+import com.tablekok.exception.AppException;
+import com.tablekok.store_service.domain.exception.StoreDomainErrorCode;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -107,9 +109,19 @@ public class Store extends BaseEntity {
 	public void setReservationPolicy(ReservationPolicy reservationPolicy) {
 		this.reservationPolicy = reservationPolicy;
 	}
-	
+
 	public void setReservationOpenTime(LocalTime reservationOpenTime) {
 		this.reservationOpenTime = reservationOpenTime;
+	}
+
+	public void validatePolicyCreationAllowed() {
+		if (this.status == StoreStatus.PENDING_APPROVAL ||
+			this.status == StoreStatus.APPROVAL_REJECTED ||
+			this.status == StoreStatus.DECOMMISSIONED) {
+
+			throw new AppException(StoreDomainErrorCode.INVALID_STORE_STATUS);
+
+		}
 	}
 
 	@Builder(access = AccessLevel.PRIVATE)
@@ -132,6 +144,7 @@ public class Store extends BaseEntity {
 		this.imageUrl = imageUrl;
 		this.reservationOpenTime = reservationOpenTime;
 		this.waitingOpenTime = waitingOpenTime;
+		this.isHot = false;
 	}
 
 	public static Store of(
