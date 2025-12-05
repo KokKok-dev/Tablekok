@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-import com.tablekok.reservation_service.application.dto.param.CreateReservationParam;
+import com.tablekok.reservation_service.application.dto.command.CreateReservationCommand;
 import com.tablekok.reservation_service.domain.vo.ReservationDateTime;
 
 import jakarta.validation.constraints.FutureOrPresent;
@@ -30,9 +30,9 @@ public record CreateReservationRequest(
 	Integer deposit
 
 ) {
-	// 서비스로 전달할 파람으로
-	public CreateReservationParam toParam(UUID userId) {
-		return CreateReservationParam.builder()
+	// 서비스로 전달할 command로
+	public CreateReservationCommand toCommand(UUID userId) {
+		return CreateReservationCommand.builder()
 			.userId(userId)
 			.storeId(storeId)
 			.reservationDateTime(ReservationDateTime.of(reservationDate, reservationTime))
