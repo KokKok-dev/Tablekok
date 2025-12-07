@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.hibernate.annotations.Comment;
 
 import com.tablekok.entity.BaseEntity;
+import com.tablekok.exception.AppException;
+import com.tablekok.store_service.domain.exception.StoreDomainErrorCode;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
@@ -17,10 +19,13 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -81,16 +86,42 @@ public class Store extends BaseEntity {
 	@Column(name = "waiting_open_time")
 	private LocalTime waitingOpenTime;
 
+	// 인기 음식점
+	@Column(name = "is_hot", nullable = false)
+	private Boolean isHot;
+
 	@ElementCollection
 	@CollectionTable(name = "p_store_category_map") // 중간 테이블을 별도로 정의하지 않고 JPA의 @ElementCollection 사용
 	private List<UUID> categoryIds = new ArrayList<>();
 
-	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_id")
 	private List<OperatingHour> operatingHours = new ArrayList<>();
+
+	@OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private ReservationPolicy reservationPolicy;
 
 	public void updateCategoryIds(List<UUID> newCategoryIds) {
 		this.categoryIds.clear();
 		this.categoryIds.addAll(newCategoryIds);
+	}
+
+	public void setReservationPolicy(ReservationPolicy reservationPolicy) {
+		this.reservationPolicy = reservationPolicy;
+	}
+
+	public void setReservationOpenTime(LocalTime reservationOpenTime) {
+		this.reservationOpenTime = reservationOpenTime;
+	}
+
+	public void validatePolicyCreationAllowed() {
+		if (this.status == StoreStatus.PENDING_APPROVAL ||
+			this.status == StoreStatus.APPROVAL_REJECTED ||
+			this.status == StoreStatus.DECOMMISSIONED) {
+
+			throw new AppException(StoreDomainErrorCode.INVALID_STORE_STATUS);
+
+		}
 	}
 
 	@Builder(access = AccessLevel.PRIVATE)
@@ -113,6 +144,7 @@ public class Store extends BaseEntity {
 		this.imageUrl = imageUrl;
 		this.reservationOpenTime = reservationOpenTime;
 		this.waitingOpenTime = waitingOpenTime;
+		this.isHot = false;
 	}
 
 	public static Store of(

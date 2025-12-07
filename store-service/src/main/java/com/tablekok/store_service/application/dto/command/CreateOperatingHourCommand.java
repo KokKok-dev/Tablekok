@@ -4,7 +4,6 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 import com.tablekok.store_service.domain.entity.OperatingHour;
-import com.tablekok.store_service.domain.entity.Store;
 
 public record CreateOperatingHourCommand(
 	DayOfWeek dayOfWeek,
@@ -13,8 +12,8 @@ public record CreateOperatingHourCommand(
 	boolean isClosed
 ) {
 
-	public OperatingHour toEntity(Store store) {
-		return OperatingHour.of(store, dayOfWeek, openTime, closeTime, isClosed);
+	public OperatingHour toEntity() {
+		return OperatingHour.of(dayOfWeek, openTime, closeTime, isClosed);
 	}
 
 }
