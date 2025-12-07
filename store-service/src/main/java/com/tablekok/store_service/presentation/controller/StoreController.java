@@ -23,7 +23,6 @@ import com.tablekok.store_service.presentation.dto.request.CreateReservationPoli
 import com.tablekok.store_service.presentation.dto.request.CreateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateReservationPolicyRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStatusRequest;
-import com.tablekok.store_service.presentation.dto.request.UpdateStoreRequest;
 import com.tablekok.store_service.presentation.dto.response.CreateStoreResponse;
 import com.tablekok.store_service.presentation.dto.response.GetReservationPolicyResponse;
 
@@ -54,23 +53,16 @@ public class StoreController {
 			.body(ApiResponse.success("음식점 생성 성공", CreateStoreResponse.from(result), HttpStatus.CREATED));
 	}
 
-	@PutMapping("/{storeId}")
-	public ResponseEntity<ApiResponse<Void>> updateStore(
-		@PathVariable UUID storeId,
-		@RequestBody UpdateStoreRequest request
-	) {
-		// 음식점 정보 수정
-		return ResponseEntity.ok(
-			ApiResponse.success("음식점 정보 수정 성공", HttpStatus.OK)
-		);
-	}
-
-	@PatchMapping("/{storeId}")
+	@PatchMapping("/{storeId}/status")
 	public ResponseEntity<ApiResponse<Void>> updateStatus(
 		@PathVariable UUID storeId,
 		@RequestBody UpdateStatusRequest request
 	) {
+		// TODO: 추후 userRole 작업
+		String userRole = "OWNER";
 		// 음식점 상태 변경
+		storeService.updateStatus(userRole, storeId, request.toCommand());
+
 		return ResponseEntity.ok(
 			ApiResponse.success("음식점 상태 수정 성공", HttpStatus.OK)
 		);

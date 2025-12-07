@@ -124,6 +124,10 @@ public class Store extends BaseEntity {
 		}
 	}
 
+	public void changeStatus(StoreStatus newStatus) {
+		this.status = newStatus;
+	}
+
 	@Builder(access = AccessLevel.PRIVATE)
 	private Store(
 		UUID ownerId, String name, String phoneNumber, String address,
