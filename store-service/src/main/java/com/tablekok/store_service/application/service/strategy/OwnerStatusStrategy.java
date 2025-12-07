@@ -64,10 +64,8 @@ public class OwnerStatusStrategy implements StoreStatusTransitionStrategy {
 		if (store.getStatus() == StoreStatus.OPERATING) {
 			if (ALLOWED_TRANSITION_FROM_OPERATING.contains(newStatus)) {
 				store.changeStatus(newStatus);
-				return;
 			}
 		}
 
-		store.changeStatus(newStatus);
 	}
 }
