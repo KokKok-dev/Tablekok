@@ -38,6 +38,13 @@ class OwnerStatusStrategyTest {
 		);
 	}
 
+	static Stream<StoreStatus> forbiddenNewStatuses() {
+		return Stream.of(
+			StoreStatus.PENDING_APPROVAL,
+			StoreStatus.APPROVAL_REJECTED
+		);
+	}
+
 	@ParameterizedTest
 	@MethodSource("forbiddenCurrentStatuses")
 	@DisplayName("Master 만 변경할 수 있는 상태일 때 Owner 가 상태 변경 시도 시 예외 발생")
@@ -53,6 +60,21 @@ class OwnerStatusStrategyTest {
 
 		assertEquals(StoreErrorCode.OWNER_FORBIDDEN_CURRENT_STATUS_TRANSITION, exception.getErrorCode());
 
+	}
+
+	@ParameterizedTest
+	@MethodSource("forbiddenNewStatuses")
+	@DisplayName("Master 만 변경할 수 있는 상태 시도 시 예외 발생")
+	void changeStatus_NewStatusIsForbidden_ThrowsException(StoreStatus newStatus) {
+		// Given : OPERATING 상태일 때
+		this.store.changeStatus(StoreStatus.OPERATING);
+
+		// When & Then
+		AppException exception = assertThrows(AppException.class, () -> {
+			ownerStatusStrategy.changeStatus(store, newStatus);
+		});
+
+		assertEquals(StoreErrorCode.OWNER_FORBIDDEN_STATUS_TRANSITION, exception.getErrorCode());
 	}
 
 }
