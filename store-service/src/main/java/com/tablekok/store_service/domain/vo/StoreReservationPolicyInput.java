@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import lombok.Builder;
 
 @Builder
-public record ReservationPolicyInput(
+public record StoreReservationPolicyInput(
 	int monthlyOpenDay,
 	LocalTime openTime,
 	int reservationInterval,

@@ -97,15 +97,15 @@ public class Store extends BaseEntity {
 	private List<OperatingHour> operatingHours = new ArrayList<>();
 
 	@OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
-	private ReservationPolicy reservationPolicy;
+	private StoreReservationPolicy storeReservationPolicy;
 
 	public void updateCategoryIds(List<UUID> newCategoryIds) {
 		this.categoryIds.clear();
 		this.categoryIds.addAll(newCategoryIds);
 	}
 
-	public void setReservationPolicy(ReservationPolicy reservationPolicy) {
-		this.reservationPolicy = reservationPolicy;
+	public void setStoreReservationPolicy(StoreReservationPolicy storeReservationPolicy) {
+		this.storeReservationPolicy = storeReservationPolicy;
 	}
 
 	public void setReservationOpenTime(LocalTime reservationOpenTime) {

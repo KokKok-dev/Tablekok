@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 
 @Builder
-public record GetReservationPolicyResponse(
+public record GetStoreReservationPolicyResponse(
 	UUID policyId,
 	UUID storeId,
 
@@ -30,9 +30,9 @@ public record GetReservationPolicyResponse(
 	boolean isActive
 
 ) {
-	
-	public static GetReservationPolicyResponse from() {
-		return GetReservationPolicyResponse.builder()
+
+	public static GetStoreReservationPolicyResponse from() {
+		return GetStoreReservationPolicyResponse.builder()
 			.policyId(UUID.randomUUID())
 			.storeId(UUID.randomUUID())
 			.monthlyOpenDay(15)
