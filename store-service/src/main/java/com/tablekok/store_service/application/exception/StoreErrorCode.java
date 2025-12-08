@@ -17,10 +17,14 @@ public enum StoreErrorCode implements ErrorCode {
 	DUPLICATE_STORE_ENTRY("STORE100", "중복된 음식점입니다.", HttpStatus.BAD_REQUEST),
 	STORE_NOT_FOUND("STORE101", "음식점을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
-	MASTER_INVALID_STATUS_TRANSITION("STORE102", "마스터 권한은 승인/폐업 관련 상태로만 변경할 수 있습니다.", HttpStatus.BAD_REQUEST),
+	MASTER_INVALID_STATUS_TRANSITION("STORE102",
+		"마스터 권한은 승인(PENDING)/거부(REJECTED), 운영(OPERATING), 폐점(DECOMMISSIONED) 상태로만 전환 가능합니다. 일시적 운영 상태는 Owner 권한으로 처리해 주세요.",
+		HttpStatus.BAD_REQUEST),
 	OWNER_FORBIDDEN_CURRENT_STATUS_TRANSITION("STORE103", "현재 상태에서 OWNER는 상태를 변경할 권한이 없습니다.", HttpStatus.FORBIDDEN),
 	OWNER_FORBIDDEN_STATUS_TRANSITION("STORE104", "OWNER는 승인 관련 상태를 변경할 권한이 없습니다.", HttpStatus.BAD_REQUEST),
 	UNSUPPORTED_USER_ROLE("STORE105", "현재 역할에 대한 상태 전환 전략이 정의되지 않았습니다.", HttpStatus.BAD_REQUEST),
+	MASTER_FORBIDDEN_REVERSION_TRANSITION("STORE106", "이미 승인된 상태에서 PENDING_APPROVAL로의 역전환은 안됩니다.",
+		HttpStatus.BAD_REQUEST),
 
 	// ----------------------------------------------------
 	// RP1xx: 예약 정책 (ReservationPolicy) 검증 오류
