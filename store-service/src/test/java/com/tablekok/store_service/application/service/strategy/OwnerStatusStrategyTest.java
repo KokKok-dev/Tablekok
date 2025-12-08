@@ -3,13 +3,13 @@ package com.tablekok.store_service.application.service.strategy;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.tablekok.exception.AppException;
@@ -23,18 +23,6 @@ class OwnerStatusStrategyTest {
 
 	private Store store;
 
-	private static final Set<StoreStatus> FORBIDDEN_CURRENT_STATUSES = Set.of(
-		StoreStatus.PENDING_APPROVAL,
-		StoreStatus.APPROVAL_REJECTED,
-		StoreStatus.DECOMMISSIONED
-	);
-
-	private static final Set<StoreStatus> ALLOWED_TRANSITION_FROM_OPERATING = Set.of(
-		StoreStatus.CLOSED_TODAY,
-		StoreStatus.BREAK_TIME,
-		StoreStatus.DECOMMISSIONED
-	);
-
 	@BeforeEach
 	void setUp() {
 		this.store = Store.of(
@@ -43,21 +31,31 @@ class OwnerStatusStrategyTest {
 		);
 	}
 
-	static Stream<StoreStatus> forbiddenCurrentStatuses() {
-		return FORBIDDEN_CURRENT_STATUSES.stream();
-	}
-
 	@ParameterizedTest(name = "[Fail] 현재 상태: {0}일 때 Owner 변경 시도 시 예외 발생")
-	@MethodSource("forbiddenCurrentStatuses")
+	@CsvSource({
+		// [1] master만 변경할 수 있는 상태에서 OPERATING 시도
+		"PENDING_APPROVAL, OPERATING",
+		"APPROVAL_REJECTED, OPERATING",
+		"DECOMMISSIONED, OPERATING",
+
+		// [2] master만 변경할 수 있는 상태에서 CLOSED_TODAY 시도
+		"PENDING_APPROVAL, CLOSED_TODAY",
+		"APPROVAL_REJECTED, CLOSED_TODAY",
+		"DECOMMISSIONED, CLOSED_TODAY",
+
+		// [3] master만 변경할 수 있는 상태에서 BREAK_TIME 시도
+		"PENDING_APPROVAL, BREAK_TIME",
+		"APPROVAL_REJECTED, BREAK_TIME",
+		"DECOMMISSIONED, BREAK_TIME",
+	})
 	@DisplayName("Master 만 변경할 수 있는 상태일 때 Owner 가 상태 변경 시도 시 예외 발생")
-	void changeStatus_CurrentStatusIsForbidden_ThrowsException(StoreStatus nowStatus) {
+	void changeStatus_CurrentStatusIsForbidden_ThrowsException(StoreStatus startStatus, StoreStatus targetStatuss) {
 		// Given
-		this.store.changeStatus(nowStatus);
-		StoreStatus targetStatus = StoreStatus.OPERATING;
+		this.store.changeStatus(startStatus);
 
 		// When & Then
 		AppException exception = assertThrows(AppException.class, () -> {
-			ownerStatusStrategy.changeStatus(store, targetStatus);
+			ownerStatusStrategy.changeStatus(store, targetStatuss);
 		});
 
 		assertEquals(StoreErrorCode.OWNER_FORBIDDEN_CURRENT_STATUS_TRANSITION, exception.getErrorCode());
@@ -88,40 +86,32 @@ class OwnerStatusStrategyTest {
 
 	// ================ 성공 케이스 ================
 
-	static Stream<StoreStatus> temporaryStatusesForRecovery() {
-		return Stream.of(StoreStatus.CLOSED_TODAY, StoreStatus.BREAK_TIME);
-	}
+	@ParameterizedTest(name = "[Success] {0} -> {1} 전환 성공")
+	@CsvSource({
+		// [1] 임시 상태에서 OPERATING으로 복구
+		"CLOSED_TODAY, OPERATING",
+		"BREAK_TIME, OPERATING",
 
-	@ParameterizedTest(name = "[Success] 임시 상태 {0}에서 OPERATING으로 복구")
-	@MethodSource("temporaryStatusesForRecovery")
-	@DisplayName("임시 상태(CLOSED_TODAY, BREAK_TIME)에서 OPERATING으로의 복구는 성공해야 함")
-	void changeStatus_TemporaryStatusToOperating_Success(StoreStatus currentStatus) {
+		// [2] 임시상태에서 임시상태로 변경 가능
+		"BREAK_TIME, CLOSED_TODAY",
+		"CLOSED_TODAY, BREAK_TIME",
+
+		// [3] OPERATING 상태에서 허용된 상태로 전환
+		"OPERATING, CLOSED_TODAY",
+		"OPERATING, BREAK_TIME",
+		"OPERATING, DECOMMISSIONED"
+	})
+	@DisplayName("[1] & [2] & [3]. 허용된 모든 성공 전환은 상태를 변경해야 함")
+	void changeStatus_AllowedTransitions_Success(StoreStatus startStatus, StoreStatus targetStatus) {
 		// Given
-		this.store.changeStatus(currentStatus);
-		StoreStatus targetStatus = StoreStatus.OPERATING;
+		this.store.changeStatus(startStatus);
 
 		// When
 		ownerStatusStrategy.changeStatus(store, targetStatus);
 
 		// Then
-		assertEquals(targetStatus, store.getStatus(), "임시 상태에서 OPERATING으로 상태가 성공적으로 변경되어야 합니다.");
+		assertEquals(targetStatus, store.getStatus(),
+			startStatus + "에서 " + targetStatus + "로 상태가 성공적으로 변경되어야 합니다.");
 	}
 
-	static Stream<StoreStatus> allowedTransitionFromOperating() {
-		return ALLOWED_TRANSITION_FROM_OPERATING.stream();
-	}
-
-	@ParameterizedTest(name = "[Success] OPERATING에서 허용된 임시 상태 {0}로 전환")
-	@MethodSource("allowedTransitionFromOperating")
-	@DisplayName("OPERATING 상태에서 허용된 임시 상태로의 전환은 성공해야 함")
-	void changeStatus_OperatingToAllowedTempStatus_Success(StoreStatus targetStatus) {
-		// Given
-		this.store.changeStatus(StoreStatus.OPERATING);
-
-		// When
-		ownerStatusStrategy.changeStatus(store, targetStatus);
-
-		// Then
-		assertEquals(targetStatus, store.getStatus(), "OPERATING에서 허용된 상태로 성공적으로 전환되어야 합니다.");
-	}
 }
