@@ -2,15 +2,24 @@ package com.tablekok.review_service.application.service;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.review_service.application.client.ReservationClient;
-import com.tablekok.review_service.application.dto.param.CreateReviewCommand;
-import com.tablekok.review_service.application.dto.param.UpdateReviewCommand;
+import com.tablekok.review_service.application.dto.command.CreateReviewCommand;
+import com.tablekok.review_service.application.dto.command.GetMyReviewsCommand;
+import com.tablekok.review_service.application.dto.command.GetStoreReviewsCommand;
+import com.tablekok.review_service.application.dto.command.UpdateReviewCommand;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
+import com.tablekok.review_service.application.dto.result.CursorResult;
+import com.tablekok.review_service.application.dto.result.GetMyReviewsResult;
 import com.tablekok.review_service.application.dto.result.GetReviewResult;
+import com.tablekok.review_service.application.dto.result.GetStoreReviewsResult;
 import com.tablekok.review_service.domain.entity.Review;
+import com.tablekok.review_service.domain.entity.ReviewSortCriteria;
 import com.tablekok.review_service.domain.repository.ReviewRepository;
 import com.tablekok.review_service.domain.service.ReviewDomainService;
 import com.tablekok.review_service.domain.vo.Reservation;
@@ -25,6 +34,7 @@ public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final ReservationClient reservationClient;
 	private final ReviewDomainService reviewDomainService;
+	private final ReviewDtoMapper reviewDtoMapper;
 
 	@Transactional
 	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId) {
@@ -66,5 +76,32 @@ public class ReviewService {
 	public GetReviewResult getReview(UUID reviewId) {
 		Review foundReview = findReview(reviewId);
 		return GetReviewResult.fromResult(foundReview);
+	}
+
+	public CursorResult<GetStoreReviewsResult> findStoreReviews(GetStoreReviewsCommand command) {
+		Pageable pageable = PageRequest.of(0, command.size() + 1);
+
+		Page<Review> storeReviews = reviewRepository.findReviewsByStoreId(
+			command.storeId(),
+			command.criteria(),
+			command.cursor(),
+			command.cursorId(),
+			pageable
+		);
+
+		return reviewDtoMapper.toStoreReviewsCursorResult(storeReviews, command.size(), command.criteria());
+	}
+
+	public CursorResult<GetMyReviewsResult> findMyReviews(GetMyReviewsCommand command) {
+		Pageable pageable = PageRequest.of(0, command.size() + 1);
+
+		Page<Review> myReviews = reviewRepository.findReviewsByUserId(
+			command.userId(),
+			command.cursor(),
+			command.cursorId(),
+			pageable
+		);
+
+		return reviewDtoMapper.toMyReviewsCursorResult(myReviews, command.size(), ReviewSortCriteria.NEWEST);
 	}
 }
