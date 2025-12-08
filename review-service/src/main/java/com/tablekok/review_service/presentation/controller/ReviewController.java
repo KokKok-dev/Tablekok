@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -128,10 +129,11 @@ public class ReviewController {
 	@GetMapping("/users/me/reviews")
 	public ResponseEntity<ApiResponse<CursorResponse<GetMyReviewsResponse>>> findMyReviews(
 		//@RequestHeader("XXX-USER-ID") UUID userId,
+		@RequestParam UUID userId,
 		@ModelAttribute GetMyReviewsRequest request
 	) {
 		// 임시로 id 지정
-		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677");
+		// UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677");
 
 		CursorResult<GetMyReviewsResult> myReviews = reviewService.findMyReviews(request.toCommand(userId));
 

@@ -35,7 +35,7 @@ public class ReviewQuerydslRepositoryAdapter implements ReviewQuerydslRepository
 	) {
 		BooleanExpression cursorCondition = createCursorCondition(criteria, cursor, cursorId);
 
-		List<Review> contents = jpaQueryFactory.select(review)
+		List<Review> contents = jpaQueryFactory.selectFrom(review)
 			.where(
 				review.storeId.eq(storeId),
 				cursorCondition,
@@ -57,7 +57,7 @@ public class ReviewQuerydslRepositoryAdapter implements ReviewQuerydslRepository
 		ReviewSortCriteria criteria = ReviewSortCriteria.NEWEST;
 		BooleanExpression cursorCondition = createCursorCondition(criteria, cursor, cursorId);
 
-		List<Review> contents = jpaQueryFactory.select(review)
+		List<Review> contents = jpaQueryFactory.selectFrom(review)
 			.where(
 				review.userId.eq(userId),
 				cursorCondition,
@@ -84,10 +84,6 @@ public class ReviewQuerydslRepositoryAdapter implements ReviewQuerydslRepository
 		if (criteria == ReviewSortCriteria.OLDEST) {
 			LocalDateTime date = LocalDateTime.parse(cursor);
 			return review.createdAt.gt(date).or(review.createdAt.eq(date).and(review.id.gt(cursorId)));
-		}
-		if (criteria == ReviewSortCriteria.NEWEST) {
-			LocalDateTime date = LocalDateTime.parse(cursor);
-			return review.createdAt.lt(date).or(review.createdAt.eq(date).and(review.id.lt(cursorId)));
 		}
 		// 최신 순 (기본값 / 내림차순: 작거나 같음)
 		// 위 if문들에 해당하지 않으면 기본적으로 NEWEST 로직을 수행합니다.
