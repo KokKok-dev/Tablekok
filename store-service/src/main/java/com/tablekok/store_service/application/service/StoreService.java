@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
 import com.tablekok.store_service.application.dto.command.CreateReservationPolicyCommand;
 import com.tablekok.store_service.application.dto.command.CreateStoreCommand;
@@ -95,11 +96,11 @@ public class StoreService {
 	}
 
 	@Transactional
-	public void updateStatus(String role, UUID storeId, UpdateStoreStatusCommand command) {
+	public void updateStatus(UserRole userRole, UUID storeId, UpdateStoreStatusCommand command) {
 		Store store = findStore(storeId);
 		StoreStatus newStatus = StoreStatus.valueOf(command.storeStatus());
 
-		StoreStatusTransitionStrategy strategy = strategyFactory.getStrategy(role);
+		StoreStatusTransitionStrategy strategy = strategyFactory.getStrategy(userRole);
 		strategy.changeStatus(store, newStatus);
 	}
 

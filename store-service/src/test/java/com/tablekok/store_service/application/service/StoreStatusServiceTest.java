@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
 import com.tablekok.store_service.application.dto.command.UpdateStoreStatusCommand;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
@@ -45,7 +46,7 @@ public class StoreStatusServiceTest {
 	private UUID storeId;
 	private Store store;
 
-	private final String ownerRole = "OWNER";
+	private final UserRole ownerRole = UserRole.OWNER;
 
 	@BeforeEach
 	void setUp() {

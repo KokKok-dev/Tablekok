@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.entity.UserRole;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.service.StoreService;
 import com.tablekok.store_service.presentation.dto.request.CreateReservationPolicyRequest;
@@ -59,7 +60,7 @@ public class StoreController {
 		@RequestBody UpdateStatusRequest request
 	) {
 		// TODO: 추후 userRole 작업
-		String userRole = "OWNER";
+		UserRole userRole = UserRole.OWNER;
 		// 음식점 상태 변경
 		storeService.updateStatus(userRole, storeId, request.toCommand());
 
