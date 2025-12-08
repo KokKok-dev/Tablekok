@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
 import com.tablekok.store_service.domain.entity.Store;
@@ -36,8 +37,8 @@ public class MasterStatusStrategy implements StoreStatusTransitionStrategy {
 	);
 
 	@Override
-	public Boolean supports(String role) {
-		return role.equals("MASTER");
+	public Boolean supports(UserRole userRole) {
+		return userRole == UserRole.MASTER;
 	}
 
 	@Override

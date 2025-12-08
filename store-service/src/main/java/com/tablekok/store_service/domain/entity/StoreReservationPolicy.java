@@ -23,12 +23,12 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @AllArgsConstructor
-@Table(name = "p_reservation_policy")
+@Table(name = "p_store_reservation_policy")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ReservationPolicy extends BaseEntity {
+public class StoreReservationPolicy extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	@Column(name = "id", updatable = false, nullable = false)
+	@Column(name = "store_reservation_policy_id", updatable = false, nullable = false)
 	private UUID id;
 
 	@OneToOne(fetch = FetchType.LAZY)
@@ -70,7 +70,7 @@ public class ReservationPolicy extends BaseEntity {
 	private boolean isActive;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private ReservationPolicy(
+	private StoreReservationPolicy(
 		Store store, int monthlyOpenDay, LocalTime openTime, int reservationInterval,
 		LocalTime dailyReservationStartTime,
 		LocalTime dailyReservationEndTime,
@@ -89,13 +89,13 @@ public class ReservationPolicy extends BaseEntity {
 		this.isActive = isActive;
 	}
 
-	public static ReservationPolicy of(
+	public static StoreReservationPolicy of(
 		Store store, int monthlyOpenDay, LocalTime openTime, int reservationInterval,
 		LocalTime dailyReservationStartTime,
 		LocalTime dailyReservationEndTime,
 		int minHeadcount, int maxHeadcount, boolean isDepositRequired, int depositAmount, boolean isActive
 	) {
-		return ReservationPolicy.builder()
+		return StoreReservationPolicy.builder()
 			.store(store)
 			.monthlyOpenDay(monthlyOpenDay)
 			.openTime(openTime)

@@ -29,21 +29,21 @@ public enum StoreDomainErrorCode implements ErrorCode {
 	INVALID_TIME_RANGE("OH004", "영업 종료 시간은 시작 시간보다 늦어야 합니다.", HttpStatus.BAD_REQUEST), // OperatingHour 시간 범위 오류
 
 	// ----------------------------------------------------
-	// RP0xx: 예약 정책 (ReservationPolicy) 검증 오류
+	// SRP0xx: 예약 정책 (ReservationPolicy) 검증 오류
 	// ----------------------------------------------------
-	INVALID_OPEN_DAY("RP000", "예약 오픈 날짜(monthlyOpenDay)는 1일부터 28일까지만 유효합니다.", HttpStatus.BAD_REQUEST),
-	INVALID_RESERVATION_INTERVAL("RP001", "예약 간격은 10, 15, 20, 30, 60, 120분 중 하나여야 합니다.", HttpStatus.BAD_REQUEST),
+	INVALID_OPEN_DAY("SRP000", "예약 오픈 날짜(monthlyOpenDay)는 1일부터 28일까지만 유효합니다.", HttpStatus.BAD_REQUEST),
+	INVALID_RESERVATION_INTERVAL("SRP001", "예약 간격은 10, 15, 20, 30, 60, 120분 중 하나여야 합니다.", HttpStatus.BAD_REQUEST),
 
-	INVALID_POLICY_TIME_RANGE("RP002", "예약 마감 시간은 시작 시간보다 이후여야 합니다.", HttpStatus.BAD_REQUEST),
-	RESERVATION_TIME_BEFORE_STORE_OPEN("RP003", "예약 가능 시작 시간은 매장 운영 시작 시간보다 빠를 수 없습니다.", HttpStatus.BAD_REQUEST),
-	INSUFFICIENT_TIME_SLOT("RP004", "예약 가능 시간 범위가 최소 예약 간격보다 짧아 슬롯 생성이 불가능합니다.", HttpStatus.BAD_REQUEST),
+	INVALID_POLICY_TIME_RANGE("SRP002", "예약 마감 시간은 시작 시간보다 이후여야 합니다.", HttpStatus.BAD_REQUEST),
+	RESERVATION_TIME_BEFORE_STORE_OPEN("SRP003", "예약 가능 시작 시간은 매장 운영 시작 시간보다 빠를 수 없습니다.", HttpStatus.BAD_REQUEST),
+	INSUFFICIENT_TIME_SLOT("SRP004", "예약 가능 시간 범위가 최소 예약 간격보다 짧아 슬롯 생성이 불가능합니다.", HttpStatus.BAD_REQUEST),
 
-	INVALID_HEADCOUNT_RANGE("RP005", "최대 예약 인원수는 최소 예약 인원수보다 크거나 같아야 합니다.", HttpStatus.BAD_REQUEST),
-	INVALID_DEPOSIT_AMOUNT("RP006", "선예약금 필수 시, 예약금은 0보다 큰 값이어야 합니다.", HttpStatus.BAD_REQUEST),
+	INVALID_HEADCOUNT_RANGE("SRP005", "최대 예약 인원수는 최소 예약 인원수보다 크거나 같아야 합니다.", HttpStatus.BAD_REQUEST),
+	INVALID_DEPOSIT_AMOUNT("SRP006", "선예약금 필수 시, 예약금은 0보다 큰 값이어야 합니다.", HttpStatus.BAD_REQUEST),
 
-	RESERVATION_TIME_BEFORE_OPERATING_OPEN("RP007", "예약 가능 시작 시간이 실제 운영 시작 시간보다 빠를 수 없습니다.",
+	RESERVATION_TIME_BEFORE_OPERATING_OPEN("SRP007", "예약 가능 시작 시간이 실제 운영 시작 시간보다 빠를 수 없습니다.",
 		HttpStatus.BAD_REQUEST),
-	RESERVATION_TIME_AFTER_OPERATING_CLOSE("RP008", "예약 가능 마감 시간이 실제 운영 종료 시간보다 늦을 수 없습니다.",
+	RESERVATION_TIME_AFTER_OPERATING_CLOSE("SRP008", "예약 가능 마감 시간이 실제 운영 종료 시간보다 늦을 수 없습니다.",
 		HttpStatus.BAD_REQUEST);
 
 	private final String code;

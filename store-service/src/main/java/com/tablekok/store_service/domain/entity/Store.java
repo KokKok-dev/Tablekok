@@ -23,6 +23,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -41,7 +42,7 @@ public class Store extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	@Column(name = "id", updatable = false, nullable = false)
+	@Column(name = "store_id", updatable = false, nullable = false)
 	private UUID id;
 
 	@Column(name = "owner_id", nullable = false)
@@ -90,22 +91,25 @@ public class Store extends BaseEntity {
 	private Boolean isHot;
 
 	@ElementCollection
-	@CollectionTable(name = "p_store_category_map") // 중간 테이블을 별도로 정의하지 않고 JPA의 @ElementCollection 사용
+	@CollectionTable( // 중간 테이블을 별도로 정의하지 않고 JPA의 @ElementCollection 사용
+		name = "p_store_category_map",
+		joinColumns = @JoinColumn(name = "store_id")
+	)
 	private List<UUID> categoryIds = new ArrayList<>();
 
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<OperatingHour> operatingHours = new ArrayList<>();
 
 	@OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
-	private ReservationPolicy reservationPolicy;
+	private StoreReservationPolicy storeReservationPolicy;
 
 	public void updateCategoryIds(List<UUID> newCategoryIds) {
 		this.categoryIds.clear();
 		this.categoryIds.addAll(newCategoryIds);
 	}
 
-	public void setReservationPolicy(ReservationPolicy reservationPolicy) {
-		this.reservationPolicy = reservationPolicy;
+	public void setStoreReservationPolicy(StoreReservationPolicy storeReservationPolicy) {
+		this.storeReservationPolicy = storeReservationPolicy;
 	}
 
 	public void setReservationOpenTime(LocalTime reservationOpenTime) {

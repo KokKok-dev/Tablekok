@@ -3,14 +3,14 @@ package com.tablekok.store_service.application.dto.command;
 import java.time.LocalTime;
 import java.util.UUID;
 
-import com.tablekok.store_service.domain.entity.ReservationPolicy;
 import com.tablekok.store_service.domain.entity.Store;
-import com.tablekok.store_service.domain.vo.ReservationPolicyInput;
+import com.tablekok.store_service.domain.entity.StoreReservationPolicy;
+import com.tablekok.store_service.domain.vo.StoreReservationPolicyInput;
 
 import lombok.Builder;
 
 @Builder
-public record CreateReservationPolicyCommand(
+public record CreateStoreReservationPolicyCommand(
 
 	UUID storeId,
 
@@ -35,14 +35,15 @@ public record CreateReservationPolicyCommand(
 	Boolean isActive
 ) {
 
-	public ReservationPolicy toEntity(Store store) {
-		return ReservationPolicy.of(store, monthlyOpenDay, openTime, reservationInterval, dailyReservationStartTime,
+	public StoreReservationPolicy toEntity(Store store) {
+		return StoreReservationPolicy.of(store, monthlyOpenDay, openTime, reservationInterval,
+			dailyReservationStartTime,
 			dailyReservationEndTime,
 			minHeadCount, maxHeadcount, isDepositRequired, depositAmount, isActive);
 	}
 
-	public ReservationPolicyInput toVo() {
-		return ReservationPolicyInput.builder()
+	public StoreReservationPolicyInput toVo() {
+		return StoreReservationPolicyInput.builder()
 			.monthlyOpenDay(monthlyOpenDay)
 			.openTime(openTime)
 			.reservationInterval(reservationInterval)

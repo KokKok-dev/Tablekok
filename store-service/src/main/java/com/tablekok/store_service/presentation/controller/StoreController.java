@@ -17,14 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.entity.UserRole;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.service.StoreService;
-import com.tablekok.store_service.presentation.dto.request.CreateReservationPolicyRequest;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreRequest;
-import com.tablekok.store_service.presentation.dto.request.UpdateReservationPolicyRequest;
+import com.tablekok.store_service.presentation.dto.request.CreateStoreReservationPolicyRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStatusRequest;
+import com.tablekok.store_service.presentation.dto.request.UpdateStoreReservationPolicyRequest;
 import com.tablekok.store_service.presentation.dto.response.CreateStoreResponse;
-import com.tablekok.store_service.presentation.dto.response.GetReservationPolicyResponse;
+import com.tablekok.store_service.presentation.dto.response.GetStoreReservationPolicyResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +60,7 @@ public class StoreController {
 		@RequestBody UpdateStatusRequest request
 	) {
 		// TODO: 추후 userRole 작업
-		String userRole = "OWNER";
+		UserRole userRole = UserRole.OWNER;
 		// 음식점 상태 변경
 		storeService.updateStatus(userRole, storeId, request.toCommand());
 
@@ -78,15 +79,15 @@ public class StoreController {
 		);
 	}
 
-	/* =================== 날짜 예약 정책 ================ **/
+	/* =================== 음식점 날짜 예약 정책 ================ **/
 	@PostMapping("/{storeId}/reservation-policy")
-	public ResponseEntity<ApiResponse<Void>> createReservationPolicy(
+	public ResponseEntity<ApiResponse<Void>> createStoreReservationPolicy(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody CreateReservationPolicyRequest request
+		@Valid @RequestBody CreateStoreReservationPolicyRequest request
 	) {
-		storeService.createReservationPolicy(storeId, request.toCommand(storeId));
+		storeService.createStoreReservationPolicy(storeId, request.toCommand(storeId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-			.path("/{reservationPolicyId}")
+			.path("/{storeReservationPolicyId}")
 			.buildAndExpand(UUID.randomUUID())
 			.toUri();
 
@@ -95,18 +96,18 @@ public class StoreController {
 	}
 
 	@GetMapping("/{storeId}/reservation-policy")
-	public ResponseEntity<ApiResponse<GetReservationPolicyResponse>> getReservationPolicy(
+	public ResponseEntity<ApiResponse<GetStoreReservationPolicyResponse>> getStoreReservationPolicy(
 		@PathVariable UUID storeId
 	) {
-		GetReservationPolicyResponse responseDto = GetReservationPolicyResponse.from();
+		GetStoreReservationPolicyResponse responseDto = GetStoreReservationPolicyResponse.from();
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("예약정책 조회 성공", responseDto, HttpStatus.OK));
 	}
 
 	@PutMapping("/{storeId}/reservation-policy")
-	public ResponseEntity<ApiResponse<Void>> updateReservationPolicy(
+	public ResponseEntity<ApiResponse<Void>> updateStoreReservationPolicy(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody UpdateReservationPolicyRequest request
+		@Valid @RequestBody UpdateStoreReservationPolicyRequest request
 	) {
 		// 날짜예약 정책 정보 수정
 		return ResponseEntity.ok()
@@ -114,7 +115,7 @@ public class StoreController {
 	}
 
 	@DeleteMapping("/{storeId}/reservation-policy")
-	public ResponseEntity<ApiResponse<Void>> updateReservationPolicyStatus(
+	public ResponseEntity<ApiResponse<Void>> updateStoreReservationPolicyStatus(
 		@PathVariable UUID storeId
 	) {
 		// 날짜예약 정책 삭제

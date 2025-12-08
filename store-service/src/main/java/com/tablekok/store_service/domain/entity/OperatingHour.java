@@ -33,6 +33,7 @@ public class OperatingHour extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "operating_hour_id")
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)

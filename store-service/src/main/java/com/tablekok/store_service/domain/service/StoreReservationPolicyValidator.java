@@ -10,15 +10,15 @@ import com.tablekok.exception.AppException;
 import com.tablekok.store_service.domain.entity.OperatingHour;
 import com.tablekok.store_service.domain.entity.Store;
 import com.tablekok.store_service.domain.exception.StoreDomainErrorCode;
-import com.tablekok.store_service.domain.vo.ReservationPolicyInput;
+import com.tablekok.store_service.domain.vo.StoreReservationPolicyInput;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationPolicyValidator {
+public class StoreReservationPolicyValidator {
 
-	public void validate(ReservationPolicyInput input, Store store) {
+	public void validate(StoreReservationPolicyInput input, Store store) {
 		// 1. 월별 오픈 날짜(monthlyOpenDay) 유효성 검증 (1 ~ 28일 이내)
 		if (input.monthlyOpenDay() < 1 || input.monthlyOpenDay() > 28) {
 			throw new AppException(StoreDomainErrorCode.INVALID_OPEN_DAY);
