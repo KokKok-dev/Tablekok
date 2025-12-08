@@ -103,8 +103,7 @@ public class StoreService {
 		strategy.changeStatus(store, newStatus);
 	}
 
-	@Transactional(readOnly = true)
-	Store findStore(UUID storeId) {
+	private Store findStore(UUID storeId) {
 		return storeRepository.findById(storeId)
 			.orElseThrow(() -> new AppException(StoreErrorCode.STORE_NOT_FOUND));
 	}
