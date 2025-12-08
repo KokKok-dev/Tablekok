@@ -130,6 +130,10 @@ public class Store extends BaseEntity {
 		this.status = newStatus;
 	}
 
+	public void softDelete(UUID deleterId) {
+		super.delete(deleterId);
+	}
+
 	@Builder(access = AccessLevel.PRIVATE)
 	private Store(
 		UUID ownerId, String name, String phoneNumber, String address,
