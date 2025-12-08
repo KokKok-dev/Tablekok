@@ -60,12 +60,6 @@ public class OwnerStatusStrategy implements StoreStatusTransitionStrategy {
 			return;
 		}
 
-		// 현재 OPERATING 상태일 때 임시 상태/DECOMMISSIONED로의 전환만 허용
-		if (store.getStatus() == StoreStatus.OPERATING) {
-			if (ALLOWED_TRANSITION_FROM_OPERATING.contains(newStatus)) {
-				store.changeStatus(newStatus);
-			}
-		}
-
+		store.changeStatus(newStatus);
 	}
 }
