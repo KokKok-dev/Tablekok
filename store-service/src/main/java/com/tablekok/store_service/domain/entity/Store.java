@@ -96,7 +96,7 @@ public class Store extends BaseEntity {
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<OperatingHour> operatingHours = new ArrayList<>();
 
-	@OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private ReservationPolicy reservationPolicy;
 
 	public void updateCategoryIds(List<UUID> newCategoryIds) {
