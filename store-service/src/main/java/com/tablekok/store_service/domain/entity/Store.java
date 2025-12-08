@@ -23,7 +23,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -94,8 +93,7 @@ public class Store extends BaseEntity {
 	@CollectionTable(name = "p_store_category_map") // 중간 테이블을 별도로 정의하지 않고 JPA의 @ElementCollection 사용
 	private List<UUID> categoryIds = new ArrayList<>();
 
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JoinColumn(name = "store_id")
+	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<OperatingHour> operatingHours = new ArrayList<>();
 
 	@OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.exception.AppException;
-import com.tablekok.store_service.application.dto.command.CreateOperatingHourCommand;
 import com.tablekok.store_service.application.dto.command.CreateReservationPolicyCommand;
 import com.tablekok.store_service.application.dto.command.CreateStoreCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreStatusCommand;
@@ -26,9 +25,11 @@ import com.tablekok.store_service.domain.service.ReservationPolicyValidator;
 import com.tablekok.store_service.domain.vo.ReservationPolicyInput;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StoreService {
 
 	private final StoreRepository storeRepository;
@@ -49,7 +50,7 @@ public class StoreService {
 
 		// OperatingHourCommand -> OperatingHour Entity 생성
 		List<OperatingHour> hoursToSave = command.operatingHours().stream()
-			.map(CreateOperatingHourCommand::toEntity)
+			.map(createOperatingHourCommand -> createOperatingHourCommand.toEntity(store))
 			.toList();
 
 		// 운영시간 검증
