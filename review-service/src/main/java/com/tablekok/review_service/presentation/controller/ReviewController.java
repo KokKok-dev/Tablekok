@@ -18,13 +18,17 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
+import com.tablekok.review_service.application.dto.result.CursorResult;
+import com.tablekok.review_service.application.dto.result.GetMyReviewsResult;
 import com.tablekok.review_service.application.dto.result.GetReviewResult;
+import com.tablekok.review_service.application.dto.result.GetStoreReviewsResult;
 import com.tablekok.review_service.application.service.ReviewService;
 import com.tablekok.review_service.presentation.dto.request.CreateReviewRequest;
 import com.tablekok.review_service.presentation.dto.request.GetMyReviewsRequest;
 import com.tablekok.review_service.presentation.dto.request.GetStoreReviewsRequest;
 import com.tablekok.review_service.presentation.dto.request.UpdateReviewRequest;
 import com.tablekok.review_service.presentation.dto.response.CreateReviewResponse;
+import com.tablekok.review_service.presentation.dto.response.CursorResponse;
 import com.tablekok.review_service.presentation.dto.response.GetMyReviewsResponse;
 import com.tablekok.review_service.presentation.dto.response.GetReviewResponse;
 import com.tablekok.review_service.presentation.dto.response.GetStoreReviewsResponse;
@@ -94,27 +98,60 @@ public class ReviewController {
 	}
 
 	@GetMapping("/stores/{storeId}/reviews")
-	public ResponseEntity<ApiResponse<GetStoreReviewsResponse>> findStoreReviews(
+	public ResponseEntity<ApiResponse<CursorResponse<GetStoreReviewsResponse>>> findStoreReviews(
 		@PathVariable("storeId") UUID storeId,
 		@ModelAttribute GetStoreReviewsRequest request
 	) {
+		CursorResult<GetStoreReviewsResult> storeReviews = reviewService.findStoreReviews(request.toCommand(storeId));
+
+		CursorResponse<GetStoreReviewsResponse> response = CursorResponse.from(storeReviews
+			.map(r -> new GetStoreReviewsResponse(
+				r.reviewId(),
+				r.storeId(),
+				r.userId(),
+				r.rating(),
+				r.content(),
+				r.createdAt(),
+				r.createdBy(),
+				r.updatedAt(),
+				r.updatedBy()
+			)));
 
 		return ResponseEntity.ok(
 			ApiResponse.success(
 				"리뷰 조회 성공",
+				response,
 				HttpStatus.OK
 			));
 	}
 
 	@GetMapping("/users/me/reviews")
-	public ResponseEntity<ApiResponse<GetMyReviewsResponse>> findMyReviews(
+	public ResponseEntity<ApiResponse<CursorResponse<GetMyReviewsResponse>>> findMyReviews(
 		//@RequestHeader("XXX-USER-ID") UUID userId,
 		@ModelAttribute GetMyReviewsRequest request
 	) {
+		// 임시로 id 지정
+		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677");
+
+		CursorResult<GetMyReviewsResult> myReviews = reviewService.findMyReviews(request.toCommand(userId));
+
+		CursorResponse<GetMyReviewsResponse> response = CursorResponse.from(myReviews
+			.map(r -> new GetMyReviewsResponse(
+				r.reviewId(),
+				r.storeId(),
+				r.userId(),
+				r.rating(),
+				r.content(),
+				r.createdAt(),
+				r.createdBy(),
+				r.updatedAt(),
+				r.updatedBy()
+			)));
 
 		return ResponseEntity.ok(
 			ApiResponse.success(
 				"리뷰 조회 성공",
+				response,
 				HttpStatus.OK
 			));
 	}
