@@ -12,7 +12,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +24,18 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted_at is NULL")
-@Table(name = "p_review")
+@Table(
+	name = "p_review",
+	uniqueConstraints = {
+		@UniqueConstraint(name = "uk_review_reservation", columnNames = {"reservation_id"})
+	},
+	indexes = {
+		@Index(name = "idx_store_created_at", columnList = "store_id, created_at DESC, review_id"),
+		@Index(name = "idx_store_created_at", columnList = "store_id, created_at DESC, review_id"),
+		@Index(name = "idx_store_created_at", columnList = "store_id, created_at DESC, review_id")
+	}
+)
+@Check(constraints = "rating >= 0 AND rating <= 5")
 public class Review extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -39,7 +52,6 @@ public class Review extends BaseEntity {
 	private UUID reservationId;
 
 	@Column(name = "rating", nullable = false)
-	@Check(constraints = "rating >= 0 AND rating <= 5")
 	private Double rating;
 
 	@Column(name = "content", nullable = false, columnDefinition = "TEXT")

@@ -1,6 +1,6 @@
 package com.tablekok.review_service.presentation.dto.request;
 
-import com.tablekok.review_service.application.dto.param.UpdateReviewCommand;
+import com.tablekok.review_service.application.dto.command.UpdateReviewCommand;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
