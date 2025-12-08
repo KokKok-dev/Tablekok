@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 public class StoreReservationPolicy extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	@Column(name = "id", updatable = false, nullable = false)
+	@Column(name = "store_reservation_policy_id", updatable = false, nullable = false)
 	private UUID id;
 
 	@OneToOne(fetch = FetchType.LAZY)
