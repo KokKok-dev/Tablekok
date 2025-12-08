@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @AllArgsConstructor
-@Table(name = "p_reservation_policy")
+@Table(name = "p_store_reservation_policy")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StoreReservationPolicy extends BaseEntity {
 	@Id
