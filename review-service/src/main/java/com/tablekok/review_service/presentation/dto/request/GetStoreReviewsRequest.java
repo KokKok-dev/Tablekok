@@ -12,7 +12,7 @@ public record GetStoreReviewsRequest(
 	UUID cursorId,
 	@PositiveOrZero
 	Integer size,
-	ReviewSortCriteria criteria
+	ReviewSortCriteria sortBy
 ) {
 	public GetStoreReviewsCommand toCommand(UUID storeId) {
 		return new GetStoreReviewsCommand(
@@ -20,7 +20,7 @@ public record GetStoreReviewsRequest(
 			cursor,
 			cursorId,
 			(size == null) ? 10 : size,
-			(criteria == null) ? ReviewSortCriteria.NEWEST : criteria
+			(sortBy == null) ? ReviewSortCriteria.NEWEST : sortBy
 		);
 	}
 }

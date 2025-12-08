@@ -28,12 +28,12 @@ public class ReviewQuerydslRepositoryAdapter implements ReviewQuerydslRepository
 	@Override
 	public Page<Review> findReviewsByStoreId(
 		UUID storeId,
-		ReviewSortCriteria criteria,
+		ReviewSortCriteria sortBy,
 		String cursor,
 		UUID cursorId,
 		Pageable pageable
 	) {
-		BooleanExpression cursorCondition = createCursorCondition(criteria, cursor, cursorId);
+		BooleanExpression cursorCondition = createCursorCondition(sortBy, cursor, cursorId);
 
 		List<Review> contents = jpaQueryFactory.selectFrom(review)
 			.where(
@@ -41,7 +41,7 @@ public class ReviewQuerydslRepositoryAdapter implements ReviewQuerydslRepository
 				cursorCondition,
 				review.deletedAt.isNull()
 			)
-			.orderBy(getOrderSpecifier(criteria))
+			.orderBy(getOrderSpecifier(sortBy))
 			.limit(pageable.getPageSize())
 			.fetch();
 

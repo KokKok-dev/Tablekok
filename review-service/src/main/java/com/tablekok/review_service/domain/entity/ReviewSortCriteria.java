@@ -16,8 +16,4 @@ public enum ReviewSortCriteria {
 
 	private final String property;
 	private final Sort.Direction direction;
-
-	public Sort toSort() {
-		return Sort.by(direction, property);
-	}
 }

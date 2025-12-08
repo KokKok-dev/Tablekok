@@ -12,7 +12,7 @@ public interface ReviewQuerydslRepository {
 
 	Page<Review> findReviewsByStoreId(
 		UUID storeId,
-		ReviewSortCriteria criteria,
+		ReviewSortCriteria sortBy,
 		String cursor,
 		UUID cursorId,
 		Pageable pageable

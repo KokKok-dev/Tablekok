@@ -20,10 +20,10 @@ public class ReviewDtoMapper {
 	public CursorResult<GetStoreReviewsResult> toStoreReviewsCursorResult(
 		Page<Review> page,
 		int size,
-		ReviewSortCriteria criteria
+		ReviewSortCriteria sortBy
 	) {
 		return cursorResultFactory.create(
-			page, size, criteria,
+			page, size, sortBy,
 			review -> new GetStoreReviewsResult(
 				review.getId(),
 				review.getStoreId(),
@@ -41,10 +41,10 @@ public class ReviewDtoMapper {
 	public CursorResult<GetMyReviewsResult> toMyReviewsCursorResult(
 		Page<Review> page,
 		int size,
-		ReviewSortCriteria criteria
+		ReviewSortCriteria sortBy
 	) {
 		return cursorResultFactory.create(
-			page, size, criteria,
+			page, size, sortBy,
 			review -> new GetMyReviewsResult(
 				review.getId(),
 				review.getStoreId(),

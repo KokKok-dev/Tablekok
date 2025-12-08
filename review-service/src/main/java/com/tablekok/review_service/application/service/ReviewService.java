@@ -83,13 +83,13 @@ public class ReviewService {
 
 		Page<Review> storeReviews = reviewRepository.findReviewsByStoreId(
 			command.storeId(),
-			command.criteria(),
+			command.sortBy(),
 			command.cursor(),
 			command.cursorId(),
 			pageable
 		);
 
-		return reviewDtoMapper.toStoreReviewsCursorResult(storeReviews, command.size(), command.criteria());
+		return reviewDtoMapper.toStoreReviewsCursorResult(storeReviews, command.size(), command.sortBy());
 	}
 
 	public CursorResult<GetMyReviewsResult> findMyReviews(GetMyReviewsCommand command) {

@@ -17,7 +17,7 @@ public class CursorResultFactory {
 	public <E extends Review, T> CursorResult<T> create(
 		Page<E> page,
 		int size,
-		ReviewSortCriteria criteria,
+		ReviewSortCriteria sortBy,
 		Function<E, T> mapper
 	) {
 		List<E> entities = page.getContent();
@@ -36,10 +36,10 @@ public class CursorResultFactory {
 			E lastEntity = contentEntities.get(contentEntities.size() - 1);
 			nextCursorId = lastEntity.getId();
 
-			if (criteria == ReviewSortCriteria.RATING_HIGH || criteria == ReviewSortCriteria.RATING_LOW) {
+			if (sortBy == ReviewSortCriteria.RATING_HIGH || sortBy == ReviewSortCriteria.RATING_LOW) {
 				nextCursor = String.valueOf(lastEntity.getRating());
 			}
-			if (criteria == ReviewSortCriteria.NEWEST ||  criteria == ReviewSortCriteria.OLDEST) {
+			if (sortBy == ReviewSortCriteria.NEWEST ||  sortBy == ReviewSortCriteria.OLDEST) {
 				nextCursor = String.valueOf(lastEntity.getCreatedAt());
 			}
 		}

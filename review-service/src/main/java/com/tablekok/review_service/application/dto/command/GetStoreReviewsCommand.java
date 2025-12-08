@@ -9,6 +9,6 @@ public record GetStoreReviewsCommand(
 	String cursor,
 	UUID cursorId,
 	int size,
-	ReviewSortCriteria criteria
+	ReviewSortCriteria sortBy
 ) {
 }
