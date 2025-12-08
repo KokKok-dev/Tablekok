@@ -7,14 +7,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.exception.AppException;
-import com.tablekok.store_service.application.dto.command.CreateOperatingHourCommand;
 import com.tablekok.store_service.application.dto.command.CreateReservationPolicyCommand;
 import com.tablekok.store_service.application.dto.command.CreateStoreCommand;
+import com.tablekok.store_service.application.dto.command.UpdateStoreStatusCommand;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
+import com.tablekok.store_service.application.service.strategy.StoreStatusTransitionStrategy;
+import com.tablekok.store_service.application.service.strategy.StrategyFactory;
 import com.tablekok.store_service.domain.entity.OperatingHour;
 import com.tablekok.store_service.domain.entity.ReservationPolicy;
 import com.tablekok.store_service.domain.entity.Store;
+import com.tablekok.store_service.domain.entity.StoreStatus;
 import com.tablekok.store_service.domain.repository.StoreRepository;
 import com.tablekok.store_service.domain.service.CategoryLinker;
 import com.tablekok.store_service.domain.service.OperatingHourValidator;
@@ -22,15 +25,18 @@ import com.tablekok.store_service.domain.service.ReservationPolicyValidator;
 import com.tablekok.store_service.domain.vo.ReservationPolicyInput;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StoreService {
 
 	private final StoreRepository storeRepository;
 	private final CategoryLinker categoryDomainService;
 	private final OperatingHourValidator operatingHourValidator;
 	private final ReservationPolicyValidator reservationPolicyValidator;
+	private final StrategyFactory strategyFactory;
 
 	@Transactional
 	public CreateStoreResult createStore(CreateStoreCommand command) {
@@ -44,7 +50,7 @@ public class StoreService {
 
 		// OperatingHourCommand -> OperatingHour Entity 생성
 		List<OperatingHour> hoursToSave = command.operatingHours().stream()
-			.map(CreateOperatingHourCommand::toEntity)
+			.map(createOperatingHourCommand -> createOperatingHourCommand.toEntity(store))
 			.toList();
 
 		// 운영시간 검증
@@ -65,8 +71,7 @@ public class StoreService {
 	public void createReservationPolicy(UUID storeId, CreateReservationPolicyCommand command) {
 		/*  [A] 일관성 및 존재 여부 검증 */
 		// 1. 실제 storeId가 있는지 확인
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new AppException(StoreErrorCode.STORE_NOT_FOUND));
+		Store store = findStore(storeId);
 
 		// 2. Store에 이미 ReservationPolicy가 등록되어 있는지 확인
 		if (store.getReservationPolicy() != null) {
@@ -89,4 +94,17 @@ public class StoreService {
 
 	}
 
+	@Transactional
+	public void updateStatus(String role, UUID storeId, UpdateStoreStatusCommand command) {
+		Store store = findStore(storeId);
+		StoreStatus newStatus = StoreStatus.valueOf(command.storeStatus());
+
+		StoreStatusTransitionStrategy strategy = strategyFactory.getStrategy(role);
+		strategy.changeStatus(store, newStatus);
+	}
+
+	private Store findStore(UUID storeId) {
+		return storeRepository.findById(storeId)
+			.orElseThrow(() -> new AppException(StoreErrorCode.STORE_NOT_FOUND));
+	}
 }
