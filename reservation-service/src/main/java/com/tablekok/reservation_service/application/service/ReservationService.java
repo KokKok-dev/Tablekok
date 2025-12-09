@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
 import com.tablekok.reservation_service.application.client.SearchClient;
-import com.tablekok.reservation_service.application.client.dto.response.GetReservationPolicyResponse;
+import com.tablekok.reservation_service.application.client.dto.response.GetStoreReservationPolicyResponse;
 import com.tablekok.reservation_service.application.dto.command.CreateReservationCommand;
 import com.tablekok.reservation_service.application.dto.result.CreateReservationResult;
 import com.tablekok.reservation_service.application.dto.result.GetReservationResult;
@@ -23,7 +23,7 @@ import com.tablekok.reservation_service.application.service.strategy.StrategyFac
 import com.tablekok.reservation_service.domain.entity.Reservation;
 import com.tablekok.reservation_service.domain.repository.ReservationRepository;
 import com.tablekok.reservation_service.domain.service.ReservationDomainService;
-import com.tablekok.reservation_service.domain.vo.ReservationPolicy;
+import com.tablekok.reservation_service.domain.vo.StoreReservationPolicy;
 import com.tablekok.util.PageableUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -73,10 +73,10 @@ public class ReservationService {
 		);
 
 		// 예약할 음식점의 예약 정책에 준수하는지			TODO 내부호출 구현 후 테스트
-		ReservationPolicy policy = GetReservationPolicyResponse.toVo(
+		StoreReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
 			searchClient.getReservationPolicy(command.storeId()));
 
-		reservationDomainService.validateReservationPolicy(
+		reservationDomainService.validateStoreReservationPolicy(
 			command.headcount(),
 			command.reservationDateTime(),
 			policy
@@ -96,7 +96,7 @@ public class ReservationService {
 		Reservation findReservation = reservationRepository.findByIdAndUserId(reservationId, userId);
 
 		// 인원수 정책 검증							TODO 내부호출 구현 후 테스트
-		ReservationPolicy policy = GetReservationPolicyResponse.toVo(
+		StoreReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
 			searchClient.getReservationPolicy(findReservation.getStoreId()));
 		reservationDomainService.validateHeadcount(headcount, policy);
 

@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import com.tablekok.reservation_service.application.client.SearchClient;
-import com.tablekok.reservation_service.application.client.dto.response.GetReservationPolicyResponse;
+import com.tablekok.reservation_service.application.client.dto.response.GetStoreReservationPolicyResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +16,7 @@ public class SearchClientImpl implements SearchClient {
 	private final SearchFeignClient searchClient; //TODO 서치클라이언트 호출
 
 	@Override
-	public GetReservationPolicyResponse getReservationPolicy(UUID storeId) {
+	public GetStoreReservationPolicyResponse getReservationPolicy(UUID storeId) {
 		return null;
 	}
 
