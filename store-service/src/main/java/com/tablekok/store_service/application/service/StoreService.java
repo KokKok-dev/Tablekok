@@ -17,6 +17,7 @@ import com.tablekok.store_service.application.dto.command.CreateStoreCommand;
 import com.tablekok.store_service.application.dto.command.CreateStoreReservationPolicyCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreReservationPolicyCommand;
+import com.tablekok.store_service.application.dto.command.UpdateStoreReservationPolicyStatusCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreStatusCommand;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
@@ -194,6 +195,17 @@ public class StoreService {
 			command.isActive()
 		);
 
+	}
+
+	@Transactional
+	public void updateStoreReservationPolicyStatus(UpdateStoreReservationPolicyStatusCommand command) {
+		Store store = findStore(command.storeId());
+		// TODO : checkOwnership(store, command.ownerId());
+		checkOwnership(store, store.getOwnerId());
+
+		StoreReservationPolicy policy = findPolicy(store);
+
+		policy.setIsActive(command.isActive());
 	}
 
 	private Store findStore(UUID storeId) {

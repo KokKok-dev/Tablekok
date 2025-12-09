@@ -137,4 +137,8 @@ public class StoreReservationPolicy extends BaseEntity {
 		this.depositAmount = depositAmount;
 		this.isActive = isActive;
 	}
+
+	public void setIsActive(boolean isActive) {
+		this.isActive = isActive;
+	}
 }

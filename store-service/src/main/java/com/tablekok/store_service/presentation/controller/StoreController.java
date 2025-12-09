@@ -22,6 +22,7 @@ import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.service.StoreService;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreReservationPolicyRequest;
+import com.tablekok.store_service.presentation.dto.request.UpdatePolicyStatusRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStatusRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStoreReservationPolicyRequest;
@@ -136,12 +137,15 @@ public class StoreController {
 			.body(ApiResponse.success("예약정책 정보 변경 성공", HttpStatus.OK));
 	}
 
-	@DeleteMapping("/{storeId}/reservation-policy")
+	@PatchMapping("/{storeId}/reservation-policy/status")
 	public ResponseEntity<ApiResponse<Void>> updateStoreReservationPolicyStatus(
-		@PathVariable UUID storeId
+		@PathVariable UUID storeId,
+		@RequestBody UpdatePolicyStatusRequest request
 	) {
-		// 날짜예약 정책 삭제
+		// 날짜예약 정책 활성/비활성화
+		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+		storeService.updateStoreReservationPolicyStatus(request.toCommand(ownerId, storeId));
 		return ResponseEntity.ok()
-			.body(ApiResponse.success("예약정책 삭제 성공", HttpStatus.OK));
+			.body(ApiResponse.success("예약정책 상태 변경 성공", HttpStatus.OK));
 	}
 }
