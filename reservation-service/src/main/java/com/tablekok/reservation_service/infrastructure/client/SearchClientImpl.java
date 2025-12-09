@@ -16,7 +16,7 @@ public class SearchClientImpl implements SearchClient {
 	private final SearchFeignClient searchClient; //TODO 서치클라이언트 호출
 
 	@Override
-	public GetStoreReservationPolicyResponse getReservationPolicy(UUID storeId) {
+	public GetStoreReservationPolicyResponse getStoreReservationPolicy(UUID storeId) {
 		return null;
 	}
 

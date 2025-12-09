@@ -74,7 +74,7 @@ public class ReservationService {
 
 		// 예약할 음식점의 예약 정책에 준수하는지			TODO 내부호출 구현 후 테스트
 		StoreReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
-			searchClient.getReservationPolicy(command.storeId()));
+			searchClient.getStoreReservationPolicy(command.storeId()));
 
 		reservationDomainService.validateStoreReservationPolicy(
 			command.headcount(),
@@ -97,7 +97,7 @@ public class ReservationService {
 
 		// 인원수 정책 검증							TODO 내부호출 구현 후 테스트
 		StoreReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
-			searchClient.getReservationPolicy(findReservation.getStoreId()));
+			searchClient.getStoreReservationPolicy(findReservation.getStoreId()));
 		reservationDomainService.validateHeadcount(headcount, policy);
 
 		findReservation.updateHeadcount(headcount);
