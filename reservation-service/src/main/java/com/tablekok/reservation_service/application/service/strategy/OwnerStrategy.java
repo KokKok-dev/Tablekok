@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
 import com.tablekok.reservation_service.application.client.SearchClient;
 import com.tablekok.reservation_service.application.exception.ReservationErrorCode;
@@ -18,8 +19,8 @@ public class OwnerStrategy implements RoleStrategy {
 	private final ReservationRepository reservationRepository;
 	private final SearchClient searchClient;
 
-	public Boolean supports(String role) {
-		return role.equals("OWNER");
+	public Boolean supports(UserRole role) {
+		return role == UserRole.OWNER;
 	}
 
 	public void cancelReservation(UUID userId, UUID reservationId) {

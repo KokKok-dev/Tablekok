@@ -1,6 +1,7 @@
 package com.tablekok.reservation_service.domain.vo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import lombok.AccessLevel;
@@ -17,10 +18,10 @@ public class ReservationDateTime {
 	private LocalDate reservationDate;
 	private LocalTime reservationTime;
 
-	public static ReservationDateTime of(LocalDate reservationDate, LocalTime reservationTime) {
+	public static ReservationDateTime of(LocalDateTime reservationDateTime) {
 		return ReservationDateTime.builder()
-			.reservationDate(reservationDate)
-			.reservationTime(reservationTime)
+			.reservationDate(reservationDateTime.toLocalDate())
+			.reservationTime(reservationDateTime.toLocalTime())
 			.build();
 	}
 }

@@ -1,12 +1,8 @@
 package com.tablekok.reservation_service.domain.entity;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import com.tablekok.entity.BaseEntity;
-import com.tablekok.exception.AppException;
-import com.tablekok.reservation_service.domain.exception.ReservationDomainErrorCode;
 import com.tablekok.reservation_service.domain.vo.ReservationDateTime;
 
 import jakarta.persistence.AttributeOverride;
@@ -74,10 +70,13 @@ public class Reservation extends BaseEntity {
 		this.reservationStatus = reservationStatus;
 	}
 
-	public static Reservation of(
+	public static Reservation create(
 		UUID userId, UUID storeId, ReservationDateTime reservationDateTime, Integer headcount, Integer deposit) {
 
+		// 예약 번호 부여
 		String reservationNumber = "RSV-" + System.currentTimeMillis();
+
+		// 예약금 여부에 따라 상태 저장
 		ReservationStatus reservationStatus =
 			hasDeposit(deposit) ? ReservationStatus.PENDING : ReservationStatus.RESERVED;
 
@@ -115,25 +114,6 @@ public class Reservation extends BaseEntity {
 	// 예약 확인(DONE, 오너)
 	public void done() {
 		this.reservationStatus = ReservationStatus.DONE;
-	}
-
-	// 인기 음식점의 예약이면 거절
-	public void validateHotStore(List<UUID> hotStoreList) {
-		if (hotStoreList.contains(storeId)) {
-			throw new AppException(ReservationDomainErrorCode.HOT_STORE_RESERVATION_NOT_ALLOWED);
-		}
-	}
-
-	// 과거 시간을 예약했는지 검증
-	public void validateNotPast() {
-		LocalDateTime now = LocalDateTime.now();
-		LocalDateTime targetDateTime = LocalDateTime.of(
-			this.getReservationDateTime().getReservationDate(),
-			this.getReservationDateTime().getReservationTime()
-		);
-		if (targetDateTime.isBefore(now)) {
-			throw new AppException(ReservationDomainErrorCode.PAST_RESERVATION_NOT_ALLOWED);
-		}
 	}
 
 	// 예약금 지불 여부. 예약금이 null이 아니고 0보다 클 때 true -> 예약금을 지불해야 하는 예약

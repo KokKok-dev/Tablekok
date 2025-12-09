@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.KokKok-dev:Tablekok-common:1.0.1'           // 공통 모듈
+    implementation 'com.github.KokKok-dev:Tablekok-common:1.0.2'           // 공통 모듈
     implementation 'org.springframework.cloud:spring-cloud-starter-config' // 컨피그 서버
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'   //jpa
@@ -43,7 +43,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client' // 유레카 클라이언트
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign' // 페인 클라이언트
     runtimeOnly 'org.postgresql:postgresql' // postgres
-    
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

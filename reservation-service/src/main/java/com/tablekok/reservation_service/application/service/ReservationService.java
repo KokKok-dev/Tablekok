@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
 import com.tablekok.reservation_service.application.client.SearchClient;
 import com.tablekok.reservation_service.application.client.dto.response.GetReservationPolicyResponse;
@@ -38,19 +39,17 @@ public class ReservationService {
 	// 예약 생성(접수)
 	@Transactional
 	public CreateReservationResult createReservation(CreateReservationCommand command) {
-		Reservation newReservation = command.toEntity();
+		// 생성 전 검증
+		validateReservationConstraints(command);
 
-		// 인기 음식점의 요청인지 확인
-		validateHotStore(newReservation);
-
-		// 과거 시간을 예약했는지
-		newReservation.validateNotPast();
-
-		// 그 시간대 예약이 있는지
-		reservationDomainService.checkDuplicateReservation(newReservation);
-
-		// 예약할 음식점의 예약 정책에 준수하는지 		TODO 내부호출 구현 후 테스트
-		// validateReservationPolicy(newReservation);
+		// 생성
+		Reservation newReservation = Reservation.create(
+			command.userId(),
+			command.storeId(),
+			command.reservationDateTime(),
+			command.headcount(),
+			command.deposit()
+		);
 
 		// 저장
 		reservationRepository.save(newReservation);
@@ -58,19 +57,30 @@ public class ReservationService {
 		return CreateReservationResult.of(newReservation);
 	}
 
-	// 인기 음식점의 요청인지 확인
-	private void validateHotStore(Reservation reservation) {
+	// 생성 전 검증
+	private void validateReservationConstraints(CreateReservationCommand command) {
+		// 인기 음식점의 요청인지 확인
 		List<UUID> hotStores = searchClient.getHotStores();
+		reservationDomainService.validateHotStore(
+			hotStores,
+			command.storeId()
+		);
 
-		reservation.validateHotStore(hotStores);
-	}
+		// 그 시간대 예약이 있는지
+		reservationDomainService.validateDuplicateReservation(
+			command.storeId(),
+			command.reservationDateTime()
+		);
 
-	// 예약할 음식점의 예약 정책에 준수하는지
-	private void validateReservationPolicy(Reservation reservation) {
+		// 예약할 음식점의 예약 정책에 준수하는지			TODO 내부호출 구현 후 테스트
 		ReservationPolicy policy = GetReservationPolicyResponse.toVo(
-			searchClient.getReservationPolicy(reservation.getStoreId()));
+			searchClient.getReservationPolicy(command.storeId()));
 
-		reservationDomainService.validateReservationPolicy(reservation, policy);
+		reservationDomainService.validateReservationPolicy(
+			command.headcount(),
+			command.reservationDateTime(),
+			policy
+		);
 	}
 
 	// 단건 예약 조회(리뷰에서 호출 용도)
@@ -85,17 +95,17 @@ public class ReservationService {
 	public void updateHeadcount(UUID userId, UUID reservationId, Integer headcount) {
 		Reservation findReservation = reservationRepository.findByIdAndUserId(reservationId, userId);
 
-		// 인원수 정책 검증 TODO 내부호출 구현 후 테스트
+		// 인원수 정책 검증							TODO 내부호출 구현 후 테스트
 		ReservationPolicy policy = GetReservationPolicyResponse.toVo(
 			searchClient.getReservationPolicy(findReservation.getStoreId()));
-		reservationDomainService.checkHeadcount(headcount, policy);
+		reservationDomainService.validateHeadcount(headcount, policy);
 
 		findReservation.updateHeadcount(headcount);
 	}
 
 	// 예약 취소
 	@Transactional
-	public void cancelReservation(UUID userId, String userRole, UUID reservationId) {
+	public void cancelReservation(UUID userId, UserRole userRole, UUID reservationId) {
 		RoleStrategy strategy = strategyFactory.getStrategy(userRole); //TODO 유저 구현 후 Role값으로
 		strategy.cancelReservation(userId, reservationId);
 	}
