@@ -2,7 +2,6 @@ package com.tablekok.reservation_service.application.dto.command;
 
 import java.util.UUID;
 
-import com.tablekok.reservation_service.domain.entity.Reservation;
 import com.tablekok.reservation_service.domain.vo.ReservationDateTime;
 
 import lombok.Builder;
@@ -16,7 +15,7 @@ public record CreateReservationCommand(
 	Integer deposit
 ) {
 	// Reservation 엔티티로
-	public Reservation toEntity() {
-		return Reservation.of(userId, storeId, reservationDateTime, headcount, deposit);
-	}
+	// public Reservation toEntity() {
+	// 	return Reservation.create(userId, storeId, reservationDateTime, headcount, deposit);
+	// }
 }

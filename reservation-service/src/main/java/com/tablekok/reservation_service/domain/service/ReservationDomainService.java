@@ -3,14 +3,16 @@ package com.tablekok.reservation_service.domain.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.exception.AppException;
-import com.tablekok.reservation_service.domain.entity.Reservation;
 import com.tablekok.reservation_service.domain.exception.ReservationDomainErrorCode;
 import com.tablekok.reservation_service.domain.repository.ReservationRepository;
+import com.tablekok.reservation_service.domain.vo.ReservationDateTime;
 import com.tablekok.reservation_service.domain.vo.ReservationPolicy;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,8 @@ public class ReservationDomainService {
 	private final ReservationRepository reservationRepository;
 
 	// 예약 정책 검증
-	public void validateReservationPolicy(Reservation reservation, ReservationPolicy policy) {
+	public void validateReservationPolicy(Integer headcount, ReservationDateTime reservationDateTime,
+		ReservationPolicy policy) {
 
 		// 음식점이 예약을 허용하는지
 		if (!policy.getEnable()) {
@@ -29,41 +32,16 @@ public class ReservationDomainService {
 		}
 
 		// 인원수가 정책에 준수하는지
-		checkHeadcount(reservation.getHeadcount(), policy);
+		validateHeadcount(headcount, policy);
 
-		// 예약 가능한 달인지
-		validateMonthRule(reservation, policy);
-
-	}
-
-	// 중복 예약인지
-	@Transactional(readOnly = true)
-	public void checkDuplicateReservation(Reservation reservation) {
-		boolean exists = reservationRepository.existsByStoreIdAndReservationDateTimeReservationDateAndReservationDateTimeReservationTime(
-			reservation.getStoreId(),
-			reservation.getReservationDateTime().getReservationDate(),
-			reservation.getReservationDateTime().getReservationTime()
-		);
-
-		if (exists) {
-			throw new AppException(ReservationDomainErrorCode.DUPLICATE_RESERVATION_TIME);
-		}
-	}
-
-	// 인원수 체크
-	public void checkHeadcount(Integer headcount, ReservationPolicy policy) {
-		if (headcount > policy.getMaxPeople()) {
-			throw new AppException(ReservationDomainErrorCode.INVALID_RESERVATION_POLICY);
-		}
-		if (headcount < policy.getMinPeople()) {
-			throw new AppException(ReservationDomainErrorCode.INVALID_RESERVATION_POLICY);
-		}
+		// 예약 가능한 달인지 검증
+		validateMonthRule(reservationDateTime, policy);
 	}
 
 	// 예약 가능한 달인지 검증
-	private void validateMonthRule(Reservation reservation, ReservationPolicy policy) {
+	private void validateMonthRule(ReservationDateTime reservationDateTime, ReservationPolicy policy) {
 		LocalDateTime now = LocalDateTime.now();
-		LocalDate reservationDate = reservation.getReservationDateTime().getReservationDate();
+		LocalDate reservationDate = reservationDateTime.getReservationDate();
 
 		// 현재 달과 예약한 달의 차이
 		int diff = monthDiff(now.toLocalDate(), reservationDate);
@@ -100,4 +78,36 @@ public class ReservationDomainService {
 			throw new AppException(ReservationDomainErrorCode.RESERVATION_NOT_OPENED_YET);
 		}
 	}
+
+	// 중복 예약인지
+	@Transactional(readOnly = true)
+	public void validateDuplicateReservation(UUID storeId, ReservationDateTime reservationDateTime) {
+		boolean exists = reservationRepository.existsByStoreIdAndReservationDateTimeReservationDateAndReservationDateTimeReservationTime(
+			storeId,
+			reservationDateTime.getReservationDate(),
+			reservationDateTime.getReservationTime()
+		);
+
+		if (exists) {
+			throw new AppException(ReservationDomainErrorCode.DUPLICATE_RESERVATION_TIME);
+		}
+	}
+
+	// 인기 음식점의 예약이면 거절
+	public void validateHotStore(List<UUID> hotStoreList, UUID storeId) {
+		if (hotStoreList.contains(storeId)) {
+			throw new AppException(ReservationDomainErrorCode.HOT_STORE_RESERVATION_NOT_ALLOWED);
+		}
+	}
+
+	// 인원수 체크
+	public void validateHeadcount(Integer headcount, ReservationPolicy policy) {
+		if (headcount > policy.getMaxPeople()) {
+			throw new AppException(ReservationDomainErrorCode.INVALID_RESERVATION_POLICY);
+		}
+		if (headcount < policy.getMinPeople()) {
+			throw new AppException(ReservationDomainErrorCode.INVALID_RESERVATION_POLICY);
+		}
+	}
+
 }
