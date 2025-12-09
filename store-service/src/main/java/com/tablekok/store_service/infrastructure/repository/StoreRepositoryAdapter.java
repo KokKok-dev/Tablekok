@@ -31,4 +31,9 @@ public class StoreRepositoryAdapter implements StoreRepository {
 		return storeJpaRepository.findById(storeId);
 	}
 
+	@Override
+	public boolean existsByNameAndAddressAndIdNot(String name, String address, UUID excludedId) {
+		return storeJpaRepository.existsByNameAndAddressAndIdNot(name, address, excludedId);
+	}
+
 }

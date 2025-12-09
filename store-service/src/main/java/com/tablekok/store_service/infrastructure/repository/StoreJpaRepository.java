@@ -9,4 +9,7 @@ import com.tablekok.store_service.domain.entity.Store;
 public interface StoreJpaRepository extends JpaRepository<Store, UUID> {
 	boolean existsByNameAndAddress(String name, String address);
 
+	// 특정 Store (excludedId)를 제외하고 검색
+	// 주어진 이름(name)과 주소(address)를 기준으로 중복되는 Store 엔티티가 존재하는지 검색
+	boolean existsByNameAndAddressAndIdNot(String name, String address, UUID excludedId);
 }

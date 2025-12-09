@@ -13,4 +13,5 @@ public interface StoreRepository {
 
 	Optional<Store> findById(UUID storeId);
 
+	boolean existsByNameAndAddressAndIdNot(String name, String address, UUID excludedId);
 }

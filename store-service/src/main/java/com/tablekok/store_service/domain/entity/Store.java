@@ -121,11 +121,6 @@ public class Store extends BaseEntity {
 		this.imageUrl = imageUrl;
 	}
 
-	public void updateOperatingHours(List<OperatingHour> newHours) {
-		this.operatingHours.clear();
-		this.operatingHours.addAll(newHours);
-	}
-
 	public void setStoreReservationPolicy(StoreReservationPolicy storeReservationPolicy) {
 		this.storeReservationPolicy = storeReservationPolicy;
 	}
