@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 	indexes = {
 		@Index(name = "idx_store_created_at", columnList = "store_id, created_at DESC, review_id"), // 가게별 최신순 인덱스
 		@Index(name = "idx_store_rating_id", columnList = "store_id, rating DESC, review_id"), // 가게별 별점순 인덱스
-		@Index(name = "idx_store_created_at", columnList = "user_id, created_at DESC, review_id") // 사용자별 최신순 인덱스
+		@Index(name = "idx_user_created_at", columnList = "user_id, created_at DESC, review_id") // 사용자별 최신순 인덱스
 	}
 )
 @Check(constraints = "rating >= 0 AND rating <= 5")
