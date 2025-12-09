@@ -1,6 +1,6 @@
 package com.tablekok.review_service.presentation.dto.request;
 
-import com.tablekok.review_service.application.dto.param.UpdateReviewParam;
+import com.tablekok.review_service.application.dto.command.UpdateReviewCommand;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -13,8 +13,8 @@ public record UpdateReviewRequest(
 	@Size(min = 10, max = 1000, message = "리뷰는 10자 이상, 1000자 이하로 작성해야합니다.")
 	String content
 ) {
-	public UpdateReviewParam toParam() {
-		return UpdateReviewParam.builder()
+	public UpdateReviewCommand toCommand() {
+		return UpdateReviewCommand.builder()
 			.rating(rating)
 			.content(content)
 			.build();
