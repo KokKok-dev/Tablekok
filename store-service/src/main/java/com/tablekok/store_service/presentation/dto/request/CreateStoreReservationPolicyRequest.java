@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record CreateStoreReservationPolicyRequest(
 	@NotNull(message = "예약 오픈 날짜는 필수입니다.")
-	@Range(min = 1, max = 31, message = "예약 오픈 날짜는 1일부터 31일 사이여야 합니다.")
+	@Range(min = 1, max = 28, message = "예약 오픈 날짜는 1일부터 31일 사이여야 합니다.")
 	Integer monthlyOpenDay,
 
 	@NotNull(message = "예약 오픈 시간은 필수입니다.")

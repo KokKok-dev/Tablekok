@@ -19,28 +19,23 @@ import lombok.RequiredArgsConstructor;
 public class StoreReservationPolicyValidator {
 
 	public void validate(StoreReservationPolicyInput input, Store store) {
-		// 1. 월별 오픈 날짜(monthlyOpenDay) 유효성 검증 (1 ~ 28일 이내)
-		if (input.monthlyOpenDay() < 1 || input.monthlyOpenDay() > 28) {
-			throw new AppException(StoreDomainErrorCode.INVALID_OPEN_DAY);
-		}
-
-		// 2. 예약 가능한 간격 분 10/ 15 /20/30/60/120 입력인지 확인
+		// 1. 예약 가능한 간격 분 10/ 15 /20/30/60/120 입력인지 확인
 		List<Integer> validIntervals = List.of(10, 15, 20, 30, 60, 120);
 		if (!validIntervals.contains(input.reservationInterval())) {
 			throw new AppException(StoreDomainErrorCode.INVALID_RESERVATION_INTERVAL);
 		}
 
-		// 3. dailyReservationEndTime이 dailyReservationStartTime보다 이후 시간인지 확인
+		// 2. dailyReservationEndTime이 dailyReservationStartTime보다 이후 시간인지 확인
 		if (!input.dailyReservationEndTime().isAfter(input.dailyReservationStartTime())) {
 			throw new AppException(StoreDomainErrorCode.INVALID_TIME_RANGE);
 		}
 
-		// 6. maxHeadcount가 minHeadcount보다 크거나 같은지 확인
+		// 3. maxHeadcount가 minHeadcount보다 크거나 같은지 확인
 		if (input.maxHeadcount() < input.minHeadcount()) {
 			throw new AppException(StoreDomainErrorCode.INVALID_HEADCOUNT_RANGE);
 		}
 
-		// 7. is_deposit_required가 true인 경우 deposit_amount는 0보다 큰가
+		// 4. is_deposit_required가 true인 경우 deposit_amount는 0보다 큰가
 		if (input.isDepositRequired() && input.depositAmount() <= 0) {
 			throw new AppException(StoreDomainErrorCode.INVALID_DEPOSIT_AMOUNT);
 		}
