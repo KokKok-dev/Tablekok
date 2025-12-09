@@ -1,8 +1,7 @@
-// auth/domain/entity/User.java
 package com.tablekok.user_service.auth.domain.entity;
 
 import com.tablekok.entity.BaseEntity;
-import com.tablekok.user_service.auth.domain.enums.UserRole;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -12,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 @Entity
 @Table(name = "p_user", indexes = {
@@ -59,22 +57,19 @@ public class User extends BaseEntity {
 	@Column(name = "business_number", length = 12)
 	private String businessNumber;  // Owner인 경우만 사용
 
-	// ========== Domain 정적 팩토리 메서드 (기존) ==========
+	// ========== Domain 정적 팩토리 메서드 (gashine20 피드백 반영) ==========
 
 	/**
 	 * Customer 생성 정적 팩토리 메서드
+	 * ✅ gashine20 피드백 반영: 검증 로직 제거, UserValidator에서 처리
 	 */
-	public static User createCustomer(String email, String name, String password, String phoneNumber) {
-		// Domain 검증 적용
-		validateEmail(email);
-		validateName(name);
-		validatePassword(password);
-		validatePhoneNumber(phoneNumber);
-
+	public static User createCustomer(String email, String name, String encodedPassword, String phoneNumber) {
+		// ✅ 검증은 UserValidator에서 수행하므로 여기서는 제거
+		// 정규화만 수행
 		return User.builder()
 			.email(normalizeEmail(email))
 			.name(name.trim())
-			.password(password)
+			.password(encodedPassword)  // 이미 암호화된 비밀번호
 			.phoneNumber(normalizePhoneNumber(phoneNumber))
 			.role(UserRole.CUSTOMER)
 			.isActive(true)
@@ -84,18 +79,15 @@ public class User extends BaseEntity {
 
 	/**
 	 * Owner 생성 정적 팩토리 메서드
+	 * ✅ gashine20 피드백 반영: 검증 로직 제거, UserValidator에서 처리
 	 */
-	public static User createOwner(String email, String name, String password, String phoneNumber) {
-		// Domain 검증 적용
-		validateEmail(email);
-		validateName(name);
-		validatePassword(password);
-		validatePhoneNumber(phoneNumber);
-
+	public static User createOwner(String email, String name, String encodedPassword, String phoneNumber) {
+		// ✅ 검증은 UserValidator에서 수행하므로 여기서는 제거
+		// 정규화만 수행
 		return User.builder()
 			.email(normalizeEmail(email))
 			.name(name.trim())
-			.password(password)
+			.password(encodedPassword)  // 이미 암호화된 비밀번호
 			.phoneNumber(normalizePhoneNumber(phoneNumber))
 			.role(UserRole.OWNER)
 			.isActive(true)
@@ -105,18 +97,15 @@ public class User extends BaseEntity {
 
 	/**
 	 * Master 생성 정적 팩토리 메서드
+	 * ✅ gashine20 피드백 반영: 검증 로직 제거, UserValidator에서 처리
 	 */
-	public static User createMaster(String email, String name, String password, String phoneNumber) {
-		// Domain 검증 적용
-		validateEmail(email);
-		validateName(name);
-		validatePassword(password);
-		validatePhoneNumber(phoneNumber);
-
+	public static User createMaster(String email, String name, String encodedPassword, String phoneNumber) {
+		// ✅ 검증은 UserValidator에서 수행하므로 여기서는 제거
+		// 정규화만 수행
 		return User.builder()
 			.email(normalizeEmail(email))
 			.name(name.trim())
-			.password(password)
+			.password(encodedPassword)  // 이미 암호화된 비밀번호
 			.phoneNumber(normalizePhoneNumber(phoneNumber))
 			.role(UserRole.MASTER)
 			.isActive(true)
@@ -124,7 +113,7 @@ public class User extends BaseEntity {
 			.build();
 	}
 
-	// ========== Domain 정규화 메서드들 (Application Service에서 이동) ==========
+	// ========== Domain 정규화 메서드들 (유지) ==========
 
 	/**
 	 * 이메일 정규화 (Domain 규칙)
@@ -156,93 +145,13 @@ public class User extends BaseEntity {
 		return phoneNumber.replaceAll("-", "").replaceAll("\\s", "");
 	}
 
-	// ========== Domain 검증 메서드들 (Application Service에서 이동) ==========
+	// ========== ❌ 제거된 검증 메서드들 (gashine20 피드백 반영) ==========
+	// public static void validateEmail() - UserValidator로 이동
+	// public static void validateName() - UserValidator로 이동
+	// public static void validatePassword() - UserValidator로 이동
+	// public static void validatePhoneNumber() - UserValidator로 이동
 
-	/**
-	 * 이메일 도메인 검증
-	 *
-	 * @param email 검증할 이메일
-	 * @throws IllegalArgumentException 유효하지 않은 이메일인 경우
-	 */
-	public static void validateEmail(String email) {
-		if (email == null || email.trim().isEmpty()) {
-			throw new IllegalArgumentException("이메일은 필수 입력 값입니다.");
-		}
-
-		String normalized = normalizeEmail(email);
-
-		// 기본 이메일 형식 검증
-		if (!Pattern.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", normalized)) {
-			throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다.");
-		}
-
-		// 이메일 길이 검증
-		if (normalized.length() > 100) {
-			throw new IllegalArgumentException("이메일은 100자를 초과할 수 없습니다.");
-		}
-	}
-
-	/**
-	 * 이름 도메인 검증
-	 *
-	 * @param name 검증할 이름
-	 * @throws IllegalArgumentException 유효하지 않은 이름인 경우
-	 */
-	public static void validateName(String name) {
-		if (name == null || name.trim().isEmpty()) {
-			throw new IllegalArgumentException("이름은 필수 입력 값입니다.");
-		}
-
-		String trimmed = name.trim();
-
-		if (trimmed.length() < 2 || trimmed.length() > 50) {
-			throw new IllegalArgumentException("이름은 2자 이상 50자 이하로 입력해주세요.");
-		}
-
-		if (!Pattern.matches("^[가-힣a-zA-Z\\s]+$", trimmed)) {
-			throw new IllegalArgumentException("이름은 한글, 영문, 공백만 허용됩니다.");
-		}
-	}
-
-	/**
-	 * 비밀번호 도메인 검증
-	 *
-	 * @param password 검증할 비밀번호
-	 * @throws IllegalArgumentException 유효하지 않은 비밀번호인 경우
-	 */
-	public static void validatePassword(String password) {
-		if (password == null || password.trim().isEmpty()) {
-			throw new IllegalArgumentException("비밀번호는 필수 입력 값입니다.");
-		}
-
-		if (password.length() < 8 || password.length() > 20) {
-			throw new IllegalArgumentException("비밀번호는 8자 이상 20자 이하로 입력해주세요.");
-		}
-
-		if (!Pattern.matches("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", password)) {
-			throw new IllegalArgumentException("비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다.");
-		}
-	}
-
-	/**
-	 * 휴대폰번호 도메인 검증
-	 *
-	 * @param phoneNumber 검증할 휴대폰번호
-	 * @throws IllegalArgumentException 유효하지 않은 휴대폰번호인 경우
-	 */
-	public static void validatePhoneNumber(String phoneNumber) {
-		if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
-			throw new IllegalArgumentException("휴대폰번호는 필수 입력 값입니다.");
-		}
-
-		String normalized = normalizePhoneNumber(phoneNumber);
-
-		if (!Pattern.matches("^01[0-9]{8,9}$", normalized)) {
-			throw new IllegalArgumentException("올바른 휴대폰번호 형식이 아닙니다. (01X + 8~9자리 숫자)");
-		}
-	}
-
-	// ========== Domain 비즈니스 메서드들 (기존) ==========
+	// ========== Domain 비즈니스 메서드들 (유지) ==========
 
 	/**
 	 * 계정 활성 여부 확인
@@ -260,7 +169,7 @@ public class User extends BaseEntity {
 	}
 
 	/**
-	 * 비밀번호 업데이트
+	 * 비밀번호 업데이트 (이미 암호화된 비밀번호)
 	 */
 	public void updatePassword(String newEncodedPassword) {
 		if (newEncodedPassword == null || newEncodedPassword.trim().isEmpty()) {

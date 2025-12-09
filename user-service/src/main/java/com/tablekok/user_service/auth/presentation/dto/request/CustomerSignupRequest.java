@@ -1,7 +1,6 @@
-// auth/presentation/dto/request/CustomerSignupRequest.java
 package com.tablekok.user_service.auth.presentation.dto.request;
 
-import com.tablekok.user_service.auth.application.dto.CustomerSignupParam;
+import com.tablekok.user_service.auth.application.dto.command.CustomerSignupCommand;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
@@ -9,8 +8,7 @@ import jakarta.validation.constraints.*;
  * 고객 회원가입 요청 DTO
  * API 명세서: POST /v1/auth/signup/customer
  *
- * shipping-19man 스타일: Request → Param 변환 방식 적용
- * gashine20 피드백: record 방식 사용
+ * gashine20 피드백 반영: toParam() → toCommand() 메서드명 변경
  * 순수 Validation만 담당 - 나머지 로직은 제거
  */
 @Schema(description = "고객 회원가입 요청")
@@ -42,22 +40,17 @@ public record CustomerSignupRequest(
 ) {
 
 	/**
-	 * Request DTO → Application Layer Param 변환
-	 * shipping-19man 스타일 적용
+	 * Request DTO → Application Layer Command 변환
+	 * ✅ gashine20 피드백 반영: toParam() → toCommand() 메서드명 변경
 	 *
-	 * @return CustomerSignupParam (Application Layer DTO)
+	 * @return CustomerSignupCommand (Application Layer DTO)
 	 */
-	public CustomerSignupParam toParam() {
-		return CustomerSignupParam.builder()
+	public CustomerSignupCommand toCommand() {  // ✅ toParam() → toCommand() 변경
+		return CustomerSignupCommand.builder()
 			.email(email)
 			.username(username)
 			.password(password)
 			.phone(phone)
 			.build();
 	}
-
-	// ❌ 제거된 메서드들:
-	// - isValidRequest() → Service에서 처리
-	// - getNormalizedEmail() → Service에서 처리
-	// - toString() 오버라이드 → record 기본 toString 사용
 }

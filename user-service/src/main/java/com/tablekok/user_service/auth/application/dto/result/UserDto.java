@@ -1,8 +1,7 @@
-// auth/application/dto/UserDto.java
-package com.tablekok.user_service.auth.application.dto;
+package com.tablekok.user_service.auth.application.dto.result;
 
 import com.tablekok.user_service.auth.domain.entity.User;
-import com.tablekok.user_service.auth.domain.enums.UserRole;
+import com.tablekok.user_service.auth.domain.entity.UserRole;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

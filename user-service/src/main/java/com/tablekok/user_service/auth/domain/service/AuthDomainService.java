@@ -1,151 +1,235 @@
-// auth/domain/service/AuthDomainService.java
 package com.tablekok.user_service.auth.domain.service;
 
-import com.tablekok.user_service.auth.application.dto.CustomerSignupParam;
-import com.tablekok.user_service.auth.application.dto.LoginParam;
-import com.tablekok.user_service.auth.application.dto.OwnerSignupParam;
+import com.tablekok.exception.AppException;
+import com.tablekok.user_service.auth.application.dto.command.CustomerSignupCommand;
+import com.tablekok.user_service.auth.application.dto.command.OwnerSignupCommand;
+import com.tablekok.user_service.auth.application.dto.command.LoginCommand;
 import com.tablekok.user_service.auth.domain.entity.User;
+import com.tablekok.user_service.auth.domain.exception.AuthDomainErrorCode;
 import com.tablekok.user_service.auth.domain.repository.OwnerRepository;
-import com.tablekok.user_service.auth.domain.validator.BusinessNumberValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 인증 관련 Domain Service (Auth 전용으로 축소)
+ * 인증 관련 Domain Service (Auth 전용)
+ *
+ * ✅ gashine20 피드백 반영:
+ * 1. Owner.validateBusinessNumber() 제거 → BusinessNumberValidator 사용
+ * 2. AuthDomainErrorCode 네이밍 변경
+ * 3. Entity 직접 호출 (Owner.xxx(), User.xxx()) 제거
  *
  * 주요 책임:
  * 1. 인증 관련 복합 비즈니스 로직
- * 2. Owner 관련 검증 (사업자번호)
- * 3. 인증 자격 검증 통합
- *
- * User 관련 로직은 UserDomainService로 분리됨
+ * 2. 회원가입 자격 검증
+ * 3. 사업자번호 관련 검증 (Owner 전용)
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuthDomainService {
 
-	private final UserDomainService userDomainService;  // User 로직 위임
+	private final UserDomainService userDomainService;
 	private final OwnerRepository ownerRepository;
 	private final BusinessNumberValidator businessNumberValidator;
+	private final UserValidator userValidator;
 
 	// ========== Customer 회원가입 자격 검증 ==========
 
 	/**
 	 * Customer 회원가입 자격 검증
-	 *
-	 * @param param Customer 회원가입 파라미터
-	 * @throws IllegalArgumentException 회원가입 자격이 없는 경우
+	 * ✅ gashine20 피드백 반영: AuthDomainErrorCode 사용
 	 */
-	public void validateCustomerSignupEligibility(CustomerSignupParam param) {
-		log.debug("Starting customer signup eligibility validation for email: {}", param.email());
+	public void validateCustomerSignupEligibility(CustomerSignupCommand command) {
+		log.debug("Validating customer signup eligibility for email: {}", command.email());
 
-		// 1. Domain Entity 검증 적용
-		User.validateEmail(param.email());
-		User.validateName(param.username());
-		User.validatePassword(param.password());
-		User.validatePhoneNumber(param.phone());
+		// UserValidator를 통한 Domain 검증
+		userValidator.validateEmail(command.email());
+		userValidator.validateName(command.username());
+		userValidator.validatePassword(command.password());
+		userValidator.validatePhoneNumber(command.phone());
 
-		// 2. UserDomainService로 중복 검증 위임
-		userDomainService.validateEmailNotDuplicated(param.email());
-		userDomainService.validatePhoneNumberNotDuplicated(param.phone());
+		// 중복 검증 (AuthDomainErrorCode 사용)
+		if (!userDomainService.isEmailAvailable(command.email())) {
+			log.warn("Duplicate email registration attempt: {}", command.email());
+			throw new AppException(AuthDomainErrorCode.DUPLICATE_EMAIL);
+		}
 
-		log.debug("Customer signup eligibility validation passed");
+		if (!userDomainService.isPhoneNumberAvailable(command.phone())) {
+			log.warn("Duplicate phone number registration attempt: {}", command.phone());
+			throw new AppException(AuthDomainErrorCode.DUPLICATE_PHONE_NUMBER);
+		}
+
+		log.debug("Customer signup eligibility validation completed for email: {}", command.email());
 	}
 
 	// ========== Owner 회원가입 자격 검증 ==========
 
 	/**
 	 * Owner 회원가입 자격 검증
-	 * Customer 검증 + Owner 특화 검증
-	 *
-	 * @param param Owner 회원가입 파라미터
-	 * @throws IllegalArgumentException 회원가입 자격이 없는 경우
+	 * ✅ gashine20 피드백 반영:
+	 * - Owner.validateBusinessNumber() 제거
+	 * - BusinessNumberValidator 사용
+	 * - AuthDomainErrorCode 사용
 	 */
-	public void validateOwnerSignupEligibility(OwnerSignupParam param) {
-		log.debug("Starting owner signup eligibility validation for email: {}", param.email());
+	public void validateOwnerSignupEligibility(OwnerSignupCommand command) {
+		log.debug("Validating owner signup eligibility for email: {}, business number: {}",
+			command.email(), command.businessNumber());
 
-		// 1. Customer 기본 검증 재사용
-		CustomerSignupParam customerParam = CustomerSignupParam.builder()
-			.email(param.email())
-			.username(param.username())
-			.password(param.password())
-			.phone(param.phone())
-			.build();
-		validateCustomerSignupEligibility(customerParam);
+		// 1. UserValidator를 통한 기본 검증
+		userValidator.validateEmail(command.email());
+		userValidator.validateName(command.username());
+		userValidator.validatePassword(command.password());
+		userValidator.validatePhoneNumber(command.phone());
 
-		// 2. Owner 특화 검증
-		String normalizedBusinessNumber = com.tablekok.user_service.auth.domain.entity.Owner
-			.normalizeBusinessNumber(param.businessNumber());
+		// 2. 중복 검증 (AuthDomainErrorCode 사용)
+		if (!userDomainService.isEmailAvailable(command.email())) {
+			log.warn("Duplicate email registration attempt: {}", command.email());
+			throw new AppException(AuthDomainErrorCode.DUPLICATE_EMAIL);
+		}
 
-		// Domain Entity 기본 검증
-		com.tablekok.user_service.auth.domain.entity.Owner.validateBusinessNumber(param.businessNumber());
+		if (!userDomainService.isPhoneNumberAvailable(command.phone())) {
+			log.warn("Duplicate phone number registration attempt: {}", command.phone());
+			throw new AppException(AuthDomainErrorCode.DUPLICATE_PHONE_NUMBER);
+		}
 
-		// 사업자번호 중복 검증
-		validateBusinessNumberNotDuplicated(normalizedBusinessNumber);
+		// 3. ✅ Owner 특화 검증 (BusinessNumberValidator 사용 - Owner.validate~ 제거)
+		businessNumberValidator.validateAll(command.businessNumber());  // 필수값 + 형식 + 체크섬
+		validateBusinessNumberNotDuplicated(command.businessNumber());
 
-		// 사업자번호 체크섬 검증
-		validateBusinessNumberChecksum(normalizedBusinessNumber);
-
-		log.debug("Owner signup eligibility validation passed");
+		log.debug("Owner signup eligibility validation completed for email: {}", command.email());
 	}
 
 	// ========== 로그인 자격 검증 ==========
 
 	/**
-	 * 로그인 자격 검증
-	 *
-	 * @param param 로그인 파라미터
-	 * @throws IllegalArgumentException 로그인 자격이 없는 경우
+	 * 로그인 자격 검증 (모든 역할 공통)
+	 * ✅ gashine20 피드백 반영: AuthDomainErrorCode 사용
 	 */
-	public void validateLoginEligibility(LoginParam param) {
-		log.debug("Starting login eligibility validation for email: {}", param.email());
+	public void validateLoginEligibility(LoginCommand command) {
+		log.debug("Validating login eligibility for email: {}", command.email());
 
-		// Domain Entity 검증 적용
-		User.validateEmail(param.email());
+		// UserValidator를 통한 기본 형식 검증
+		userValidator.validateEmail(command.email());
+		userValidator.validatePassword(command.password());
 
-		if (param.password() == null || param.password().trim().isEmpty()) {
-			throw new IllegalArgumentException("비밀번호는 필수 입력 값입니다.");
+		log.debug("Login eligibility validation completed for email: {}", command.email());
+	}
+
+	// ========== Owner Entity 생성 전 User 검증 ==========
+
+	/**
+	 * Owner Entity 생성 전 User 검증
+	 * ✅ gashine20 피드백 반영: Owner.validateUser() 대신 DomainService에서 검증
+	 *
+	 * @param user 검증할 User
+	 * @throws AppException 유효하지 않은 User인 경우
+	 */
+	public void validateUserForOwner(User user) {
+		log.debug("Validating user for owner creation: {}", user != null ? user.getUserId() : "null");
+
+		if (user == null) {
+			throw new AppException(AuthDomainErrorCode.USER_REQUIRED);
 		}
 
-		log.debug("Login eligibility validation passed");
+		if (!user.isOwner()) {
+			throw new AppException(AuthDomainErrorCode.INVALID_USER_FOR_OWNER);
+		}
+
+		log.debug("User validation for owner passed: {}", user.getUserId());
 	}
 
 	// ========== 사업자번호 관련 검증 (Owner 전용) ==========
 
 	/**
 	 * 사업자번호 중복 검증
+	 * ✅ gashine20 피드백 반영: AuthDomainErrorCode 사용
+	 *
+	 * @param businessNumber 검증할 사업자번호
+	 * @throws AppException 이미 사용 중인 사업자번호인 경우
 	 */
-	public void validateBusinessNumberNotDuplicated(String normalizedBusinessNumber) {
-		if (ownerRepository.existsByBusinessNumber(normalizedBusinessNumber)) {
-			log.warn("Business number duplication validation failed: {}",
-				businessNumberValidator.mask(normalizedBusinessNumber));
-			throw new IllegalArgumentException("이미 등록된 사업자번호입니다.");
-		}
-		log.debug("Business number duplication check passed");
-	}
+	public void validateBusinessNumberNotDuplicated(String businessNumber) {
+		log.debug("Validating business number not duplicated: {}", businessNumber);
 
-	/**
-	 * 사업자번호 체크섬 검증
-	 */
-	public void validateBusinessNumberChecksum(String normalizedBusinessNumber) {
-		if (!businessNumberValidator.isValid(normalizedBusinessNumber)) {
-			log.warn("Business number checksum validation failed for number: {}",
-				businessNumberValidator.mask(normalizedBusinessNumber));
-			throw new IllegalArgumentException("유효하지 않은 사업자번호입니다.");
+		String normalizedBusinessNumber = businessNumberValidator.normalize(businessNumber);
+
+		if (ownerRepository.existsByBusinessNumber(normalizedBusinessNumber)) {
+			log.warn("Duplicate business number registration attempt: {}", normalizedBusinessNumber);
+			throw new AppException(AuthDomainErrorCode.DUPLICATE_BUSINESS_NUMBER);
 		}
-		log.debug("Business number checksum validation passed");
+
+		log.debug("Business number duplication validation passed: {}", normalizedBusinessNumber);
 	}
 
 	/**
 	 * 사업자번호 사용 가능 여부 확인
+	 *
+	 * @param businessNumber 확인할 사업자번호
+	 * @return 사용 가능 여부
 	 */
 	public boolean isBusinessNumberAvailable(String businessNumber) {
-		String normalizedBusiness = com.tablekok.user_service.auth.domain.entity.Owner
-			.normalizeBusinessNumber(businessNumber);
-		boolean available = !ownerRepository.existsByBusinessNumber(normalizedBusiness);
-		log.debug("Business number availability check: {}", available);
-		return available;
+		log.debug("Checking business number availability: {}", businessNumber);
+
+		try {
+			// 형식 검증 (Boolean 반환 메서드 사용)
+			if (!businessNumberValidator.isValidFormat(businessNumber)) {
+				log.debug("Business number format invalid: {}", businessNumber);
+				return false;
+			}
+
+			String normalizedBusinessNumber = businessNumberValidator.normalize(businessNumber);
+
+			// 중복 검증
+			boolean isNotDuplicated = !ownerRepository.existsByBusinessNumber(normalizedBusinessNumber);
+
+			// 체크섬 검증
+			boolean hasValidChecksum = businessNumberValidator.isValidChecksum(normalizedBusinessNumber);
+
+			boolean isAvailable = isNotDuplicated && hasValidChecksum;
+			log.debug("Business number availability result: {} - available: {}",
+				normalizedBusinessNumber, isAvailable);
+
+			return isAvailable;
+
+		} catch (Exception e) {
+			log.debug("Business number check failed: {} - {}", businessNumber, e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * 본인 제외 사업자번호 중복 검증 (수정 시 사용)
+	 *
+	 * @param businessNumber 검증할 사업자번호
+	 * @param currentUserId 현재 사용자 ID (제외할 사용자)
+	 * @return 중복 여부
+	 */
+	public boolean isBusinessNumberDuplicateExcludingSelf(String businessNumber, java.util.UUID currentUserId) {
+		log.debug("Checking business number duplicate excluding self: {}, current user: {}",
+			businessNumber, currentUserId);
+
+		String normalizedBusinessNumber = businessNumberValidator.normalize(businessNumber);
+		boolean isDuplicate = ownerRepository.existsByBusinessNumberAndUserIdNot(normalizedBusinessNumber, currentUserId);
+
+		log.debug("Business number duplicate check result excluding self: {} - duplicate: {}",
+			normalizedBusinessNumber, isDuplicate);
+
+		return isDuplicate;
+	}
+
+	// ========== 통계 및 조회 메서드 (Owner 관련) ==========
+
+	/**
+	 * 사업자번호 패턴으로 Owner 검색 가능 여부
+	 */
+	public boolean canSearchByBusinessNumberPattern(String pattern) {
+		return pattern != null && pattern.trim().length() >= 3;
+	}
+
+	/**
+	 * Owner 등록 통계
+	 */
+	public long getTotalOwnerCount() {
+		return ownerRepository.count();
 	}
 }

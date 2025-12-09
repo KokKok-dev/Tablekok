@@ -1,7 +1,6 @@
-// auth/presentation/dto/request/OwnerSignupRequest.java
 package com.tablekok.user_service.auth.presentation.dto.request;
 
-import com.tablekok.user_service.auth.application.dto.OwnerSignupParam;
+import com.tablekok.user_service.auth.application.dto.command.OwnerSignupCommand;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
@@ -9,6 +8,7 @@ import jakarta.validation.constraints.*;
  * 사장님 회원가입 요청 DTO
  * API 명세서: POST /v1/auth/signup/owner
  *
+ * gashine20 피드백 반영: toParam() → toCommand() 메서드명 변경
  * Customer 회원가입 + 사업자번호 검증 추가
  * 순수 Validation만 담당 - 나머지 로직은 제거
  */
@@ -46,13 +46,13 @@ public record OwnerSignupRequest(
 ) {
 
 	/**
-	 * Request DTO → Application Layer Param 변환
-	 * shipping-19man 스타일 적용
+	 * Request DTO → Application Layer Command 변환
+	 * ✅ gashine20 피드백 반영: toParam() → toCommand() 메서드명 변경
 	 *
-	 * @return OwnerSignupParam (Application Layer DTO)
+	 * @return OwnerSignupCommand (Application Layer DTO)
 	 */
-	public OwnerSignupParam toParam() {
-		return OwnerSignupParam.builder()
+	public OwnerSignupCommand toCommand() {  // ✅ toParam() → toCommand() 변경
+		return OwnerSignupCommand.builder()
 			.email(email)
 			.username(username)
 			.password(password)
@@ -60,9 +60,4 @@ public record OwnerSignupRequest(
 			.businessNumber(businessNumber)
 			.build();
 	}
-
-	// ❌ 제거된 메서드들:
-	// - isValidRequest() → Service에서 처리
-	// - getNormalizedBusinessNumber() → Service에서 처리
-	// - toString() 오버라이드 → record 기본 toString 사용
 }

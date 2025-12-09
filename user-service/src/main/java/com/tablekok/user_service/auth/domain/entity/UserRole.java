@@ -1,5 +1,4 @@
-// auth/domain/enums/UserRole.java
-package com.tablekok.user_service.auth.domain.enums;
+package com.tablekok.user_service.auth.domain.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

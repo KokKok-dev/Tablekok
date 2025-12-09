@@ -1,8 +1,7 @@
-// auth/presentation/dto/response/LoginResponse.java
 package com.tablekok.user_service.auth.presentation.dto.response;
 
-import com.tablekok.user_service.auth.application.dto.LoginResult;
-import com.tablekok.user_service.auth.domain.enums.UserRole;
+import com.tablekok.user_service.auth.application.dto.result.LoginResult;
+import com.tablekok.user_service.auth.domain.entity.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import com.fasterxml.jackson.annotation.JsonInclude;
 

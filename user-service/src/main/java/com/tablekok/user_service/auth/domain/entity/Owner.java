@@ -1,4 +1,3 @@
-// auth/domain/entity/Owner.java
 package com.tablekok.user_service.auth.domain.entity;
 
 import com.tablekok.entity.BaseEntity;
@@ -10,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 @Entity
 @Table(name = "p_owner", indexes = {
@@ -18,7 +16,7 @@ import java.util.regex.Pattern;
 	@Index(name = "idx_owner_user_id", columnList = "user_id")
 })
 @Getter
-@Builder(access = AccessLevel.PRIVATE)  // gyoseok17 피드백: PRIVATE
+@Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Owner extends BaseEntity {
@@ -39,16 +37,17 @@ public class Owner extends BaseEntity {
 
 	/**
 	 * Owner 생성 정적 팩토리 메서드
+	 * ✅ 피드백 반영: 검증은 DomainService에서 수행하므로 여기서는 제거
 	 * 양방향 연관관계 자동 설정
 	 *
-	 * @param user Owner 역할의 User 엔티티
-	 * @param businessNumber 사업자번호 (정규화되지 않은 원본)
+	 * @param user Owner 역할의 User 엔티티 (이미 검증된 상태)
+	 * @param businessNumber 사업자번호 (이미 검증된 상태, 정규화되지 않은 원본)
 	 * @return 생성된 Owner 엔티티
 	 */
 	public static Owner create(User user, String businessNumber) {
-		// Domain 검증
-		validateUser(user);
-		validateBusinessNumber(businessNumber);
+		// ✅ 피드백 반영: 검증 로직 제거 - DomainService에서 사전 검증 완료
+		// validateUser(user); - 제거
+		// validateBusinessNumber(businessNumber); - 제거
 
 		String normalizedBusinessNumber = normalizeBusinessNumber(businessNumber);
 
@@ -80,43 +79,9 @@ public class Owner extends BaseEntity {
 		return businessNumber.replaceAll("-", "").replaceAll("\\s", "");
 	}
 
-	// ========== Domain 검증 메서드 ==========
-
-	/**
-	 * User 엔티티 검증
-	 *
-	 * @param user 검증할 User 엔티티
-	 * @throws IllegalArgumentException User가 유효하지 않은 경우
-	 */
-	public static void validateUser(User user) {
-		if (user == null) {
-			throw new IllegalArgumentException("User는 필수입니다.");
-		}
-
-		if (!user.isOwner()) {
-			throw new IllegalArgumentException("Owner 역할의 User만 Owner 엔티티를 생성할 수 있습니다.");
-		}
-	}
-
-	/**
-	 * 사업자번호 도메인 검증 (기본 형식만)
-	 * 상세 체크섬 검증은 BusinessNumberValidator에서 수행
-	 *
-	 * @param businessNumber 검증할 사업자번호
-	 * @throws IllegalArgumentException 유효하지 않은 사업자번호인 경우
-	 */
-	public static void validateBusinessNumber(String businessNumber) {
-		if (businessNumber == null || businessNumber.trim().isEmpty()) {
-			throw new IllegalArgumentException("사업자번호는 필수 입력 값입니다.");
-		}
-
-		String normalized = normalizeBusinessNumber(businessNumber);
-
-		// 기본 형식 검증 (10자리 숫자)
-		if (!Pattern.matches("^\\d{10}$", normalized)) {
-			throw new IllegalArgumentException("사업자번호는 10자리 숫자여야 합니다.");
-		}
-	}
+	// ========== ❌ 제거된 검증 메서드들 (피드백 반영) ==========
+	// validateUser() - AuthDomainService로 이동
+	// validateBusinessNumber() - BusinessNumberValidator로 이동
 
 	// ========== Domain 비즈니스 메서드들 ==========
 
@@ -148,18 +113,20 @@ public class Owner extends BaseEntity {
 
 	/**
 	 * User 연관관계 업데이트
+	 * ✅ 피드백 반영: 검증은 DomainService에서 수행
 	 */
 	public void assignUser(User user) {
-		validateUser(user);
+		// ✅ 검증은 DomainService에서 수행하므로 여기서는 제거
 		this.user = user;
 		user.assignBusinessNumber(this.businessNumber);
 	}
 
 	/**
 	 * 사업자번호 업데이트
+	 * ✅ 피드백 반영: 검증은 DomainService에서 수행
 	 */
 	public void updateBusinessNumber(String newBusinessNumber) {
-		validateBusinessNumber(newBusinessNumber);
+		// ✅ 검증은 DomainService에서 수행하므로 여기서는 제거
 		String normalized = normalizeBusinessNumber(newBusinessNumber);
 		this.businessNumber = normalized;
 		this.user.assignBusinessNumber(normalized);

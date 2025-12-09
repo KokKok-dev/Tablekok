@@ -1,8 +1,7 @@
-// auth/domain/repository/UserRepository.java
 package com.tablekok.user_service.auth.domain.repository;
 
 import com.tablekok.user_service.auth.domain.entity.User;
-import com.tablekok.user_service.auth.domain.enums.UserRole;
+import com.tablekok.user_service.auth.domain.entity.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
