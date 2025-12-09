@@ -8,7 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-public record CreateReservationPolicyRequest(
+public record UpdateStoreReservationPolicyRequest(
 	@NotNull(message = "예약 오픈 날짜는 필수입니다.")
 	@Range(min = 1, max = 31, message = "예약 오픈 날짜는 1일부터 31일 사이여야 합니다.")
 	Integer monthlyOpenDay,
@@ -46,6 +46,5 @@ public record CreateReservationPolicyRequest(
 
 	@NotNull(message = "정책 활성화 여부는 필수입니다.")
 	Boolean isActive
-
 ) {
 }

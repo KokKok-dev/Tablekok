@@ -1,4 +1,4 @@
-package com.tablekok.reservation_service.application.dto.param;
+package com.tablekok.reservation_service.application.dto.command;
 
 import java.util.UUID;
 
@@ -8,7 +8,7 @@ import com.tablekok.reservation_service.domain.vo.ReservationDateTime;
 import lombok.Builder;
 
 @Builder
-public record CreateReservationParam(
+public record CreateReservationCommand(
 	UUID userId,
 	UUID storeId,
 	ReservationDateTime reservationDateTime,

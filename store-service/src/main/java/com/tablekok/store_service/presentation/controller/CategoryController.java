@@ -32,9 +32,9 @@ public class CategoryController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<Void>> createCategory(
-		@Valid @RequestBody CreateCategoryRequest requestDto
+		@Valid @RequestBody CreateCategoryRequest request
 	) {
-		UUID categoryId = categoryService.createCategory(requestDto.toParam());
+		UUID categoryId = categoryService.createCategory(request.toCommand());
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{categoryId}")
 			.buildAndExpand(categoryId)

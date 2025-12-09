@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.exception.AppException;
-import com.tablekok.store_service.application.dto.param.CreateCategoryParam;
+import com.tablekok.store_service.application.dto.command.CreateCategoryCommand;
 import com.tablekok.store_service.application.dto.result.FindCategoryResult;
 import com.tablekok.store_service.application.exception.CategoryErrorCode;
 import com.tablekok.store_service.domain.entity.Category;
@@ -24,10 +24,10 @@ public class CategoryService {
 	private final CategoryRepository categoryRepository;
 
 	@Transactional
-	public UUID createCategory(CreateCategoryParam param) {
-		validateCategoryNameDuplicate(param);
+	public UUID createCategory(CreateCategoryCommand command) {
+		validateCategoryNameDuplicate(command);
 
-		Category category = param.toEntity();
+		Category category = command.toEntity();
 		categoryRepository.save(category);
 		return category.getId();
 	}
@@ -39,8 +39,8 @@ public class CategoryService {
 		return categoryPage.map(FindCategoryResult::from);
 	}
 
-	private void validateCategoryNameDuplicate(CreateCategoryParam param) {
-		if (categoryRepository.existsByName(param.name())) {
+	private void validateCategoryNameDuplicate(CreateCategoryCommand command) {
+		if (categoryRepository.existsByName(command.name())) {
 			throw new AppException(CategoryErrorCode.DUPLICATE_CATEGORY_NAME);
 		}
 	}

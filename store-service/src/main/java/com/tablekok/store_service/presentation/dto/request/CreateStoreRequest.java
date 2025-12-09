@@ -2,6 +2,10 @@ package com.tablekok.store_service.presentation.dto.request;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
+
+import com.tablekok.store_service.application.dto.command.CreateOperatingHourCommand;
+import com.tablekok.store_service.application.dto.command.CreateStoreCommand;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -38,10 +42,35 @@ public record CreateStoreRequest(
 
 	String imageUrl,
 
+	@NotNull(message = "카테고리 정보는 필수입니다.")
+	@Size(min = 1, max = 3, message = "카테고리는 최소 1개, 최대 3개까지 설정 가능합니다.")
+	List<UUID> categoryIds,
+
 	@NotNull(message = "운영 시간 정보는 필수입니다.")
-	@Size(min = 1, message = "최소 하나의 운영 시간 정보가 필요합니다.")
+	@Size(min = 7, max = 7, message = "운영 시간 정보는 월요일부터 일요일까지 7개 모두 입력되어야 합니다.")
 	@Valid
 	List<CreateOperatingHourRequest> operatingHours
 ) {
 
+	public CreateStoreCommand toCommand(UUID ownerId) {
+
+		List<CreateOperatingHourCommand> operatingHourCommands = this.operatingHours.stream()
+			.map(CreateOperatingHourRequest::toCommand)
+			.toList();
+
+		return CreateStoreCommand.builder()
+			.ownerId(ownerId)
+			.name(name)
+			.phoneNumber(phoneNumber)
+			.address(address)
+			.latitude(latitude)
+			.longitude(longitude)
+			.description(description)
+			.totalCapacity(totalCapacity)
+			.turnoverRateMinutes(turnoverRateMinutes)
+			.imageUrl(imageUrl)
+			.categoryIds(categoryIds)
+			.operatingHours(operatingHourCommands)
+			.build();
+	}
 }

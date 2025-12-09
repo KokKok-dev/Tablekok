@@ -1,6 +1,6 @@
 package com.tablekok.store_service.presentation.dto.request;
 
-import com.tablekok.store_service.application.dto.param.CreateCategoryParam;
+import com.tablekok.store_service.application.dto.command.CreateCategoryCommand;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -9,8 +9,8 @@ public record CreateCategoryRequest(
 	String name
 
 ) {
-	public CreateCategoryParam toParam() {
-		return CreateCategoryParam.builder()
+	public CreateCategoryCommand toCommand() {
+		return CreateCategoryCommand.builder()
 			.name(name)
 			.build();
 	}
