@@ -1,11 +1,13 @@
 package com.tablekok.user_service.auth.application.service;
 
+import com.tablekok.exception.AppException;
 import com.tablekok.user_service.auth.application.dto.command.CustomerSignupCommand;
 import com.tablekok.user_service.auth.application.dto.command.OwnerSignupCommand;
 import com.tablekok.user_service.auth.application.dto.command.LoginCommand;
 import com.tablekok.user_service.auth.application.dto.result.SignupResult;
 import com.tablekok.user_service.auth.application.dto.result.LoginResult;
 import com.tablekok.user_service.auth.application.dto.result.UserDto;
+import com.tablekok.user_service.auth.application.exception.AuthErrorCode;
 import com.tablekok.user_service.auth.domain.entity.Owner;
 import com.tablekok.user_service.auth.domain.entity.User;
 import com.tablekok.user_service.auth.domain.entity.UserRole;
@@ -25,14 +27,13 @@ import java.util.UUID;
 /**
  * 인증 관련 Application Service (DTO 반환으로 개선)
  *
+ * ✅ gashine20 피드백 반영: Application 계층용 AuthErrorCode 사용
+ *
  * 주요 책임:
  * 1. 비즈니스 플로우 오케스트레이션
  * 2. Infrastructure 계층 호출 관리
  * 3. 트랜잭션 관리
  * 4. DTO 변환 관리 (Entity 직접 노출 방지)
- *
- * 팀 피드백: Service → Controller는 DTO로만 반환
- * 팀 피드백: Command/Result 구조로 변경 완료
  */
 @Slf4j
 @Service
@@ -43,7 +44,7 @@ public class AuthApplicationService {
 	private final UserRepository userRepository;
 	private final OwnerRepository ownerRepository;
 	private final AuthDomainService authDomainService;
-	private final UserDomainService userDomainService;  // 신규 추가
+	private final UserDomainService userDomainService;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 
@@ -139,7 +140,7 @@ public class AuthApplicationService {
 
 	/**
 	 * 로그인 (모든 역할 공통)
-	 * UserDomainService 활용으로 Optional 처리 자동화
+	 * ✅ gashine20 피드백 반영: AuthErrorCode 사용
 	 */
 	@Transactional
 	public LoginResult login(LoginCommand command) {
@@ -155,10 +156,10 @@ public class AuthApplicationService {
 		// 3. UserDomainService: 계정 상태 검증
 		userDomainService.validateAccountActive(user);
 
-		// 4. Infrastructure: 비밀번호 검증
+		// 4. ✅ Infrastructure: 비밀번호 검증 (AuthErrorCode 사용)
 		if (!passwordEncoder.matches(command.password(), user.getPassword())) {
 			log.warn("Login failed - password mismatch for user: {}", user.getUserId());
-			throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+			throw new AppException(AuthErrorCode.INVALID_CREDENTIALS);
 		}
 		log.debug("Password verification successful for user: {}", user.getUserId());
 

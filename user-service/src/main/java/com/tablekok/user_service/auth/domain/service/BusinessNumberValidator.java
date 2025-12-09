@@ -1,5 +1,7 @@
 package com.tablekok.user_service.auth.domain.service;
 
+import com.tablekok.exception.AppException;
+import com.tablekok.user_service.auth.domain.exception.AuthDomainErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -7,11 +9,11 @@ import java.util.regex.Pattern;
 
 /**
  * 사업자번호 검증 도메인 서비스
- * thdwnsdlf61 피드백: Validator를 Domain 계층으로 이동
+ * ✅ gashine20 피드백 반영: AppException + AuthDomainErrorCode 사용
  *
  * 사업자번호 관련 모든 검증, 변환, 포맷팅 로직을 담당
  * - 형식 검증 (10자리 숫자)
- * - 체크섬 알고리즘 검증 
+ * - 체크섬 알고리즘 검증
  * - 정규화 (하이픈 제거)
  * - 포맷팅 (XXX-XX-XXXXX)
  * - 마스킹 (보안용)
@@ -38,33 +40,104 @@ public class BusinessNumberValidator {
 	 */
 	private static final int[] CHECK_SUM_WEIGHTS = {1, 3, 7, 1, 3, 7, 1, 3, 5};
 
-	// ========== 공개 검증 메서드 ==========
+	// ========== 공개 검증 메서드 (AppException 발생) ==========
 
 	/**
-	 * 사업자번호 전체 유효성 검증
-	 * 형식 검증 + 체크섬 검증을 모두 수행
+	 * 사업자번호 필수값 및 형식 검증
+	 * ✅ gashine20 피드백 반영: AuthDomainErrorCode 사용
 	 *
-	 * @param businessNumber 검증할 사업자번호 (하이픈 포함/제외 모두 가능)
+	 * @param businessNumber 검증할 사업자번호
+	 * @throws AppException 유효하지 않은 경우
+	 */
+	public void validateRequired(String businessNumber) {
+		log.debug("Validating business number required: {}", maskForLog(businessNumber));
+
+		if (businessNumber == null || businessNumber.trim().isEmpty()) {
+			log.warn("Business number is required but was null or empty");
+			throw new AppException(AuthDomainErrorCode.INVALID_BUSINESS_NUMBER);
+		}
+	}
+
+	/**
+	 * 사업자번호 형식 검증 (10자리 숫자)
+	 * ✅ gashine20 피드백 반영: AuthDomainErrorCode 사용
+	 *
+	 * @param businessNumber 검증할 사업자번호
+	 * @throws AppException 형식이 올바르지 않은 경우
+	 */
+	public void validateFormat(String businessNumber) {
+		log.debug("Validating business number format: {}", maskForLog(businessNumber));
+
+		String normalized = normalize(businessNumber);
+
+		if (!BUSINESS_NUMBER_PATTERN.matcher(normalized).matches()) {
+			log.warn("Business number format validation failed: {}", maskForLog(businessNumber));
+			throw new AppException(AuthDomainErrorCode.INVALID_BUSINESS_NUMBER_FORMAT);
+		}
+
+		log.debug("Business number format validation passed");
+	}
+
+	/**
+	 * 사업자번호 체크섬 검증
+	 * ✅ gashine20 피드백 반영: AuthDomainErrorCode 사용
+	 *
+	 * @param businessNumber 검증할 사업자번호
+	 * @throws AppException 체크섬이 올바르지 않은 경우
+	 */
+	public void validateChecksum(String businessNumber) {
+		log.debug("Validating business number checksum: {}", maskForLog(businessNumber));
+
+		String normalized = normalize(businessNumber);
+
+		if (!isValidChecksum(normalized)) {
+			log.warn("Business number checksum validation failed: {}", maskForLog(businessNumber));
+			throw new AppException(AuthDomainErrorCode.INVALID_BUSINESS_NUMBER_CHECKSUM);
+		}
+
+		log.debug("Business number checksum validation passed");
+	}
+
+	/**
+	 * 사업자번호 전체 검증 (필수값 + 형식 + 체크섬)
+	 * ✅ gashine20 피드백 반영: AuthDomainErrorCode 사용
+	 *
+	 * @param businessNumber 검증할 사업자번호
+	 * @throws AppException 검증 실패 시
+	 */
+	public void validateAll(String businessNumber) {
+		log.debug("Validating business number (all): {}", maskForLog(businessNumber));
+
+		validateRequired(businessNumber);
+		validateFormat(businessNumber);
+		validateChecksum(businessNumber);
+
+		log.debug("All business number validations passed");
+	}
+
+	// ========== Boolean 반환 검증 메서드 (기존 유지) ==========
+
+	/**
+	 * 사업자번호 전체 유효성 검증 (Boolean 반환)
+	 *
+	 * @param businessNumber 검증할 사업자번호
 	 * @return 유효하면 true, 아니면 false
 	 */
 	public boolean isValid(String businessNumber) {
-		log.debug("Validating business number: {}", maskForLog(businessNumber));
+		log.debug("Checking business number validity: {}", maskForLog(businessNumber));
 
 		if (businessNumber == null || businessNumber.trim().isEmpty()) {
 			log.debug("Business number is null or empty");
 			return false;
 		}
 
-		// 정규화 (하이픈 제거)
 		String normalized = normalize(businessNumber);
 
-		// 기본 형식 검증
 		if (!isValidFormat(normalized)) {
 			log.debug("Business number format validation failed: {}", maskForLog(businessNumber));
 			return false;
 		}
 
-		// 체크섬 검증
 		boolean isValidChecksum = isValidChecksum(normalized);
 		log.debug("Business number checksum validation result: {} for number: {}",
 			isValidChecksum, maskForLog(businessNumber));
@@ -93,8 +166,7 @@ public class BusinessNumberValidator {
 	}
 
 	/**
-	 * 사업자번호 체크섬 검증
-	 * 국세청 체크섬 알고리즘 적용
+	 * 사업자번호 체크섬 검증 (Boolean 반환)
 	 *
 	 * @param businessNumber 검증할 사업자번호 (10자리 숫자)
 	 * @return 체크섬이 올바르면 true
@@ -107,7 +179,6 @@ public class BusinessNumberValidator {
 		}
 
 		try {
-			// 각 자리수를 정수로 변환
 			int[] digits = new int[10];
 			for (int i = 0; i < 10; i++) {
 				digits[i] = Character.getNumericValue(businessNumber.charAt(i));
@@ -117,16 +188,13 @@ public class BusinessNumberValidator {
 				}
 			}
 
-			// 체크섬 계산
 			int sum = 0;
 			for (int i = 0; i < 9; i++) {
 				sum += digits[i] * CHECK_SUM_WEIGHTS[i];
 			}
 
-			// 9번째 자리수에 5를 곱한 후 10으로 나눈 몫을 더함
 			sum += (digits[8] * 5) / 10;
 
-			// 체크 디지트 계산
 			int checkDigit = (10 - (sum % 10)) % 10;
 			boolean isValid = checkDigit == digits[9];
 
@@ -177,7 +245,7 @@ public class BusinessNumberValidator {
 
 		if (normalized.length() != 10) {
 			log.warn("Cannot format business number with invalid length: {}", normalized.length());
-			return businessNumber; // 원본 반환
+			return businessNumber;
 		}
 
 		String formatted = normalized.substring(0, 3) + "-" +
@@ -213,60 +281,6 @@ public class BusinessNumberValidator {
 		log.debug("Masked business number for security");
 
 		return masked;
-	}
-
-	// ========== 검증 결과 상세 정보 메서드 ==========
-
-	/**
-	 * 사업자번호 검증 결과 상세 정보 반환
-	 *
-	 * @param businessNumber 검증할 사업자번호
-	 * @return 검증 결과 상세 정보
-	 */
-	public ValidationResult validateWithDetails(String businessNumber) {
-		log.debug("Performing detailed validation for business number: {}", maskForLog(businessNumber));
-
-		ValidationResult.ValidationResultBuilder builder = ValidationResult.builder()
-			.originalNumber(businessNumber);
-
-		if (businessNumber == null || businessNumber.trim().isEmpty()) {
-			return builder
-				.isValid(false)
-				.errorMessage("사업자번호가 입력되지 않았습니다.")
-				.build();
-		}
-
-		String normalized = normalize(businessNumber);
-		builder.normalizedNumber(normalized);
-
-		// 형식 검증
-		if (!isValidFormat(normalized)) {
-			return builder
-				.isValid(false)
-				.formatValid(false)
-				.errorMessage("사업자번호는 10자리 숫자여야 합니다.")
-				.build();
-		}
-
-		builder.formatValid(true);
-
-		// 체크섬 검증
-		boolean checksumValid = isValidChecksum(normalized);
-		builder.checksumValid(checksumValid);
-
-		if (!checksumValid) {
-			return builder
-				.isValid(false)
-				.errorMessage("유효하지 않은 사업자번호입니다. (체크섬 오류)")
-				.build();
-		}
-
-		return builder
-			.isValid(true)
-			.formattedNumber(format(normalized))
-			.maskedNumber(mask(normalized))
-			.errorMessage(null)
-			.build();
 	}
 
 	// ========== 유틸리티 메서드 ==========
@@ -311,7 +325,6 @@ public class BusinessNumberValidator {
 
 	/**
 	 * 로깅용 사업자번호 마스킹
-	 * 로그에 민감정보가 노출되지 않도록 보호
 	 *
 	 * @param businessNumber 원본 사업자번호
 	 * @return 마스킹된 사업자번호 (로깅용)
@@ -327,38 +340,5 @@ public class BusinessNumberValidator {
 
 		return businessNumber.substring(0, 2) + "***" +
 			businessNumber.substring(businessNumber.length() - 2);
-	}
-
-	// ========== 내부 검증 결과 클래스 ==========
-
-	/**
-	 * 사업자번호 검증 결과 상세 정보
-	 */
-	@lombok.Builder
-	@lombok.Getter
-	@lombok.ToString
-	public static class ValidationResult {
-		private final String originalNumber;
-		private final String normalizedNumber;
-		private final String formattedNumber;
-		private final String maskedNumber;
-		private final boolean isValid;
-		private final boolean formatValid;
-		private final boolean checksumValid;
-		private final String errorMessage;
-
-		/**
-		 * 검증 성공 여부 확인
-		 */
-		public boolean isSuccess() {
-			return isValid && formatValid && checksumValid;
-		}
-
-		/**
-		 * 에러 메시지 존재 여부 확인
-		 */
-		public boolean hasError() {
-			return errorMessage != null && !errorMessage.trim().isEmpty();
-		}
 	}
 }
