@@ -49,7 +49,7 @@ public class StoreService {
 	@Transactional
 	public CreateStoreResult createStore(CreateStoreCommand command) {
 		// 음식점 중복확인
-		checkDuplicateStore(command.name(), command.address());
+		checkDuplicateStoreForCreation(command.name(), command.address());
 
 		// Store Entity 생성 (PENDING_APPROVAL 상태로)
 		Store store = command.toEntity();
@@ -82,7 +82,7 @@ public class StoreService {
 		store.validateIsUpdatable();
 
 		// 변경하려고 하는 음식점 정보 중복되는지 확인
-		checkDuplicateStore(command.name(), command.address());
+		checkDuplicateStoreForUpdate(command.name(), command.address(), command.storeId());
 
 		// Store 주인이 ownerId 맞는지 확인
 		// TODO : checkOwnership(store, command.ownerId());
@@ -201,9 +201,17 @@ public class StoreService {
 			.orElseThrow(() -> new AppException(StoreErrorCode.STORE_NOT_FOUND));
 	}
 
-	private void checkDuplicateStore(String name, String address) {
+	private void checkDuplicateStoreForCreation(String name, String address) {
+		// 똑같은 음식점이 있는지 확인
 		if (storeRepository.existsByNameAndAddress(name, address)) {
-			throw new AppException(StoreErrorCode.DUPLICATE_STORE_ENTRY);
+			throw new AppException(StoreErrorCode.DUPLICATE_STORE_INFO);
+		}
+	}
+
+	private void checkDuplicateStoreForUpdate(String name, String address, UUID currentStoreId) {
+		// 본인 빼고 똑같은 음식점이 있는가 확인
+		if (storeRepository.existsByNameAndAddressAndIdNot(name, address, currentStoreId)) {
+			throw new AppException(StoreErrorCode.DUPLICATE_STORE_INFO);
 		}
 	}
 

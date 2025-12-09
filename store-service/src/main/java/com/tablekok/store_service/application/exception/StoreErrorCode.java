@@ -14,7 +14,7 @@ public enum StoreErrorCode implements ErrorCode {
 	// ----------------------------------------------------
 	// STORE1xx: 음식점 관련 오류
 	// ----------------------------------------------------
-	DUPLICATE_STORE_ENTRY("STORE100", "중복된 음식점입니다.", HttpStatus.BAD_REQUEST),
+	DUPLICATE_STORE_INFO("STORE100", "중복된 음식점입니다.", HttpStatus.BAD_REQUEST),
 	STORE_NOT_FOUND("STORE101", "음식점을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
 	MASTER_INVALID_STATUS_TRANSITION("STORE102",
