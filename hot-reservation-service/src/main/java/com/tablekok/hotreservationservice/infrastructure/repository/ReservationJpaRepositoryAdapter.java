@@ -4,12 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import com.tablekok.exception.AppException;
-import com.tablekok.hotreservationservice.application.exception.HotReservationErrorCode;
 import com.tablekok.hotreservationservice.domain.entity.Reservation;
 import com.tablekok.hotreservationservice.domain.repository.ReservationRepository;
 
@@ -30,28 +26,6 @@ public class ReservationJpaRepositoryAdapter implements ReservationRepository {
 		UUID storeId, LocalDate reservationDate, LocalTime reservationTime) {
 		return reservationJpaRepository.existsByStoreIdAndReservationDateTimeReservationDateAndReservationDateTimeReservationTime(
 			storeId, reservationDate, reservationTime);
-	}
-
-	@Override
-	public Reservation findByIdAndUserId(UUID reservationId, UUID userId) {
-		return reservationJpaRepository.findByIdAndUserId(reservationId, userId).orElseThrow(() ->
-			new AppException(HotReservationErrorCode.RESERVATION_NOT_FOUND));
-	}
-
-	@Override
-	public Reservation findById(UUID reservationId) {
-		return reservationJpaRepository.findById(reservationId).orElseThrow(() ->
-			new AppException(HotReservationErrorCode.RESERVATION_NOT_FOUND));
-	}
-
-	@Override
-	public Page<Reservation> findByUserId(UUID userId, Pageable pageable) {
-		return reservationJpaRepository.findByUserId(userId, pageable);
-	}
-
-	@Override
-	public Page<Reservation> findByStoreId(UUID storeId, Pageable pageable) {
-		return reservationJpaRepository.findByStoreId(storeId, pageable);
 	}
 
 }

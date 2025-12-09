@@ -4,9 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import com.tablekok.hotreservationservice.domain.entity.Reservation;
 
 public interface ReservationRepository {
@@ -17,15 +14,4 @@ public interface ReservationRepository {
 	boolean existsByStoreIdAndReservationDateTimeReservationDateAndReservationDateTimeReservationTime(
 		UUID storeId, LocalDate reservationDate, LocalTime reservationTime);
 
-	// 고객 본인의 예약을 가져옴
-	Reservation findByIdAndUserId(UUID reservationId, UUID userId);
-
-	// 아이디로 예약 가져옴
-	Reservation findById(UUID reservationId);
-
-	// 고객이 예약한 모든 예약 조회
-	Page<Reservation> findByUserId(UUID userId, Pageable normalizedPageable);
-
-	// 해당 음식점의 모든 예약 조회
-	Page<Reservation> findByStoreId(UUID storeId, Pageable normalizedPageable);
 }
