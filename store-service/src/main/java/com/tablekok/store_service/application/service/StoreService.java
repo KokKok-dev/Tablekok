@@ -261,13 +261,16 @@ public class StoreService {
 				throw new AppException(StoreErrorCode.OPERATING_HOUR_MISSING);
 			}
 
+			operatingHourValidator.validateTimes(newCommand.openTime(),
+				newCommand.closeTime(),
+				newCommand.isClosed());
+
 			existingHour.updateInfo(
 				newCommand.openTime(),
 				newCommand.closeTime(),
 				newCommand.isClosed()
 			);
 
-			existingHour.validate();
 		}));
 	}
 }
