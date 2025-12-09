@@ -129,6 +129,9 @@ public class StoreController {
 		@Valid @RequestBody UpdateStoreReservationPolicyRequest request
 	) {
 		// 날짜예약 정책 정보 수정
+		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+
+		storeService.updateStoreReservationPolicy(request.toCommand(ownerId, storeId));
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("예약정책 정보 변경 성공", HttpStatus.OK));
 	}

@@ -1,9 +1,12 @@
 package com.tablekok.store_service.presentation.dto.request;
 
 import java.time.LocalTime;
+import java.util.UUID;
 
 import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.tablekok.store_service.application.dto.command.UpdateStoreReservationPolicyCommand;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -47,4 +50,21 @@ public record UpdateStoreReservationPolicyRequest(
 	@NotNull(message = "정책 활성화 여부는 필수입니다.")
 	Boolean isActive
 ) {
+
+	public UpdateStoreReservationPolicyCommand toCommand(UUID ownerId, UUID storeId) {
+		return UpdateStoreReservationPolicyCommand.builder()
+			.ownerId(ownerId)
+			.storeId(storeId)
+			.monthlyOpenDay(monthlyOpenDay)
+			.openTime(openTime)
+			.reservationInterval(reservationInterval)
+			.dailyReservationStartTime(dailyReservationStartTime)
+			.dailyReservationEndTime(dailyReservationEndTime)
+			.minHeadCount(minHeadCount)
+			.maxHeadcount(maxHeadcount)
+			.isDepositRequired(isDepositRequired)
+			.depositAmount(depositAmount)
+			.isActive(isActive)
+			.build();
+	}
 }

@@ -11,6 +11,7 @@ import com.tablekok.exception.AppException;
 import com.tablekok.store_service.application.dto.command.CreateStoreCommand;
 import com.tablekok.store_service.application.dto.command.CreateStoreReservationPolicyCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreCommand;
+import com.tablekok.store_service.application.dto.command.UpdateStoreReservationPolicyCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreStatusCommand;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
@@ -153,6 +154,45 @@ public class StoreService {
 
 	}
 
+	@Transactional
+	public void updateStoreReservationPolicy(UpdateStoreReservationPolicyCommand command) {
+		Store store = findStore(command.storeId());
+
+		// Store 주인이 ownerId 맞는지 확인
+		// TODO : checkOwnership(store, command.ownerId());
+		checkOwnership(store, store.getOwnerId());
+
+		// 예약 정책 찾기
+		StoreReservationPolicy policy = findPolicy(store);
+
+		// store 수정가능한 상태인지 확인
+		store.validateIsUpdatable();
+
+		// 날짜 예약 입력 검증
+		StoreReservationPolicyInput input = command.toVo();
+		storeReservationPolicyValidator.validate(input, store);
+
+		// 예약 오픈시간 변경된게 있으면 store 테이블에도 업데이트
+		if (!policy.getOpenTime().equals(command.openTime())) {
+			store.setReservationOpenTime(command.openTime());
+		}
+
+		// policy 정보 업데이트
+		policy.updatePolicyInfo(
+			command.monthlyOpenDay(),
+			command.openTime(),
+			command.reservationInterval(),
+			command.dailyReservationStartTime(),
+			command.dailyReservationEndTime(),
+			command.minHeadCount(),
+			command.maxHeadcount(),
+			command.isDepositRequired(),
+			command.depositAmount(),
+			command.isActive()
+		);
+
+	}
+
 	private Store findStore(UUID storeId) {
 		return storeRepository.findById(storeId)
 			.orElseThrow(() -> new AppException(StoreErrorCode.STORE_NOT_FOUND));
@@ -170,4 +210,11 @@ public class StoreService {
 		}
 	}
 
+	private StoreReservationPolicy findPolicy(Store store) {
+		StoreReservationPolicy policy = store.getStoreReservationPolicy();
+		if (policy == null) {
+			throw new AppException(StoreErrorCode.POLICY_NOT_FOUND);
+		}
+		return policy;
+	}
 }

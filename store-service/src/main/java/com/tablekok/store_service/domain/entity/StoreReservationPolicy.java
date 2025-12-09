@@ -113,4 +113,28 @@ public class StoreReservationPolicy extends BaseEntity {
 	public void softDelete(UUID deleterId) {
 		super.delete(deleterId);
 	}
+
+	public void updatePolicyInfo(
+		Integer monthlyOpenDay,
+		LocalTime openTime,
+		Integer reservationInterval,
+		LocalTime dailyReservationStartTime,
+		LocalTime dailyReservationEndTime,
+		Integer minHeadCount,
+		Integer maxHeadcount,
+		Boolean isDepositRequired,
+		Integer depositAmount,
+		Boolean isActive
+	) {
+		this.monthlyOpenDay = monthlyOpenDay;
+		this.openTime = openTime;
+		this.reservationInterval = reservationInterval;
+		this.dailyReservationStartTime = dailyReservationStartTime;
+		this.dailyReservationEndTime = dailyReservationEndTime;
+		this.minHeadcount = minHeadCount;
+		this.maxHeadcount = maxHeadcount;
+		this.isDepositRequired = isDepositRequired;
+		this.depositAmount = depositAmount;
+		this.isActive = isActive;
+	}
 }

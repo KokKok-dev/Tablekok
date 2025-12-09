@@ -31,8 +31,8 @@ public enum StoreErrorCode implements ErrorCode {
 	// ----------------------------------------------------
 	// SRP1xx: 예약 정책 (ReservationPolicy) 검증 오류
 	// ----------------------------------------------------
-	POLICY_ALREADY_EXISTS("SRP100", "해당 음식점의 예약 정책이 이미 등록되어 있습니다.", HttpStatus.BAD_REQUEST);
-
+	POLICY_ALREADY_EXISTS("SRP100", "해당 음식점의 예약 정책이 이미 등록되어 있습니다.", HttpStatus.BAD_REQUEST),
+	POLICY_NOT_FOUND("SRP101", "해당 음식점의 예약 정책을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
 	private final String code;
 	private final String message;
 	private final HttpStatus status;
