@@ -2,6 +2,7 @@ package com.tablekok.store_service.domain.entity;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.UUID;
 
 import com.tablekok.entity.BaseEntity;
 import com.tablekok.exception.AppException;
@@ -93,5 +94,9 @@ public class OperatingHour extends BaseEntity {
 				throw new AppException(StoreDomainErrorCode.INVALID_TIME_RANGE);
 			}
 		}
+	}
+
+	public void softDelete(UUID deleterId) {
+		super.delete(deleterId);
 	}
 }

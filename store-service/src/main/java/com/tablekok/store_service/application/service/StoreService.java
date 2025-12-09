@@ -10,6 +10,7 @@ import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
 import com.tablekok.store_service.application.dto.command.CreateStoreCommand;
 import com.tablekok.store_service.application.dto.command.CreateStoreReservationPolicyCommand;
+import com.tablekok.store_service.application.dto.command.UpdateStoreCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreStatusCommand;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
@@ -42,9 +43,7 @@ public class StoreService {
 	@Transactional
 	public CreateStoreResult createStore(CreateStoreCommand command) {
 		// 음식점 중복확인
-		if (storeRepository.existsByNameAndAddress(command.name(), command.address())) {
-			throw new AppException(StoreErrorCode.DUPLICATE_STORE_ENTRY);
-		}
+		checkDuplicateStore(command.name(), command.address());
 
 		// Store Entity 생성 (PENDING_APPROVAL 상태로)
 		Store store = command.toEntity();
@@ -69,30 +68,42 @@ public class StoreService {
 	}
 
 	@Transactional
-	public void createStoreReservationPolicy(UUID storeId, CreateStoreReservationPolicyCommand command) {
-		/*  [A] 일관성 및 존재 여부 검증 */
-		// 1. 실제 storeId가 있는지 확인
-		Store store = findStore(storeId);
+	public void updateStore(UpdateStoreCommand command) {
+		// storeId로 Store 찾기
+		Store store = findStore(command.storeId());
 
-		// 2. Store에 이미 ReservationPolicy가 등록되어 있는지 확인
-		if (store.getStoreReservationPolicy() != null) {
-			throw new AppException(StoreErrorCode.POLICY_ALREADY_EXISTS);
+		// Store Status가 정보 수정 허용하는 상태인지 확인
+		store.validateIsUpdatable();
+
+		// 변경하려고 하는 음식점 정보 중복되는지 확인
+		checkDuplicateStore(command.name(), command.address());
+
+		// Store 주인이 ownerId 맞는지 확인
+		// TODO : checkOwnership(store, command.ownerId());
+		checkOwnership(store, store.getOwnerId());
+
+		// 음식점 정보 수정
+		store.updateInfo(
+			command.name(),
+			command.phoneNumber(),
+			command.address(),
+			command.description(),
+			command.totalCapacity(),
+			command.turnoverRateMinutes(),
+			command.imageUrl()
+		);
+
+		// OperatingHours 수정이 일어났다면 정보 수정
+		if (command.operatingHours() != null && !command.operatingHours().isEmpty()) {
+			// 운영 시간 Entity 생성 및 검증
+			List<OperatingHour> hoursToSave = command.operatingHours().stream()
+				.map(createOperatingHourCommand -> createOperatingHourCommand.toEntity(store))
+				.toList();
+			operatingHourValidator.validateOperatingHours(hoursToSave);
+
+			// operatingHour 수정
+			store.updateOperatingHours(hoursToSave);
 		}
-		// 3. Store Status가 정책 생성을 허용하는 상태인지 확인
-		store.validatePolicyCreationAllowed();
-
-
-		/* [B] 입력 데이터 논리 검증  (Domain Validation) */
-		StoreReservationPolicyInput input = command.toVo();
-		storeReservationPolicyValidator.validate(input, store);
-
-
-		/* [C] 정책 생성 및 저장 */
-		StoreReservationPolicy policy = command.toEntity(store);
-		store.setStoreReservationPolicy(policy);
-		store.setReservationOpenTime(policy.getOpenTime());
-		storeRepository.save(store);
-
 	}
 
 	@Transactional
@@ -112,8 +123,51 @@ public class StoreService {
 		store.softDelete(deleterId);
 	}
 
+
+	/* ========= ========= 예약 정책 service ========= ========= */
+
+	@Transactional
+	public void createStoreReservationPolicy(UUID storeId, CreateStoreReservationPolicyCommand command) {
+		/*  [A] 일관성 및 존재 여부 검증 */
+		// 1. 실제 storeId가 있는지 확인
+		Store store = findStore(storeId);
+
+		// 2. Store에 이미 ReservationPolicy가 등록되어 있는지 확인
+		if (store.getStoreReservationPolicy() != null) {
+			throw new AppException(StoreErrorCode.POLICY_ALREADY_EXISTS);
+		}
+		// 3. Store Status가 정책 생성을 허용하는 상태인지 확인
+		store.validateIsUpdatable();
+
+
+		/* [B] 입력 데이터 논리 검증  (Domain Validation) */
+		StoreReservationPolicyInput input = command.toVo();
+		storeReservationPolicyValidator.validate(input, store);
+
+
+		/* [C] 정책 생성 및 저장 */
+		StoreReservationPolicy policy = command.toEntity(store);
+		store.setStoreReservationPolicy(policy);
+		store.setReservationOpenTime(policy.getOpenTime());
+		storeRepository.save(store);
+
+	}
+
 	private Store findStore(UUID storeId) {
 		return storeRepository.findById(storeId)
 			.orElseThrow(() -> new AppException(StoreErrorCode.STORE_NOT_FOUND));
 	}
+
+	private void checkDuplicateStore(String name, String address) {
+		if (storeRepository.existsByNameAndAddress(name, address)) {
+			throw new AppException(StoreErrorCode.DUPLICATE_STORE_ENTRY);
+		}
+	}
+
+	private void checkOwnership(Store store, UUID userId) {
+		if (!store.getOwnerId().equals(userId)) {
+			throw new AppException(StoreErrorCode.FORBIDDEN_ACCESS); // 접근 권한 없음 예외 발생
+		}
+	}
+
 }

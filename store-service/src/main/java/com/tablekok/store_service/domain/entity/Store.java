@@ -100,12 +100,30 @@ public class Store extends BaseEntity {
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<OperatingHour> operatingHours = new ArrayList<>();
 
-	@OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToOne(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private StoreReservationPolicy storeReservationPolicy;
 
 	public void updateCategoryIds(List<UUID> newCategoryIds) {
 		this.categoryIds.clear();
 		this.categoryIds.addAll(newCategoryIds);
+	}
+
+	public void updateInfo(
+		String name, String phoneNumber, String address, String description,
+		Integer totalCapacity, Integer turnoverRateMinutes, String imageUrl
+	) {
+		this.name = name;
+		this.phoneNumber = phoneNumber;
+		this.address = address;
+		this.description = description;
+		this.totalCapacity = totalCapacity;
+		this.turnoverRateMinutes = turnoverRateMinutes;
+		this.imageUrl = imageUrl;
+	}
+
+	public void updateOperatingHours(List<OperatingHour> newHours) {
+		this.operatingHours.clear();
+		this.operatingHours.addAll(newHours);
 	}
 
 	public void setStoreReservationPolicy(StoreReservationPolicy storeReservationPolicy) {
@@ -116,13 +134,12 @@ public class Store extends BaseEntity {
 		this.reservationOpenTime = reservationOpenTime;
 	}
 
-	public void validatePolicyCreationAllowed() {
+	public void validateIsUpdatable() {
 		if (this.status == StoreStatus.PENDING_APPROVAL ||
 			this.status == StoreStatus.APPROVAL_REJECTED ||
 			this.status == StoreStatus.DECOMMISSIONED) {
 
 			throw new AppException(StoreDomainErrorCode.INVALID_STORE_STATUS);
-
 		}
 	}
 
@@ -132,6 +149,16 @@ public class Store extends BaseEntity {
 
 	public void softDelete(UUID deleterId) {
 		super.delete(deleterId);
+
+		// 2. OperatingHour 소프트 삭제 위임 (1:N 관계)
+		if (this.operatingHours != null) {
+			this.operatingHours.forEach(hour -> hour.softDelete(deleterId));
+		}
+
+		// 3. StoreReservationPolicy 소프트 삭제 위임 (1:1 관계)
+		if (this.storeReservationPolicy != null) {
+			this.storeReservationPolicy.softDelete(deleterId);
+		}
 	}
 
 	@Builder(access = AccessLevel.PRIVATE)

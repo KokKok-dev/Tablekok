@@ -109,4 +109,8 @@ public class StoreReservationPolicy extends BaseEntity {
 			.isActive(isActive)
 			.build();
 	}
+
+	public void softDelete(UUID deleterId) {
+		super.delete(deleterId);
+	}
 }

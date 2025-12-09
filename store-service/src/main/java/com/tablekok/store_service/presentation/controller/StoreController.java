@@ -23,6 +23,7 @@ import com.tablekok.store_service.application.service.StoreService;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreReservationPolicyRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStatusRequest;
+import com.tablekok.store_service.presentation.dto.request.UpdateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStoreReservationPolicyRequest;
 import com.tablekok.store_service.presentation.dto.response.CreateStoreResponse;
 import com.tablekok.store_service.presentation.dto.response.GetStoreReservationPolicyResponse;
@@ -52,6 +53,21 @@ public class StoreController {
 
 		return ResponseEntity.created(location)
 			.body(ApiResponse.success("음식점 생성 성공", CreateStoreResponse.from(result), HttpStatus.CREATED));
+	}
+
+	@PatchMapping("/{storeId}")
+	public ResponseEntity<ApiResponse<Void>> updateStore(
+		@PathVariable UUID storeId,
+		@Valid @RequestBody UpdateStoreRequest request
+	) {
+		// store 생성
+		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+
+		storeService.updateStore(request.toCommand(ownerId, storeId));
+
+		return ResponseEntity.ok(
+			ApiResponse.success("음식점 정보 수정 성공", HttpStatus.OK)
+		);
 	}
 
 	@PatchMapping("/{storeId}/status")
