@@ -26,6 +26,8 @@ public enum StoreErrorCode implements ErrorCode {
 	MASTER_FORBIDDEN_REVERSION_TRANSITION("STORE106", "이미 승인된 상태에서 PENDING_APPROVAL로의 역전환은 안됩니다.",
 		HttpStatus.BAD_REQUEST),
 
+	FORBIDDEN_ACCESS("STORE107", "접근권한이 없습니다.", HttpStatus.BAD_REQUEST),
+
 	// ----------------------------------------------------
 	// SRP1xx: 예약 정책 (ReservationPolicy) 검증 오류
 	// ----------------------------------------------------

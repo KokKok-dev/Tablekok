@@ -15,7 +15,7 @@ public enum StoreDomainErrorCode implements ErrorCode {
 	// STORE0xx: 음식점 관련 오류
 	// ----------------------------------------------------
 	INVALID_CATEGORY_ID("STORE000", "유효하지 않은 카테고리 ID입니다.", HttpStatus.BAD_REQUEST),
-	INVALID_STORE_STATUS("STORE001", "현재 음식점 상태에서는 예약 정책 등록이 불가능합니다.", HttpStatus.BAD_REQUEST),
+	INVALID_STORE_STATUS("STORE001", "현재 음식점 상태에서는 수정이 불가능합니다.", HttpStatus.BAD_REQUEST),
 
 	// ----------------------------------------------------
 	// OH0xx: 운영 시간 (OperatingHour) 검증 오류
