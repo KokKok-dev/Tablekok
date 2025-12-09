@@ -8,6 +8,7 @@ import jakarta.validation.constraints.*;
  * 로그인 요청 DTO
  * API 명세서: POST /v1/auth/login
  *
+ * gashine20 피드백 반영: toParam() → toCommand() 메서드명 변경
  * 모든 역할군(CUSTOMER, OWNER, MASTER) 공통 사용
  * 순수 Validation만 담당 - 나머지 로직은 제거
  */
@@ -27,21 +28,15 @@ public record LoginRequest(
 ) {
 
 	/**
-	 * Request DTO → Application Layer Param 변환
-	 * shipping-19man 스타일 적용
+	 * Request DTO → Application Layer Command 변환
+	 * ✅ gashine20 피드백 반영: toParam() → toCommand() 메서드명 변경
 	 *
-	 * @return LoginParam (Application Layer DTO)
+	 * @return LoginCommand (Application Layer DTO)
 	 */
-	public LoginCommand toParam() {
+	public LoginCommand toCommand() {  // ✅ toParam() → toCommand() 변경
 		return LoginCommand.builder()
 			.email(email)
 			.password(password)
 			.build();
 	}
-
-	// ❌ 제거된 메서드들:
-	// - isValidRequest() → Service에서 처리
-	// - getNormalizedEmail() → Service에서 처리
-	// - getEmailDomain(), getEmailLocalPart() → Service에서 필요시 처리
-	// - toString() 오버라이드 → record 기본 toString 사용
 }

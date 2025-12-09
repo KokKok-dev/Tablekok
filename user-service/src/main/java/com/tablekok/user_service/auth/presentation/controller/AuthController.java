@@ -27,9 +27,11 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 인증 관련 REST API Controller
  *
+ * gashine20 피드백 반영: Request DTO의 toCommand() 메서드 사용
+ *
  * 주요 책임:
  * 1. HTTP 요청/응답 처리
- * 2. Request DTO → Command DTO 변환
+ * 2. Request DTO → Command DTO 변환 (toCommand() 사용)
  * 3. Result DTO → Response DTO 변환
  * 4. HTTP 상태 코드 관리
  *
@@ -68,23 +70,17 @@ public class AuthController {
 	) {
 		log.info("Customer signup request received for email: {}", request.email());
 
-		// Request → Command 변환
-		CustomerSignupCommand command = CustomerSignupCommand.builder()
-			.email(request.email())
-			.username(request.username())
-			.password(request.password())
-			.phone(request.phone())
-			.build();
+		// ✅ gashine20 피드백 반영: request.toCommand() 사용
+		CustomerSignupCommand command = request.toCommand();
 
 		// Service 호출
 		SignupResult result = authApplicationService.signupCustomer(command);
 
-		// Result → Response 변환 (실제 존재하는 메서드 사용)
+		// Result → Response 변환
 		SignupResponse response = SignupResponse.from(result);
 
 		log.info("Customer signup completed successfully for email: {}", request.email());
 
-		// Common 모듈 ApiResponse의 실제 시그니처 사용
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(ApiResponse.success("고객 회원가입이 완료되었습니다.", response, HttpStatus.CREATED));
 	}
@@ -112,24 +108,17 @@ public class AuthController {
 	) {
 		log.info("Owner signup request received for email: {} with business number", request.email());
 
-		// Request → Command 변환
-		OwnerSignupCommand command = OwnerSignupCommand.builder()
-			.email(request.email())
-			.username(request.username())
-			.password(request.password())
-			.phone(request.phone())
-			.businessNumber(request.businessNumber())
-			.build();
+		// ✅ gashine20 피드백 반영: request.toCommand() 사용
+		OwnerSignupCommand command = request.toCommand();
 
 		// Service 호출
 		SignupResult result = authApplicationService.signupOwner(command);
 
-		// Result → Response 변환 (실제 존재하는 메서드 사용)
+		// Result → Response 변환
 		SignupResponse response = SignupResponse.from(result);
 
 		log.info("Owner signup completed successfully for email: {}", request.email());
 
-		// Common 모듈 ApiResponse의 실제 시그니처 사용
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(ApiResponse.success("사장님 회원가입이 완료되었습니다.", response, HttpStatus.CREATED));
 	}
@@ -161,22 +150,18 @@ public class AuthController {
 	) {
 		log.info("Login request received for email: {}", request.email());
 
-		// Request → Command 변환
-		LoginCommand command = LoginCommand.builder()
-			.email(request.email())
-			.password(request.password())
-			.build();
+		// ✅ gashine20 피드백 반영: request.toCommand() 사용
+		LoginCommand command = request.toCommand();
 
 		// Service 호출
 		LoginResult result = authApplicationService.login(command);
 
-		// Result → Response 변환 (실제 존재하는 메서드 사용)
+		// Result → Response 변환
 		LoginResponse response = LoginResponse.from(result);
 
 		log.info("Login completed successfully for email: {} with role: {}",
 			request.email(), response.role());
 
-		// Common 모듈 ApiResponse의 실제 시그니처 사용
 		return ResponseEntity.ok(
 			ApiResponse.success("로그인이 완료되었습니다.", response, HttpStatus.OK)
 		);

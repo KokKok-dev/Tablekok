@@ -101,10 +101,12 @@ public class Owner extends BaseEntity {
 	 * 사업자번호 도메인 검증 (기본 형식만)
 	 * 상세 체크섬 검증은 BusinessNumberValidator에서 수행
 	 *
+	 * ✅ gashine20 피드백 고려: AuthDomainService에서 접근 가능하도록 public으로 변경
+	 *
 	 * @param businessNumber 검증할 사업자번호
 	 * @throws IllegalArgumentException 유효하지 않은 사업자번호인 경우
 	 */
-	public static void validateBusinessNumber(String businessNumber) {
+	public static void validateBusinessNumber(String businessNumber) {  // ✅ private → public 변경
 		if (businessNumber == null || businessNumber.trim().isEmpty()) {
 			throw new IllegalArgumentException("사업자번호는 필수 입력 값입니다.");
 		}

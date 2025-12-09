@@ -112,12 +112,19 @@ public class UserDomainService {
 	 * @throws IllegalArgumentException 이미 가입된 휴대폰번호인 경우
 	 */
 	public void validatePhoneNumberNotDuplicated(String phoneNumber) {
-		String normalizedPhone = User.normalizePhoneNumber(phoneNumber);
+		String normalizedPhone = normalizePhoneNumber(phoneNumber);
 		if (userRepository.existsByPhoneNumber(normalizedPhone)) {
 			log.warn("Phone number duplication validation failed: {}", normalizedPhone);
 			throw new IllegalArgumentException("이미 가입된 휴대폰번호입니다.");
 		}
 		log.debug("Phone number duplication check passed: {}", normalizedPhone);
+	}
+
+	private String normalizePhoneNumber(String phoneNumber) {
+		if (phoneNumber == null) {
+			return null;
+		}
+		return phoneNumber.replaceAll("-", "").replaceAll("\\s", "");
 	}
 
 	// ========== User 상태 검증 ==========
@@ -158,7 +165,7 @@ public class UserDomainService {
 	 * @return 사용 가능하면 true
 	 */
 	public boolean isPhoneNumberAvailable(String phoneNumber) {
-		String normalizedPhone = User.normalizePhoneNumber(phoneNumber);
+		String normalizedPhone = normalizePhoneNumber(phoneNumber);
 		boolean available = !userRepository.existsByPhoneNumber(normalizedPhone);
 		log.debug("Phone number availability check: {}", available);
 		return available;
