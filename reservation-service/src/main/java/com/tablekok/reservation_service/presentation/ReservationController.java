@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.entity.UserRole;
 import com.tablekok.reservation_service.application.dto.result.CreateReservationResult;
 import com.tablekok.reservation_service.application.service.ReservationService;
 import com.tablekok.reservation_service.presentation.dto.request.CreateReservationRequest;
@@ -75,7 +76,7 @@ public class ReservationController {
 	@PatchMapping("/{reservationId}/cancel")
 	public ResponseEntity<ApiResponse<Void>> cancelReservation(@PathVariable("reservationId") UUID reservationId) {
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
-		String userRole = "OWNER";     //TODO 추후 유저id 구현
+		UserRole userRole = UserRole.OWNER;     //TODO 추후 유저id 구현
 
 		reservationService.cancelReservation(userId, userRole, reservationId);
 		return ResponseEntity.ok(
