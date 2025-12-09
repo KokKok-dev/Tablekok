@@ -104,6 +104,14 @@ public class StoreService {
 		strategy.changeStatus(store, newStatus);
 	}
 
+	@Transactional
+	public void deleteStore(UUID storeId, UUID deleterId) {
+		Store store = findStore(storeId);
+
+		store.changeStatus(StoreStatus.DECOMMISSIONED);
+		store.softDelete(deleterId);
+	}
+
 	private Store findStore(UUID storeId) {
 		return storeRepository.findById(storeId)
 			.orElseThrow(() -> new AppException(StoreErrorCode.STORE_NOT_FOUND));

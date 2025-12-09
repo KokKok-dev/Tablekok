@@ -26,15 +26,8 @@ public class OwnerStatusStrategy implements StoreStatusTransitionStrategy {
 	// Owner가 목표 상태로 설정할 수 없는 Master 전용 상태 목록
 	private final Set<StoreStatus> FORBIDDEN_NEW_STATUSES = Set.of(
 		StoreStatus.PENDING_APPROVAL,
-		StoreStatus.APPROVAL_REJECTED
-	);
-
-	// Owner가 OPERATING 상태에서 설정할 수 있는 임시 상태 목록
-	private final Set<StoreStatus> ALLOWED_TRANSITION_FROM_OPERATING = Set.of(
-		StoreStatus.CLOSED_TODAY,
-		StoreStatus.BREAK_TIME,
-		StoreStatus.OPERATING, // 복구는 가능해야 함
-		StoreStatus.DECOMMISSIONED // 영구 폐업 요청 가능
+		StoreStatus.APPROVAL_REJECTED,
+		StoreStatus.DECOMMISSIONED
 	);
 
 	@Override
