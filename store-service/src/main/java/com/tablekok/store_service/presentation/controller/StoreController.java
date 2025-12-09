@@ -74,7 +74,7 @@ public class StoreController {
 	@PatchMapping("/{storeId}/status")
 	public ResponseEntity<ApiResponse<Void>> updateStatus(
 		@PathVariable UUID storeId,
-		@RequestBody UpdateStatusRequest request
+		@Valid @RequestBody UpdateStatusRequest request
 	) {
 		// TODO: 추후 userRole 작업
 		UserRole userRole = UserRole.OWNER;
@@ -140,7 +140,7 @@ public class StoreController {
 	@PatchMapping("/{storeId}/reservation-policy/status")
 	public ResponseEntity<ApiResponse<Void>> updateStoreReservationPolicyStatus(
 		@PathVariable UUID storeId,
-		@RequestBody UpdatePolicyStatusRequest request
+		@Valid @RequestBody UpdatePolicyStatusRequest request
 	) {
 		// 날짜예약 정책 활성/비활성화
 		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
