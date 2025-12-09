@@ -31,6 +31,7 @@ import com.tablekok.store_service.domain.repository.StoreRepository;
 import com.tablekok.store_service.domain.service.CategoryLinker;
 import com.tablekok.store_service.domain.service.OperatingHourValidator;
 import com.tablekok.store_service.domain.service.StoreReservationPolicyValidator;
+import com.tablekok.store_service.domain.vo.OperatingHourInput;
 import com.tablekok.store_service.domain.vo.StoreReservationPolicyInput;
 
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,13 @@ public class StoreService {
 		// 음식점 중복확인
 		checkDuplicateStoreForCreation(command.name(), command.address());
 
+		// OperatingHour Input VO 리스트 생성 및 논리 검증
+		List<OperatingHourInput> hourInputs = command.operatingHours().stream()
+			.map(CreateOperatingHourCommand::toOperatingHourInput)
+			.toList();
+		// 운영시간 검증
+		operatingHourValidator.validateOperatingHourInputs(hourInputs);
+
 		// Store Entity 생성 (PENDING_APPROVAL 상태로)
 		Store store = command.toEntity();
 
@@ -59,9 +67,6 @@ public class StoreService {
 		List<OperatingHour> hoursToSave = command.operatingHours().stream()
 			.map(createOperatingHourCommand -> createOperatingHourCommand.toEntity(store))
 			.toList();
-
-		// 운영시간 검증
-		operatingHourValidator.validateOperatingHours(hoursToSave);
 
 		// Category ID를 사용하여 Entity 조회 및 연결
 		categoryDomainService.linkCategoriesToStore(store, command.categoryIds());
