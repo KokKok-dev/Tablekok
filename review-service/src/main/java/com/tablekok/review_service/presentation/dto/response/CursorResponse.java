@@ -7,7 +7,7 @@ import com.tablekok.review_service.application.dto.result.CursorResult;
 
 public record CursorResponse<T>(
 	List<T> contents,
-	UUID netCursorId,
+	UUID nextCursorId,
 	String nextCursor,
 	boolean hasNext
 ) {
