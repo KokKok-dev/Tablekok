@@ -149,6 +149,16 @@ public class Store extends BaseEntity {
 
 	public void softDelete(UUID deleterId) {
 		super.delete(deleterId);
+
+		// 2. OperatingHour 소프트 삭제 위임 (1:N 관계)
+		if (this.operatingHours != null) {
+			this.operatingHours.forEach(hour -> hour.softDelete(deleterId));
+		}
+
+		// 3. StoreReservationPolicy 소프트 삭제 위임 (1:1 관계)
+		if (this.storeReservationPolicy != null) {
+			this.storeReservationPolicy.softDelete(deleterId);
+		}
 	}
 
 	@Builder(access = AccessLevel.PRIVATE)
