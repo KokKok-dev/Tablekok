@@ -1,13 +1,18 @@
 package com.tablekok.store_service.application.service;
 
+import java.time.DayOfWeek;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
+import com.tablekok.store_service.application.dto.command.CreateOperatingHourCommand;
 import com.tablekok.store_service.application.dto.command.CreateStoreCommand;
 import com.tablekok.store_service.application.dto.command.CreateStoreReservationPolicyCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreCommand;
@@ -96,14 +101,12 @@ public class StoreService {
 
 		// OperatingHours 수정이 일어났다면 정보 수정
 		if (command.operatingHours() != null && !command.operatingHours().isEmpty()) {
-			// 운영 시간 Entity 생성 및 검증
-			List<OperatingHour> hoursToSave = command.operatingHours().stream()
-				.map(createOperatingHourCommand -> createOperatingHourCommand.toEntity(store))
-				.toList();
-			operatingHourValidator.validateOperatingHours(hoursToSave);
+			// 1. 요청 데이터를 Map으로 변환: 비교 효율성 증대 (Key: DayOfWeek)
+			Map<DayOfWeek, CreateOperatingHourCommand> newHoursMap = command.operatingHours().stream()
+				.collect(Collectors.toMap(CreateOperatingHourCommand::dayOfWeek, Function.identity()));
 
 			// operatingHour 수정
-			store.updateOperatingHours(hoursToSave);
+			updateAllOperatingHours(store, newHoursMap);
 		}
 	}
 
@@ -216,5 +219,30 @@ public class StoreService {
 			throw new AppException(StoreErrorCode.POLICY_NOT_FOUND);
 		}
 		return policy;
+	}
+
+	private void updateAllOperatingHours(
+		Store store,
+		Map<DayOfWeek, CreateOperatingHourCommand> newHoursMap
+	) {
+		Map<DayOfWeek, OperatingHour> existingHoursMap = store.getOperatingHours().stream()
+			.collect(Collectors.toMap(OperatingHour::getDayOfWeek, Function.identity()));
+
+		// 요청 Map 을 순회하며 기존 엔티티를 찾아 업데이트
+		newHoursMap.forEach(((dayOfWeek, newCommand) -> {
+			OperatingHour existingHour = existingHoursMap.get(dayOfWeek);
+
+			if (existingHour == null) {
+				throw new AppException(StoreErrorCode.OPERATING_HOUR_MISSING);
+			}
+
+			existingHour.updateInfo(
+				newCommand.openTime(),
+				newCommand.closeTime(),
+				newCommand.isClosed()
+			);
+
+			existingHour.validate();
+		}));
 	}
 }

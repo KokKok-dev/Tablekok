@@ -99,4 +99,11 @@ public class OperatingHour extends BaseEntity {
 	public void softDelete(UUID deleterId) {
 		super.delete(deleterId);
 	}
+
+	public void updateInfo(LocalTime openTime, LocalTime closeTime, boolean isClosed) {
+		this.openTime = openTime;
+		this.closeTime = closeTime;
+		this.isClosed = isClosed;
+	}
+
 }
