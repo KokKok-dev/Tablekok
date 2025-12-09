@@ -1,7 +1,6 @@
 package com.tablekok.reservation_service.presentation.dto.request;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.tablekok.reservation_service.application.dto.command.CreateReservationCommand;
@@ -16,12 +15,9 @@ public record CreateReservationRequest(
 	@NotNull(message = "가게 ID는 필수입니다.")
 	UUID storeId,
 
-	@NotNull(message = "예약 날짜는 필수입니다.")
+	@NotNull(message = "예약 날짜, 시간은 필수입니다.")
 	@FutureOrPresent(message = "예약 날짜는 오늘 또는 미래 날짜여야 합니다.")
-	LocalDate reservationDate,
-
-	@NotNull(message = "예약 시간은 필수입니다.")
-	LocalTime reservationTime,
+	LocalDateTime reservationDateTime,
 
 	@NotNull(message = "예약 인원은 필수입니다.")
 	@Min(value = 1, message = "예약 인원은 최소 1명이어야 합니다.")
@@ -35,7 +31,7 @@ public record CreateReservationRequest(
 		return CreateReservationCommand.builder()
 			.userId(userId)
 			.storeId(storeId)
-			.reservationDateTime(ReservationDateTime.of(reservationDate, reservationTime))
+			.reservationDateTime(ReservationDateTime.of(reservationDateTime))
 			.headcount(headcount)
 			.deposit(deposit)
 			.build();
