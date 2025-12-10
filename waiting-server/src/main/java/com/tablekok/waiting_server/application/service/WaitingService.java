@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.tablekok.waiting_server.application.dto.command.CreateWaitingCommand;
 import com.tablekok.waiting_server.application.dto.result.CreateWaitingResult;
+import com.tablekok.waiting_server.application.dto.result.GetWaitingResult;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,6 +46,25 @@ public class WaitingService {
 			estimatedTime,
 			"WAITING",
 			LocalDateTime.now()
+		);
+	}
+
+	public GetWaitingResult getWaiting(UUID waitingId) {
+		// TODO: waitingId로 웨이팅 기록 조회
+		// TODO: 매장 ID 및 상태 확인 (웨이팅을 받고 있는지)
+		// TODO: Redis 순위, 팀 수, 예상 시간 조회/계산
+
+		UUID dummyStoreId = UUID.fromString("1a1b1c1d-1111-2222-3333-1234567890ab");
+
+		return GetWaitingResult.of(
+			waitingId,
+			dummyStoreId,
+			105,              // waitingNumber (DB에서 가져옴)
+			3,                // currentRank (Redis에서 계산)
+			5,                // currentWaitingTeams (Redis에서 계산)
+			25,               // estimatedWaitMinutes (계산)
+			"WAITING",        // status (DB에서 가져옴)
+			LocalDateTime.now().minusMinutes(10) // queuedAt (DB에서 가져옴)
 		);
 	}
 }

@@ -8,3 +8,8 @@ Content-Type: application/json
   "nonMemberName": "김철수",
   "nonMemberPhone": "01012345678"
 }
+
+
+### 웨이팅 조회
+GET http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1
+Content-Type: application/json
