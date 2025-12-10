@@ -67,4 +67,13 @@ public class WaitingService {
 			LocalDateTime.now().minusMinutes(10) // queuedAt (DB에서 가져옴)
 		);
 	}
+
+	public void confirmWaiting(UUID waitingId) {
+		// TODO: waitingId를 사용하여 WaitingQueue를 조회
+		// TODO: 현재 상태가 반드시 CALLED인지 확인
+		// TODO: entity 상태 변경 (CALLED -> CONFIRMED)
+
+		// TODO: 호출 시점부터 시작된 노쇼 자동 처리 타이머를 즉시 중단(취소)
+		// TODO: 고객이 입장을 확정했음을 사장님(Store Owner)에게 실시간으로 알림
+	}
 }

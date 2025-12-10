@@ -57,4 +57,15 @@ public class WaitingUserController {
 			ApiResponse.success("웨이팅 정보 조회 성공", GetWaitingResponse.from(result), HttpStatus.OK)
 		);
 	}
+
+	@PostMapping("/{waitingId}/confirm")
+	public ResponseEntity<ApiResponse<Void>> confirmWaiting(
+		@PathVariable UUID waitingId
+	) {
+		waitingService.confirmWaiting(waitingId);
+		return ResponseEntity.ok(
+			ApiResponse.success("웨이팅 confirm 상태 변경 성공", HttpStatus.OK)
+		);
+	}
+
 }

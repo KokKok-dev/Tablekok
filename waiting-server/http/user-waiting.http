@@ -13,3 +13,9 @@ Content-Type: application/json
 ### 웨이팅 조회
 GET http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1
 Content-Type: application/json
+
+
+### 웨이팅 상태 변경 (CONFIRM)
+POST http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/confirm
+Content-Type: application/json
+
