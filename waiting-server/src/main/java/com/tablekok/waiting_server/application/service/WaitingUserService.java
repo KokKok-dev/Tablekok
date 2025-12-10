@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class WaitingService {
+public class WaitingUserService {
 
 	// @Transactional
 	public CreateWaitingResult createWaiting(CreateWaitingCommand command) {
