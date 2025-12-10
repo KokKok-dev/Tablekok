@@ -19,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.entity.UserRole;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
+import com.tablekok.store_service.application.dto.result.GetStoreReservationPolicyResult;
 import com.tablekok.store_service.application.service.StoreService;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreReservationPolicyRequest;
@@ -119,9 +120,10 @@ public class StoreController {
 	public ResponseEntity<ApiResponse<GetStoreReservationPolicyResponse>> getStoreReservationPolicy(
 		@PathVariable UUID storeId
 	) {
-		GetStoreReservationPolicyResponse responseDto = GetStoreReservationPolicyResponse.from();
+		GetStoreReservationPolicyResult result = storeService.getStoreReservationPolicy(storeId);
+		GetStoreReservationPolicyResponse response = GetStoreReservationPolicyResponse.from(result);
 		return ResponseEntity.ok()
-			.body(ApiResponse.success("예약정책 조회 성공", responseDto, HttpStatus.OK));
+			.body(ApiResponse.success("예약정책 조회 성공", response, HttpStatus.OK));
 	}
 
 	@PutMapping("/{storeId}/reservation-policy")

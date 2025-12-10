@@ -20,6 +20,7 @@ import com.tablekok.store_service.application.dto.command.UpdateStoreReservation
 import com.tablekok.store_service.application.dto.command.UpdateStoreReservationPolicyStatusCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreStatusCommand;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
+import com.tablekok.store_service.application.dto.result.GetStoreReservationPolicyResult;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
 import com.tablekok.store_service.application.service.strategy.StoreStatusTransitionStrategy;
 import com.tablekok.store_service.application.service.strategy.StrategyFactory;
@@ -272,5 +273,12 @@ public class StoreService {
 			);
 
 		}));
+	}
+
+	public GetStoreReservationPolicyResult getStoreReservationPolicy(UUID storeId) {
+		Store store = findStore(storeId);
+		StoreReservationPolicy policy = store.getStoreReservationPolicy();
+
+		return GetStoreReservationPolicyResult.from(policy);
 	}
 }
