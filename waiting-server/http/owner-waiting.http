@@ -1,0 +1,4 @@
+
+### 웨이팅 큐 조회
+GET http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/queue
+Content-Type: application/json
