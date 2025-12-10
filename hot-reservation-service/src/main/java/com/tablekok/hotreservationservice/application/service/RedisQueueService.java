@@ -68,6 +68,11 @@ public class RedisQueueService {
 		redisTemplate.opsForZSet().remove(QUEUE_KEY, userId);
 	}
 
+	// 사용자의 토큰 조회
+	public String getToken(String userId) {
+		return redisTemplate.opsForValue().get(TOKEN_PREFIX + userId);
+	}
+
 	// 유효한 예약 토큰인지 확인합니다.
 	public void validateToken(String userId, String token) {
 		String storedToken = redisTemplate.opsForValue().get(TOKEN_PREFIX + userId);

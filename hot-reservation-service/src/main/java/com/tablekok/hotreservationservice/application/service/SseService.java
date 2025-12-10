@@ -20,37 +20,84 @@ public class SseService {
 	@Value("${queue.sse.timeout}")
 	private Long TIMEOUT;
 
-	// 새로운 SSE 연결을 등록합니다.
-	// @param userId 사용자 ID
-	// @return SseEmitter 객체
-	public SseEmitter addEmitter(String userId, Long rank) {
-		// 이미 연결된 Emitter가 있다면 닫고 새로 생성
+	// 새로운 SSE 연결. 대기중인 유저라면 순번 반환
+	public SseEmitter connectEmitterAndGetRank(String userId, Long rank) {
+		// 이미 연결된 Emitter가 있다면 그거 리턴
 		if (emitters.containsKey(userId)) {
-			emitters.get(userId).complete();
-			emitters.remove(userId);
+			SseEmitter emitter = emitters.get(userId);
+			try {
+				emitter.send(SseEmitter.event()
+					.name("connect")
+					.data(rank + 1)
+					.id(userId));
+			} catch (IOException e) {
+				log.error("Failed to send initial message to {}", userId, e);
+			}
+
+			return emitter;
 		}
 
-		SseEmitter emitter = new SseEmitter(TIMEOUT);
-		this.emitters.put(userId, emitter);
+		SseEmitter newEmitter = new SseEmitter(TIMEOUT);
+		this.emitters.put(userId, newEmitter);
 
 		// Emitter가 만료되거나 완료되면 Map에서 제거
-		emitter.onCompletion(() -> this.emitters.remove(userId));
-		emitter.onTimeout(() -> {
+		newEmitter.onCompletion(() -> this.emitters.remove(userId));
+		newEmitter.onTimeout(() -> {
 			log.warn("SSE Emitter Timeout: {}", userId);
-			emitter.complete();
+			newEmitter.complete();
 			this.emitters.remove(userId);
 		});
 
 		try {
-			emitter.send(SseEmitter.event()
-				.name("connect")
+			newEmitter.send(SseEmitter.event()
+				.name("connect-rank")
 				.data(rank + 1)
 				.id(userId));
 		} catch (IOException e) {
 			log.error("Failed to send initial message to {}", userId, e);
 		}
 
-		return emitter;
+		return newEmitter;
+	}
+
+	// SSE 연결. 예약 입장한 유저라면 토큰 반환
+	public SseEmitter connectEmitterAndGetToken(String userId, String token) {
+		// 이미 연결된 Emitter가 있다면 그거 리턴
+		if (emitters.containsKey(userId)) {
+			SseEmitter emitter = emitters.get(userId);
+			try {
+				emitter.send(SseEmitter.event()
+					.name("connect-token")
+					.data(token)
+					.id(userId));
+			} catch (IOException e) {
+				log.error("Failed to send initial message to {}", userId, e);
+			}
+
+			return emitter;
+		}
+
+		SseEmitter newEmitter = new SseEmitter(TIMEOUT);
+		this.emitters.put(userId, newEmitter);
+
+		// Emitter가 만료되거나 완료되면 Map에서 제거
+		newEmitter.onCompletion(() -> this.emitters.remove(userId));
+		newEmitter.onTimeout(() -> {
+			log.warn("SSE Emitter Timeout: {}", userId);
+			newEmitter.complete();
+			this.emitters.remove(userId);
+		});
+
+		try {
+			newEmitter.send(SseEmitter.event()
+				.name("connect")
+				.data(token)
+				.id(userId));
+		} catch (IOException e) {
+			log.error("Failed to send initial message to {}", userId, e);
+		}
+
+		return newEmitter;
 	}
 
 	// 특정 사용자에게 메시지를 전송합니다.

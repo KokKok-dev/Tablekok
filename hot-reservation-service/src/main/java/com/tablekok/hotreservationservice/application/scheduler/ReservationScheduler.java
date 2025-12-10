@@ -71,7 +71,7 @@ public class ReservationScheduler {
 		Set<String> allUsers = redisQueueService.getAllUsers();
 
 		int index = 0;
-		for (String userId : allUsers) {
+		for (String userId : allUsers) { // 스케쥴러로 항상 모든 유저를 조회..? 흠..
 			if (index < count) {
 				// 예약 가능자 처리
 				String token = redisQueueService.issueTokenAndRegister(userId);

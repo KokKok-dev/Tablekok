@@ -39,13 +39,19 @@ public class HotReservationController {
 	public SseEmitter connect() {
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
 
+		String token = redisQueueService.getToken(userId.toString());
+		if (token != null) {
+			// 입장 진행 중인 유저. 연결 후 토큰 반환
+			return sseService.connectEmitterAndGetToken(userId.toString(), token);
+		}
+
+		// 순번 확인
 		Long rank = redisQueueService.getRank(userId.toString());
-		// 대기열 없는 경우 대기열 추가
 		if (rank == null) {
 			rank = redisQueueService.enterQueue(userId.toString());
 		}
 
-		return sseService.addEmitter(userId.toString(), rank);
+		return sseService.connectEmitterAndGetRank(userId.toString(), rank);
 	}
 
 	// 토큰 검증
@@ -54,7 +60,7 @@ public class HotReservationController {
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
 
 		redisQueueService.validateToken(userId.toString(), token);
-		
+
 		return ResponseEntity.ok(
 			ApiResponse.success("토큰이 검증되었습니다.", HttpStatus.ACCEPTED));
 	}
@@ -71,7 +77,7 @@ public class HotReservationController {
 		// 예약 진행
 		CreateReservationResult result = hotReservationService.createReservation(request.toCommand(userId));
 
-		// 예약 요청 후 ZSet, emitter 삭제
+		// 예약 요청 후 토큰, 해시테이블, emitter 삭제
 		redisQueueService.completeReservation(userId.toString());
 		sseService.completeEmitter(userId.toString());
 
