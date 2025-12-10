@@ -24,9 +24,9 @@ public class StoreWaitingStatus extends BaseEntity {
 	private UUID storeId;
 
 	@Column(name = "latest_assigned_number", nullable = false)
-	private Integer latestAssignedNumber = 0; // 마지막으로 발급된 웨이팅 번호
+	private int latestAssignedNumber = 0; // 마지막으로 발급된 웨이팅 번호
 
 	@Column(name = "current_calling_number", nullable = false)
-	private Integer currentCallingNumber = 0; // 현재 매장에서 호출 중인 가장 최근 대기 번호
+	private int currentCallingNumber = 0; // 현재 매장에서 호출 중인 가장 최근 대기 번호
 
 }
