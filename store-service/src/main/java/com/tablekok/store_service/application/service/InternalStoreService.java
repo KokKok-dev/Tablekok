@@ -17,4 +17,8 @@ public class InternalStoreService {
 	public List<UUID> findPopularStores() {
 		return storeRepository.findHotStoreIds();
 	}
+
+	public boolean isOwner(UUID storeId, UUID ownerId) {
+		return storeRepository.isOwner(storeId, ownerId);
+	}
 }

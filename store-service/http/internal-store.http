@@ -1,3 +1,22 @@
-## 인기 음식점 리스트(uuid) 조회
+### 인기 음식점 리스트(uuid) 조회
 GET http://localhost:8082/v1/internal/stores/popular
 Content-Type: application/json
+
+
+### 음식점 주인 맞는지 확인 - success
+POST http://localhost:8082/v1/internal/stores/verify-owner
+Content-Type: application/json
+
+{
+  "storeId": "ae1c17d0-0e96-4784-b734-6d614c910524",
+  "ownerId": "16c2e29d-2c79-450e-b192-78658881d2ca"
+}
+
+### 음식점 주인 맞는지 확인 - fail
+POST http://localhost:8082/v1/internal/stores/verify-owner
+Content-Type: application/json
+
+{
+  "storeId": "ae1c17d0-0e96-4784-b734-6d614c910524",
+  "ownerId": "ae1c17d0-0e96-4784-b734-6d614c910524"
+}

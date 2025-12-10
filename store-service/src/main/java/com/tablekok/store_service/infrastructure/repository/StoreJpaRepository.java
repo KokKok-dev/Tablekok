@@ -16,6 +16,8 @@ public interface StoreJpaRepository extends JpaRepository<Store, UUID> {
 
 	List<StoreIdOnly> findByIsHotTrue(); // Projection 사용
 
+	boolean existsByIdAndOwnerId(UUID storeId, UUID ownerId);
+
 	interface StoreIdOnly {
 		UUID getId();
 	}

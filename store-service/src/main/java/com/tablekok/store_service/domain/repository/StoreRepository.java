@@ -17,4 +17,6 @@ public interface StoreRepository {
 	boolean existsByNameAndAddressAndIdNot(String name, String address, UUID excludedId);
 
 	List<UUID> findHotStoreIds();
+
+	boolean isOwner(UUID storeId, UUID ownerId);
 }

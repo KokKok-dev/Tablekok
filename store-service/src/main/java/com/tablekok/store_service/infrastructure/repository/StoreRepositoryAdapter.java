@@ -46,4 +46,9 @@ public class StoreRepositoryAdapter implements StoreRepository {
 			.collect(Collectors.toList());
 	}
 
+	@Override
+	public boolean isOwner(UUID storeId, UUID ownerId) {
+		return storeJpaRepository.existsByIdAndOwnerId(storeId, ownerId);
+	}
+
 }
