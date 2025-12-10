@@ -1,0 +1,10 @@
+
+### 웨이팅 생성
+POST http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1
+Content-Type: application/json
+
+{
+  "headcount": 3,
+  "nonMemberName": "김철수",
+  "nonMemberPhone": "01012345678"
+}

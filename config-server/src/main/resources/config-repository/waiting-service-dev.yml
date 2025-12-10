@@ -6,7 +6,7 @@ spring:
     name: waiting-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5435/waiting_db
+    url: jdbc:postgresql://localhost:5436/waiting_db
     driver-class-name: org.postgresql.Driver
     username: ${DB_USER}
     password: ${DB_PASSWORD}
