@@ -29,4 +29,55 @@ public class WaitingOwnerService {
 			)
 		);
 	}
+
+	public void callWaiting(UUID storeId, UUID waitingId) {
+		// TODO: 사장님이 storeId의 실제 소유자인지 확인
+		// TODO: waitingId 조회하여 상태가 WAITING 상태인지 확인
+
+		// TODO: 입장 호출 알림 푸시 후, 5분 내에 응답(confirm)하지 않으면 노쇼 처리한다는 내용 전달
+
+		// TODO: 5분 뒤에 실행되 ㄹ노쇼 자동 처리 배치/스케줄러 작업 등록
+
+		// TODO: StoreWaitingStatus의 currentCallingNumber를 호출된 고객의 waitingNumber로 업데이트
+		
+		// TODO: 남은 대기 고객들에게 현재 호출 번호가 변경
+	}
+
+	public void enterWaiting(UUID storeId, UUID waitingId) {
+		// TODO: 사장님이 storeId의 실제 소유자인지 확인
+		// TODO: waitingId 조회하여 상태가 CALLED인지 CONFIRMED 상태인지 확인 -> NO_SHOW 여도 바꿀수 있게 할까
+
+		// TODO: WaitingQueue 엔티티의 상태를 ENTERED 변경, 입장 시간(enteredAt) 기록
+		// TODO: WaitingId Redis ZSET 에서 제거
+
+		// TODO: 만약 상태가 CALLED였다면, 이전에 시작된 노쇼 자동 처리 타이머를 중단
+		// TODO: StoreWaitingStatus의 currentCallingNumber를 waitingNumber로 업데이트
+
+		// TODO: 남은 대기 고객들에게 순위 변경 알림
+	}
+
+	public void cancelByOwner(UUID storeId, UUID waitingId) {
+		// TODO: 사장님이 storeId의 실제 소유자인지 확인
+		// TODO: waitingId 조회하여 상태가 이미 ENTERED 등 최종 상태가 아닌지 확인
+
+		// TODO: WaitingQueue 엔티티의 상태를 OWNER_CANCELED 변경
+		// TODO: WaitingId Redis ZSET 에서 제거
+
+		// TODO: 만약 상태가 CALLED였다면, 노쇼 자동 처리 타이머를 중단
+		// TODO: 고객에게 웨이팅이 취소되었음을 알림
+		// TODO: 남은 대기 고객들에게 순위가 변경되었음을 알림
+	}
+
+	public void markNoShow(UUID storeId, UUID waitingId) {
+		// TODO: 사장님이 storeId의 실제 소유자인지 확인
+		// TODO: waitingId 조회하여 상태가 CALLED 또는 CONFIRMED 상태인지 확인
+
+		// TODO: WaitingQueue 엔티티의 상태를 NO_SHOW로 변경
+		// TODO: WaitingId Redis ZSET 에서 제거
+
+		// TODO: 노쇼 자동 처리 타이머가 혹시라도 남아있다면 중단
+		// TODO: 고객에게 노쇼 처리되었음을 알립
+		// TODO: 남은 대기 고객들에게 순위가 변경되었음을 알림
+	}
+
 }
