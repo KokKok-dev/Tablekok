@@ -68,4 +68,14 @@ public class WaitingUserController {
 		);
 	}
 
+	@PostMapping("/{waitingId}/cancel")
+	public ResponseEntity<ApiResponse<Void>> cancelWaiting(
+		@PathVariable UUID waitingId
+	) {
+		waitingService.cancelWaiting(waitingId);
+		return ResponseEntity.ok(
+			ApiResponse.success("웨이팅 cancel 상태 변경 성공", HttpStatus.OK)
+		);
+	}
+
 }
