@@ -1,5 +1,6 @@
 package com.tablekok.store_service.infrastructure.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,10 @@ public interface StoreJpaRepository extends JpaRepository<Store, UUID> {
 	// 특정 Store (excludedId)를 제외하고 검색
 	// 주어진 이름(name)과 주소(address)를 기준으로 중복되는 Store 엔티티가 존재하는지 검색
 	boolean existsByNameAndAddressAndIdNot(String name, String address, UUID excludedId);
+
+	List<StoreIdOnly> findByIsHotTrue(); // Projection 사용
+
+	interface StoreIdOnly {
+		UUID getId();
+	}
 }

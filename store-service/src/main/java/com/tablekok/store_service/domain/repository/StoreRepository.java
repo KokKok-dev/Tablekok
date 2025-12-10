@@ -1,5 +1,6 @@
 package com.tablekok.store_service.domain.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,4 +15,6 @@ public interface StoreRepository {
 	Optional<Store> findById(UUID storeId);
 
 	boolean existsByNameAndAddressAndIdNot(String name, String address, UUID excludedId);
+
+	List<UUID> findHotStoreIds();
 }

@@ -1,7 +1,9 @@
 package com.tablekok.store_service.infrastructure.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
@@ -34,6 +36,14 @@ public class StoreRepositoryAdapter implements StoreRepository {
 	@Override
 	public boolean existsByNameAndAddressAndIdNot(String name, String address, UUID excludedId) {
 		return storeJpaRepository.existsByNameAndAddressAndIdNot(name, address, excludedId);
+	}
+
+	@Override
+	public List<UUID> findHotStoreIds() {
+		List<StoreJpaRepository.StoreIdOnly> projections = storeJpaRepository.findByIsHotTrue();
+		return projections.stream()
+			.map(StoreJpaRepository.StoreIdOnly::getId)
+			.collect(Collectors.toList());
 	}
 
 }
