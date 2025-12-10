@@ -16,7 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.waiting_server.application.dto.result.CreateWaitingResult;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingResult;
-import com.tablekok.waiting_server.application.service.WaitingService;
+import com.tablekok.waiting_server.application.service.WaitingUserService;
 import com.tablekok.waiting_server.presentation.dto.request.CreateWaitingRequest;
 import com.tablekok.waiting_server.presentation.dto.response.CreateWaitingResponse;
 import com.tablekok.waiting_server.presentation.dto.response.GetWaitingResponse;
@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WaitingUserController {
 
-	private final WaitingService waitingService;
+	private final WaitingUserService waitingService;
 
 	@PostMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<CreateWaitingResponse>> createWaiting(

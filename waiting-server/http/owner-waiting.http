@@ -1,0 +1,25 @@
+
+### 웨이팅 큐 조회
+GET http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/queue
+Content-Type: application/json
+
+
+### 고객 호출 CALLED
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/call
+Content-Type: application/json
+
+
+### 고객 입장 처리 ENTERED
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/enter
+Content-Type: application/json
+
+
+### 사장님 취소 처리 OWNER_CANCELED
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/owner-cancel
+Content-Type: application/json
+
+
+### 사장님 노쇼 수동처리 NO_SHOW
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/no-show
+Content-Type: application/json
+
