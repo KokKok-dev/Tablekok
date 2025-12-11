@@ -5,6 +5,24 @@ spring:
   application:
     name: review-service
 
+  datasource:
+    url: jdbc:postgresql://localhost:5433/reservation_db
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 500
+        use_sql_comments: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    open-in-view: false
+
 eureka:
   client:
     register-with-eureka: true
