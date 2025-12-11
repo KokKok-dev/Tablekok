@@ -23,9 +23,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @AllArgsConstructor
-@Table(name = "p_waiting_queue")
+@Table(name = "p_waiting")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class WaitingQueue extends BaseEntity {
+public class Waiting extends BaseEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
