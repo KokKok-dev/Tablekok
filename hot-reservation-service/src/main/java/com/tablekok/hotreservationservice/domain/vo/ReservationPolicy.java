@@ -1,4 +1,4 @@
-package com.tablekok.reservation_service.domain.vo;
+package com.tablekok.hotreservationservice.domain.vo;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

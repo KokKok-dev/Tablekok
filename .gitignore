@@ -33,6 +33,7 @@ replay_pid*
 *.env
 .env.*
 docker-compose.override.yml
+docker-compose.yml
 
 # ===============================
 # 📦 OS / Editor Temporary Files

@@ -1,9 +1,9 @@
-package com.tablekok.reservation_service.application.client.dto.response;
+package com.tablekok.hotreservationservice.application.client.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.tablekok.reservation_service.domain.vo.ReservationPolicy;
+import com.tablekok.hotreservationservice.domain.vo.ReservationPolicy;
 
 public record GetReservationPolicyResponse(
 	Boolean enable,        // 예약 가능 여부

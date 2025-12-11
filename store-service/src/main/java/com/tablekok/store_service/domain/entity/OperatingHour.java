@@ -2,10 +2,9 @@ package com.tablekok.store_service.domain.entity;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.UUID;
 
 import com.tablekok.entity.BaseEntity;
-import com.tablekok.exception.AppException;
-import com.tablekok.store_service.domain.exception.StoreDomainErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -76,22 +75,14 @@ public class OperatingHour extends BaseEntity {
 			.build();
 	}
 
-	public void validate() {
-		// 1. isClosed가 true일 경우 시간 필드는 반드시 null이어야 합니다.
-		if (isClosed) {
-			if (openTime != null || closeTime != null) {
-				throw new AppException(StoreDomainErrorCode.INVALID_CLOSED_TIME); // TODO: StoreDomainErrorCode로 변경해야함
-			}
-		}
-		// 2. isClosed가 false일 경우 시간 필드는 반드시 존재해야 합니다.
-		else {
-			if (openTime == null || closeTime == null) {
-				throw new AppException(StoreDomainErrorCode.MISSING_OPERATING_TIME);
-			}
-			// 3. closeTime 이 openTime 이후인지 검증
-			if (openTime.isAfter(closeTime)) {
-				throw new AppException(StoreDomainErrorCode.INVALID_TIME_RANGE);
-			}
-		}
+	public void softDelete(UUID deleterId) {
+		super.delete(deleterId);
 	}
+
+	public void updateInfo(LocalTime openTime, LocalTime closeTime, boolean isClosed) {
+		this.openTime = openTime;
+		this.closeTime = closeTime;
+		this.isClosed = isClosed;
+	}
+
 }

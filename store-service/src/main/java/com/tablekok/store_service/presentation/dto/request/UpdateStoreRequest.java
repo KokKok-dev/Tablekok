@@ -2,6 +2,10 @@ package com.tablekok.store_service.presentation.dto.request;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
+
+import com.tablekok.store_service.application.dto.command.CreateOperatingHourCommand;
+import com.tablekok.store_service.application.dto.command.UpdateStoreCommand;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -38,9 +42,30 @@ public record UpdateStoreRequest(
 
 	String imageUrl,
 
-	@NotNull(message = "운영 시간 정보는 필수입니다.")
-	@Size(min = 1, message = "최소 하나의 운영 시간 정보가 필요합니다.")
 	@Valid
 	List<CreateOperatingHourRequest> operatingHours
 ) {
+	public UpdateStoreCommand toCommand(UUID ownerId, UUID storeId) {
+		List<CreateOperatingHourCommand> operatingHourCommands = null;
+		if (this.operatingHours != null) {
+			operatingHourCommands = this.operatingHours.stream()
+				.map(CreateOperatingHourRequest::toCommand)
+				.toList();
+		}
+
+		return UpdateStoreCommand.builder()
+			.ownerId(ownerId)
+			.storeId(storeId)
+			.name(name)
+			.phoneNumber(phoneNumber)
+			.address(address)
+			.latitude(latitude)
+			.longitude(longitude)
+			.description(description)
+			.totalCapacity(totalCapacity)
+			.turnoverRateMinutes(turnoverRateMinutes)
+			.imageUrl(imageUrl)
+			.operatingHours(operatingHourCommands)
+			.build();
+	}
 }

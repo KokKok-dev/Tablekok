@@ -19,10 +19,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.entity.UserRole;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
+import com.tablekok.store_service.application.dto.result.GetStoreReservationPolicyResult;
 import com.tablekok.store_service.application.service.StoreService;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreReservationPolicyRequest;
+import com.tablekok.store_service.presentation.dto.request.UpdatePolicyStatusRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStatusRequest;
+import com.tablekok.store_service.presentation.dto.request.UpdateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStoreReservationPolicyRequest;
 import com.tablekok.store_service.presentation.dto.response.CreateStoreResponse;
 import com.tablekok.store_service.presentation.dto.response.GetStoreReservationPolicyResponse;
@@ -54,10 +57,25 @@ public class StoreController {
 			.body(ApiResponse.success("음식점 생성 성공", CreateStoreResponse.from(result), HttpStatus.CREATED));
 	}
 
+	@PatchMapping("/{storeId}")
+	public ResponseEntity<ApiResponse<Void>> updateStore(
+		@PathVariable UUID storeId,
+		@Valid @RequestBody UpdateStoreRequest request
+	) {
+		// store 생성
+		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+
+		storeService.updateStore(request.toCommand(ownerId, storeId));
+
+		return ResponseEntity.ok(
+			ApiResponse.success("음식점 정보 수정 성공", HttpStatus.OK)
+		);
+	}
+
 	@PatchMapping("/{storeId}/status")
 	public ResponseEntity<ApiResponse<Void>> updateStatus(
 		@PathVariable UUID storeId,
-		@RequestBody UpdateStatusRequest request
+		@Valid @RequestBody UpdateStatusRequest request
 	) {
 		// TODO: 추후 userRole 작업
 		UserRole userRole = UserRole.OWNER;
@@ -102,9 +120,10 @@ public class StoreController {
 	public ResponseEntity<ApiResponse<GetStoreReservationPolicyResponse>> getStoreReservationPolicy(
 		@PathVariable UUID storeId
 	) {
-		GetStoreReservationPolicyResponse responseDto = GetStoreReservationPolicyResponse.from();
+		GetStoreReservationPolicyResult result = storeService.getStoreReservationPolicy(storeId);
+		GetStoreReservationPolicyResponse response = GetStoreReservationPolicyResponse.from(result);
 		return ResponseEntity.ok()
-			.body(ApiResponse.success("예약정책 조회 성공", responseDto, HttpStatus.OK));
+			.body(ApiResponse.success("예약정책 조회 성공", response, HttpStatus.OK));
 	}
 
 	@PutMapping("/{storeId}/reservation-policy")
@@ -113,16 +132,22 @@ public class StoreController {
 		@Valid @RequestBody UpdateStoreReservationPolicyRequest request
 	) {
 		// 날짜예약 정책 정보 수정
+		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+
+		storeService.updateStoreReservationPolicy(request.toCommand(ownerId, storeId));
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("예약정책 정보 변경 성공", HttpStatus.OK));
 	}
 
-	@DeleteMapping("/{storeId}/reservation-policy")
+	@PatchMapping("/{storeId}/reservation-policy/status")
 	public ResponseEntity<ApiResponse<Void>> updateStoreReservationPolicyStatus(
-		@PathVariable UUID storeId
+		@PathVariable UUID storeId,
+		@Valid @RequestBody UpdatePolicyStatusRequest request
 	) {
-		// 날짜예약 정책 삭제
+		// 날짜예약 정책 활성/비활성화
+		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+		storeService.updateStoreReservationPolicyStatus(request.toCommand(ownerId, storeId));
 		return ResponseEntity.ok()
-			.body(ApiResponse.success("예약정책 삭제 성공", HttpStatus.OK));
+			.body(ApiResponse.success("예약정책 상태 변경 성공", HttpStatus.OK));
 	}
 }
