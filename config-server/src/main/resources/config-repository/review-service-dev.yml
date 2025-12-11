@@ -6,7 +6,7 @@ spring:
     name: review-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/reservation_db
+    url: jdbc:postgresql://localhost:5434/review_db
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
