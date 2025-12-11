@@ -18,7 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.hotreservationservice.application.dto.result.CreateReservationResult;
 import com.tablekok.hotreservationservice.application.service.HotReservationService;
-import com.tablekok.hotreservationservice.application.service.RedisQueueService;
+import com.tablekok.hotreservationservice.application.service.QueueService;
 import com.tablekok.hotreservationservice.application.service.SseService;
 import com.tablekok.hotreservationservice.presentation.dto.request.CreateReservationRequest;
 import com.tablekok.hotreservationservice.presentation.dto.response.CreateReservationResponse;
@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HotReservationController {
 	private final HotReservationService hotReservationService;
-	private final RedisQueueService redisQueueService;
+	private final QueueService queueService;
 	private final SseService sseService;
 
 	// SSE 연결 실시간 순서 업데이트를 받기 위해 연결 대기 순서도 리턴
@@ -39,16 +39,16 @@ public class HotReservationController {
 	public SseEmitter connect() {
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
 
-		String token = redisQueueService.getToken(userId.toString());
+		String token = queueService.getToken(userId.toString());
 		if (token != null) {
 			// 입장 진행 중인 유저. 연결 후 토큰 반환
 			return sseService.connectEmitterAndGetToken(userId.toString(), token);
 		}
 
 		// 순번 확인
-		Long rank = redisQueueService.getRank(userId.toString());
+		Long rank = queueService.getRank(userId.toString());
 		if (rank == null) {
-			rank = redisQueueService.enterQueue(userId.toString());
+			rank = queueService.enterQueue(userId.toString());
 		}
 
 		return sseService.connectEmitterAndGetRank(userId.toString(), rank);
@@ -59,7 +59,7 @@ public class HotReservationController {
 	public ResponseEntity<ApiResponse<Void>> completeReservation(@PathVariable("token") String token) {
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
 
-		redisQueueService.validateToken(userId.toString(), token);
+		queueService.validateToken(userId.toString(), token);
 
 		return ResponseEntity.ok(
 			ApiResponse.success("토큰이 검증되었습니다.", HttpStatus.ACCEPTED));
@@ -72,13 +72,13 @@ public class HotReservationController {
 		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
 
 		//토큰 검사
-		redisQueueService.validateToken(userId.toString(), request.token());
+		queueService.validateToken(userId.toString(), request.token());
 
 		// 예약 진행
 		CreateReservationResult result = hotReservationService.createReservation(request.toCommand(userId));
 
 		// 예약 요청 후 토큰, 해시테이블, emitter 삭제
-		redisQueueService.completeReservation(userId.toString());
+		queueService.completeReservation(userId.toString());
 		sseService.completeEmitter(userId.toString());
 
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()

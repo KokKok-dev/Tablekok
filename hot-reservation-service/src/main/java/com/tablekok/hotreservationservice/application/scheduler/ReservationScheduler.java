@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.tablekok.hotreservationservice.application.service.RedisQueueService;
+import com.tablekok.hotreservationservice.application.service.QueueService;
 import com.tablekok.hotreservationservice.application.service.SseService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReservationScheduler {
 
-	private final RedisQueueService redisQueueService;
+	private final QueueService queueService;
 	private final SseService sseService;
 
 	@Value("${reservation.limit.count}")
@@ -36,7 +36,7 @@ public class ReservationScheduler {
 		processExpiredUsers(now);
 
 		// 현재 예약 진행 중인 사용자 수 확인
-		int currentAvailableCount = redisQueueService.getAvailableUsers().size();
+		int currentAvailableCount = queueService.getAvailableUsers().size();
 
 		// 새로 예약 가능 상태로 전환할 수 있는 인원 수 계산
 		int usersToProcess = reservationLimit - currentAvailableCount;
@@ -51,7 +51,7 @@ public class ReservationScheduler {
 	// 현재 예약 진행 중인 사용자 중에 예약 허용 시간이 초과된 사람 강퇴
 	private void processExpiredUsers(long now) {
 		// 예약 가능 상태 사용자 목록을 조회
-		redisQueueService.getAvailableUsers().forEach((userIdObj, expirationTimeObj) -> {
+		queueService.getAvailableUsers().forEach((userIdObj, expirationTimeObj) -> {
 			String userId = userIdObj.toString();
 			long expirationTime = Long.parseLong(expirationTimeObj.toString());
 
@@ -60,7 +60,7 @@ public class ReservationScheduler {
 				log.info("Reservation token expired for user: {}", userId);
 
 				// Redis에서 상태 삭제 (다음 대기열 사람을 받을 수 있게 됨)
-				redisQueueService.completeReservation(userId);
+				queueService.completeReservation(userId);
 				sseService.send(userId, "expired", "예약 가능 시간이 만료되어 대기열로 다시 진입해야 합니다.");
 			}
 		});
@@ -68,15 +68,15 @@ public class ReservationScheduler {
 
 	private void processAllUsers(int count) {
 		// 모든 대기자 id 조회
-		Set<String> allUsers = redisQueueService.getAllUsers();
+		Set<String> allUsers = queueService.getAllUsers();
 
 		int index = 0;
 		for (String userId : allUsers) { // 스케쥴러로 항상 모든 유저를 조회..? 흠..
 			if (index < count) {
 				// 예약 가능자 처리
-				String token = redisQueueService.issueTokenAndRegister(userId);
+				String token = queueService.issueTokenAndRegister(userId);
 
-				redisQueueService.removeFromQueue(userId);
+				queueService.removeUserFromQueue(userId);
 
 				sseService.send(userId, "enter", token);
 				index++;
