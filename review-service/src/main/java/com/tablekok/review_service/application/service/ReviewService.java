@@ -8,13 +8,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tablekok.cursor.dto.request.CursorRequest;
+import com.tablekok.cursor.dto.response.Cursor;
+import com.tablekok.cursor.util.CursorUtils;
 import com.tablekok.review_service.application.client.ReservationClient;
 import com.tablekok.review_service.application.dto.command.CreateReviewCommand;
-import com.tablekok.review_service.application.dto.command.GetMyReviewsCommand;
-import com.tablekok.review_service.application.dto.command.GetStoreReviewsCommand;
 import com.tablekok.review_service.application.dto.command.UpdateReviewCommand;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
-import com.tablekok.review_service.application.dto.result.CursorResult;
 import com.tablekok.review_service.application.dto.result.GetMyReviewsResult;
 import com.tablekok.review_service.application.dto.result.GetReviewResult;
 import com.tablekok.review_service.application.dto.result.GetStoreReviewsResult;
@@ -34,12 +34,11 @@ public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final ReservationClient reservationClient;
 	private final ReviewDomainService reviewDomainService;
-	private final ReviewDtoMapper reviewDtoMapper;
 
 	@Transactional
 	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId) {
 		// reservationClient로 storeId 가져와야함
-		UUID storeId = UUID.randomUUID();
+		// UUID storeId = UUID.randomUUID();
 
 		// 이미 작성된 리뷰인지 검증
 		reviewDomainService.validReview(command.reservationId());
@@ -78,30 +77,44 @@ public class ReviewService {
 		return GetReviewResult.fromResult(foundReview);
 	}
 
-	public CursorResult<GetStoreReviewsResult> findStoreReviews(GetStoreReviewsCommand command) {
-		Pageable pageable = PageRequest.of(0, command.size() + 1);
+	public Cursor<GetStoreReviewsResult, UUID> findStoreReviews(
+		UUID storeId,
+		CursorRequest<UUID> request,
+		ReviewSortCriteria sortBy
+	) {
+		Pageable pageable = PageRequest.of(0, request.getLimit());
 
 		Page<Review> storeReviews = reviewRepository.findReviewsByStoreId(
-			command.storeId(),
-			command.sortBy(),
-			command.cursor(),
-			command.cursorId(),
-			pageable
+			storeId, sortBy, request.cursor(), request.cursorId(), pageable);
+
+		Cursor<Review, UUID> response = CursorUtils.makeResponse(
+			storeReviews.getContent(),
+			request.size(),
+			review -> {
+				if (sortBy == ReviewSortCriteria.RATING_HIGH || sortBy == ReviewSortCriteria.RATING_LOW) {
+					return String.valueOf(review.getRating());
+				}
+				return review.getCreatedAt().toString();
+			},
+			Review::getId
 		);
 
-		return reviewDtoMapper.toStoreReviewsCursorResult(storeReviews, command.size(), command.sortBy());
+		return response.map(GetStoreReviewsResult::from);
 	}
 
-	public CursorResult<GetMyReviewsResult> findMyReviews(GetMyReviewsCommand command) {
-		Pageable pageable = PageRequest.of(0, command.size() + 1);
+	public Cursor<GetMyReviewsResult, UUID> findMyReviews(UUID userId, CursorRequest<UUID> request) {
+		Pageable pageable = PageRequest.of(0, request.getLimit());
 
 		Page<Review> myReviews = reviewRepository.findReviewsByUserId(
-			command.userId(),
-			command.cursor(),
-			command.cursorId(),
-			pageable
+			userId, request.cursor(), request.cursorId(), pageable);
+
+		Cursor<Review, UUID> response = CursorUtils.makeResponse(
+			myReviews.getContent(),
+			request.size(),
+			review -> review.getCreatedAt().toString(),
+			Review::getId
 		);
 
-		return reviewDtoMapper.toMyReviewsCursorResult(myReviews, command.size(), ReviewSortCriteria.NEWEST);
+		return response.map(GetMyReviewsResult::from);
 	}
 }
