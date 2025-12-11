@@ -34,12 +34,11 @@ public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final ReservationClient reservationClient;
 	private final ReviewDomainService reviewDomainService;
-	// private final ReviewDtoMapper reviewDtoMapper;
 
 	@Transactional
 	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId) {
 		// reservationClient로 storeId 가져와야함
-		UUID storeId = UUID.randomUUID();
+		// UUID storeId = UUID.randomUUID();
 
 		// 이미 작성된 리뷰인지 검증
 		reviewDomainService.validReview(command.reservationId());
