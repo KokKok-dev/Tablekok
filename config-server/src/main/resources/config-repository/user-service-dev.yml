@@ -1,3 +1,4 @@
+# User Service dev 설정 (Spring Boot 3.5.x 완전 호환)
 server:
   port: 8081
 
@@ -9,7 +10,7 @@ spring:
   datasource:
     url: ${DB_URL:}
     username: ${DB_USERNAME:}
-    password: ${DB_PASSWORD:} # env 파일화
+    password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
 
   # JPA 설정
@@ -28,8 +29,8 @@ spring:
 
 # ✅ JWT 설정 (환경변수 처리)
 jwt:
-  secret: ${JWT_SECRET:} # env 파일화
-  access-token-expiration: ${JWT_ACCESS_EXPIRATION:3600000}     # 1시간
+  secret: ${JWT_SECRET:}
+  access-token-expiration: ${JWT_ACCESS_EXPIRATION:86400000}     # 1시간
   refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7일
 
 # Eureka 클라이언트 설정
