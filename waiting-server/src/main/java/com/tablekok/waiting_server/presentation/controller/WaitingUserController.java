@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WaitingUserController {
 
-	private final WaitingUserService waitingService;
+	private final WaitingUserService waitingUserService;
 
 	@PostMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<CreateWaitingResponse>> createWaiting(
@@ -41,7 +41,7 @@ public class WaitingUserController {
 		UUID memberId = UUID.randomUUID();
 
 		// TODO: 로그인 사용자면 memberId 넘겨주고 아니면 null return
-		CreateWaitingResult result = waitingService.createWaiting(request.toCommand(storeId, memberId));
+		CreateWaitingResult result = waitingUserService.createWaiting(request.toCommand(storeId, memberId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{waitingId}")
 			.buildAndExpand(result.waitingId())
@@ -55,7 +55,7 @@ public class WaitingUserController {
 	public ResponseEntity<ApiResponse<GetWaitingResponse>> getWaiting(
 		@PathVariable UUID waitingId
 	) {
-		GetWaitingResult result = waitingService.getWaiting(waitingId);
+		GetWaitingResult result = waitingUserService.getWaiting(waitingId);
 		return ResponseEntity.ok(
 			ApiResponse.success("웨이팅 정보 조회 성공", GetWaitingResponse.from(result), HttpStatus.OK)
 		);
@@ -69,7 +69,7 @@ public class WaitingUserController {
 		@RequestParam(required = false) String nonMemberPhone
 	) {
 		UUID memberId = UUID.fromString("986b5a2a-dc96-4920-afec-0d4ef7903ef6");
-		return waitingService.connectWaitingNotification(
+		return waitingUserService.connectWaitingNotification(
 			waitingId, memberId, nonMemberName, nonMemberPhone
 		);
 	}
@@ -78,7 +78,7 @@ public class WaitingUserController {
 	public ResponseEntity<ApiResponse<Void>> confirmWaiting(
 		@PathVariable UUID waitingId
 	) {
-		waitingService.confirmWaiting(waitingId);
+		waitingUserService.confirmWaiting(waitingId);
 		return ResponseEntity.ok(
 			ApiResponse.success("웨이팅 confirm 상태 변경 성공", HttpStatus.OK)
 		);
@@ -88,7 +88,7 @@ public class WaitingUserController {
 	public ResponseEntity<ApiResponse<Void>> cancelWaiting(
 		@PathVariable UUID waitingId
 	) {
-		waitingService.cancelWaiting(waitingId);
+		waitingUserService.cancelWaiting(waitingId);
 		return ResponseEntity.ok(
 			ApiResponse.success("웨이팅 cancel 상태 변경 성공", HttpStatus.OK)
 		);
