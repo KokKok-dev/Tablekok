@@ -9,7 +9,7 @@ public interface CacheStore {
 	void addUserToQueue(String userId, long score);
 
 	// 대기 순번 반환
-	long getRank(String userId);
+	Long getRank(String userId);
 
 	// 현재 대기 중인 모든 사용자 조회
 	Set<String> getAllUsers();

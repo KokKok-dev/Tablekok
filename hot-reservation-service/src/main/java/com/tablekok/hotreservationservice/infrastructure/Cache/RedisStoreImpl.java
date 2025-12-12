@@ -33,7 +33,7 @@ public class RedisStoreImpl implements CacheStore {
 	}
 
 	@Override
-	public long getRank(String userId) {
+	public Long getRank(String userId) {
 		return redisTemplate.opsForZSet().rank(QUEUE_KEY, userId);
 	}
 
