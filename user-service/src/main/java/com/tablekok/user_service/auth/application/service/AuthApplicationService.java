@@ -1,13 +1,18 @@
 package com.tablekok.user_service.auth.application.service;
 
+import com.tablekok.exception.AppException;
+import com.tablekok.user_service.auth.application.dto.command.LoginCommand;
 import com.tablekok.user_service.auth.application.dto.command.SignupCommand;
+import com.tablekok.user_service.auth.application.dto.result.LoginResult;
 import com.tablekok.user_service.auth.application.dto.result.SignupResult;
+import com.tablekok.user_service.auth.application.exception.AuthErrorCode;
 import com.tablekok.user_service.auth.domain.entity.Owner;
 import com.tablekok.user_service.auth.domain.entity.User;
 import com.tablekok.user_service.auth.domain.entity.UserRole;
 import com.tablekok.user_service.auth.domain.repository.OwnerRepository;
 import com.tablekok.user_service.auth.domain.repository.UserRepository;
 import com.tablekok.user_service.auth.domain.service.BusinessNumberValidator;
+import com.tablekok.user_service.auth.domain.service.PasswordValidator;
 import com.tablekok.user_service.auth.domain.service.UserValidator;
 import com.tablekok.user_service.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +31,7 @@ public class AuthApplicationService {
 	private final BusinessNumberValidator businessNumberValidator;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
+	private final PasswordValidator passwordValidator;
 
 	@Transactional
 	public SignupResult signup(SignupCommand command) {
@@ -72,6 +78,29 @@ public class AuthApplicationService {
 			savedUser.getEmail(),
 			savedUser.getUsername(),
 			savedUser.getRole().name(),
+			accessToken
+		);
+	}
+	public LoginResult login(LoginCommand command) {
+		// 1. 이메일로 사용자 조회
+		User user = userRepository.findByEmail(command.email())
+			.orElseThrow(() -> new AppException(AuthErrorCode.LOGIN_FAILED));
+
+		// 2. 비밀번호 검증
+		passwordValidator.validatePassword(command.password(), user.getPassword());
+
+		// 3. JWT 토큰 생성
+		String accessToken = jwtUtil.generateAccessToken(
+			user.getUserId(),
+			user.getRole().name()
+		);
+
+		// 4. 결과 반환
+		return new LoginResult(
+			user.getUserId(),
+			user.getEmail(),
+			user.getUsername(),
+			user.getRole().name(),
 			accessToken
 		);
 	}
