@@ -59,8 +59,9 @@ public class SecurityConfig {
 				// 🔐 인증 관련 공개 경로 (User Service 본연의 역할)
 				.requestMatchers(
 					"/v1/auth/**",                       // 모든 인증 관련 엔드포인트
-					"/v1/users/findid",                  // ID 찾기
-					"/v1/users/findpassword",            // 비밀번호 찾기
+					"/v1/users/**",					   // 모든 user 관련 엔드포인트
+					// "/v1/users/findid",                  // ID 찾기
+					// "/v1/users/findpassword",            // 비밀번호 찾기
 					"/actuator/health",                  // 헬스체크 (MSA 필수)
 					"/actuator/info"                     // 서비스 정보
 				).permitAll()
