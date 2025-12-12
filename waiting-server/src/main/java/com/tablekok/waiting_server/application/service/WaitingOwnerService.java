@@ -15,6 +15,7 @@ import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
 import com.tablekok.waiting_server.domain.entity.WaitingStatus;
+import com.tablekok.waiting_server.domain.repository.NotificationPort;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
 
@@ -25,6 +26,9 @@ import lombok.RequiredArgsConstructor;
 public class WaitingOwnerService {
 	private final StoreWaitingStatusRepository storeWaitingStatusRepository;
 	private final WaitingRepository waitingRepository;
+	private final NotificationPort notificationPort;
+
+	final long NO_SHOW_TIMEOUT_MINUTES = 5;
 
 	@Transactional
 	public void startWaitingService(StartWaitingServiceCommand command) {
@@ -73,10 +77,11 @@ public class WaitingOwnerService {
 		);
 	}
 
-	public void callWaiting(UUID storeId, UUID waitingId) {
+	@Transactional
+	public void callWaiting(UUID storeId, UUID callingWaitingId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
 		// waitingId 조회하여 상태가 WAITING 상태인지 확인
-		Waiting waiting = findWaiting(waitingId);
+		Waiting waiting = findWaiting(callingWaitingId);
 		if (waiting.getStatus() != WaitingStatus.WAITING) {
 			throw new AppException(WaitingErrorCode.INVALID_WAITING_STATUS);
 		}
@@ -92,6 +97,7 @@ public class WaitingOwnerService {
 		waitingRepository.save(waiting);
 
 		// TODO: 입장 호출 알림 푸시 후, 5분 내에 응답(confirm)하지 않으면 노쇼 처리한다는 내용 전달
+		notificationPort.sendWaitingCall(callingWaitingId, callingNumber);
 
 		// TODO: 5분 뒤에 실행되 ㄹ노쇼 자동 처리 배치/스케줄러 작업 등록
 
