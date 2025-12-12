@@ -43,6 +43,19 @@ public class WaitingOwnerController {
 		);
 	}
 
+	// 사장님이 해당 매장의 웨이팅 기능을 비활성화합니다.
+	@PostMapping("/stop")
+	public ResponseEntity<ApiResponse<Void>> stopWaitingService(
+		// TODO: 사장님 UUID
+		@PathVariable UUID storeId
+	) {
+		UUID ownerId = UUID.randomUUID();
+		waitingOwnerService.stopWaitingService(storeId, ownerId);
+		return ResponseEntity.ok(
+			ApiResponse.success("음식점 웨이팅 중단합니다.", HttpStatus.OK)
+		);
+	}
+
 	// 웨이팅 큐(대기열) 조회 (Current Queue Status)
 	@GetMapping("/queue")
 	public ResponseEntity<ApiResponse<List<GetWaitingQueueResponse>>> getWaitingQueue(

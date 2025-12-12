@@ -84,4 +84,8 @@ public class StoreWaitingStatus extends BaseEntity {
 		this.minHeadcount = minHeadcount;
 		this.maxHeadcount = maxHeadcount;
 	}
+
+	public void stopWaiting() {
+		this.isOpenForWaiting = false;
+	}
 }

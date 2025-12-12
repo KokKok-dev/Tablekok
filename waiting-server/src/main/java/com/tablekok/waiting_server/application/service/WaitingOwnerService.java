@@ -44,6 +44,24 @@ public class WaitingOwnerService {
 		}
 	}
 
+	@Transactional
+	public void stopWaitingService(UUID storeId, UUID ownerId) {
+		// TODO: 사장님이 storeId의 실제 소유자인지 확인
+		Optional<StoreWaitingStatus> existingStatus = storeWaitingStatusRepository.findById(storeId);
+
+		// 해당 매장의 웨이팅 시스템이 아예 설정된 적이 없음.
+		if (existingStatus.isEmpty()) {
+			throw new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND);
+		}
+
+		StoreWaitingStatus status = existingStatus.get();
+		// 이미 비활성화된 상태라면 예외처리
+		if (!status.isOpenForWaiting()) {
+			throw new AppException(WaitingErrorCode.WAITING_ALREADY_CLOSED);
+		}
+		status.stopWaiting();
+	}
+
 	public List<GetWaitingQueueResult> getStoreWaitingQueue(UUID storeId) {
 		// TODO: Redis ZSET에서 현재 대기 중인 모든 waitingId를 가져와 RDB에서 상세 정보를 조회하는 로직으로 대체
 
@@ -70,7 +88,7 @@ public class WaitingOwnerService {
 		// TODO: 5분 뒤에 실행되 ㄹ노쇼 자동 처리 배치/스케줄러 작업 등록
 
 		// TODO: StoreWaitingStatus의 currentCallingNumber를 호출된 고객의 waitingNumber로 업데이트
-		
+
 		// TODO: 남은 대기 고객들에게 현재 호출 번호가 변경
 	}
 
@@ -110,5 +128,4 @@ public class WaitingOwnerService {
 		// TODO: 고객에게 노쇼 처리되었음을 알립
 		// TODO: 남은 대기 고객들에게 순위가 변경되었음을 알림
 	}
-
 }

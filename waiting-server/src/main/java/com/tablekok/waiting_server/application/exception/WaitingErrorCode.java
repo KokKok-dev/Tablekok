@@ -15,7 +15,8 @@ public enum WaitingErrorCode implements ErrorCode {
 	WAITING_ALREADY_STARTED("WAITING101", "매장 웨이팅은 이미 시작되었습니다.", HttpStatus.BAD_REQUEST),
 	HEADCOUNT_BELOW_MIN("WAITING102", "최소 인원수보다 이상이여야 합니다.", HttpStatus.BAD_REQUEST),
 	HEADCOUNT_ABOVE_MAX("WAITING103", "최대 인원수보다 이하여야 합니다.", HttpStatus.BAD_REQUEST),
-	WAITING_CLOSED("WAITING104", "현재 매장이 웨이팅 접수 중이 아닙니다.", HttpStatus.BAD_REQUEST);
+	WAITING_CLOSED("WAITING104", "현재 매장이 웨이팅 접수 중이 아닙니다.", HttpStatus.BAD_REQUEST),
+	WAITING_ALREADY_CLOSED("WAITING105", "이미 웨이팅 접수가 중단된 상태입니다.", HttpStatus.BAD_REQUEST);
 
 	private final String code;
 	private final String message;
