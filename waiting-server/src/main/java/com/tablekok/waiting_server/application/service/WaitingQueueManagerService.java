@@ -9,6 +9,8 @@ import com.tablekok.waiting_server.domain.entity.Waiting;
 import com.tablekok.waiting_server.domain.entity.WaitingStatus;
 import com.tablekok.waiting_server.domain.repository.NoShowProcessor;
 import com.tablekok.waiting_server.domain.repository.NoShowSchedulerPort;
+import com.tablekok.waiting_server.domain.repository.NotificationPort;
+import com.tablekok.waiting_server.domain.repository.WaitingCachePort;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,9 @@ import lombok.RequiredArgsConstructor;
 public class WaitingQueueManagerService implements NoShowProcessor {
 	private final WaitingRepository waitingRepository;
 	private final NoShowSchedulerPort noShowSchedulerPort;
+	private final WaitingCachePort waitingCache;
+	private final NotificationPort notificationPort;
+
 	final long NO_SHOW_TIMEOUT_MINUTES = 5;
 
 	// 타이머 등록
@@ -34,10 +39,11 @@ public class WaitingQueueManagerService implements NoShowProcessor {
 			waiting.noShow();
 			waitingRepository.save(waiting);
 
-			// TODO: cache에서 waiting 삭제
-			// TODO: Noshow 알림
+			// cache에서 waitingQueue 삭제
+			waitingCache.removeWaiting(waiting.getStoreId(), waitingId.toString());
 
-			// TODO: 매장 관리자에게 알림
+			// Noshow 알림
+			notificationPort.sendNoShowAlert(waitingId);
 		}
 	}
 

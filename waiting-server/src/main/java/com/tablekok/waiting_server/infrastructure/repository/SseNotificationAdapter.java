@@ -39,6 +39,27 @@ public class SseNotificationAdapter implements NotificationPort {
 		});
 	}
 
+	@Override
+	public void sendNoShowAlert(UUID waitingId) {
+		sseEmitterRepository.findById(waitingId).ifPresent(emitter -> {
+			try {
+				// 이벤트 빌더를 사용하여 데이터 전송 (이벤트 이름: "waiting-call")
+				emitter.send(SseEmitter.event()
+					.name("waiting-noshow-timeout") // 클라이언트가 수신할 이벤트 이름
+					.data(Map.of(
+						"newStatus", "NO_SHOW",
+						"message", "호출 응답 시간이 초과되어 자동 노쇼 처리되었습니다."
+					))
+					.id(waitingId.toString()) // 이벤트 ID (재연결 시 유용)
+				);
+
+			} catch (IOException e) {
+				// 전송 실패 시 (클라이언트 연결 끊김 등) 연결 삭제
+				sseEmitterRepository.deleteById(waitingId);
+			}
+		});
+	}
+
 	public SseEmitter connect(UUID waitingId) {
 		// Emitter 생성 및 타임아웃 설정
 		SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);

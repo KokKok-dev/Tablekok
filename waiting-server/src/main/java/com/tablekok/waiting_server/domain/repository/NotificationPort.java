@@ -8,4 +8,6 @@ public interface NotificationPort {
 	SseEmitter connect(UUID waitingId);
 
 	void sendWaitingCall(UUID waitingId, int waitingNumber);
+
+	void sendNoShowAlert(UUID waitingId);
 }

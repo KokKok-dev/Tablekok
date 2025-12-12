@@ -35,6 +35,12 @@ public class WaitingRedisCacheAdapter implements WaitingCachePort {
 		return redisTemplate.opsForZSet().size(key);
 	}
 
+	@Override
+	public void removeWaiting(UUID storeId, String waitingIdString) {
+		String key = getQueueKey(storeId);
+		redisTemplate.opsForZSet().remove(key, waitingIdString);
+	}
+
 	private String getQueueKey(UUID storeId) {
 		return "waiting:store:" + storeId.toString();
 	}
