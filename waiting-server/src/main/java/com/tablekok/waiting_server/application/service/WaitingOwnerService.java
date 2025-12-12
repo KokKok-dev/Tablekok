@@ -2,17 +2,48 @@ package com.tablekok.waiting_server.application.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.tablekok.exception.AppException;
+import com.tablekok.waiting_server.application.dto.command.StartWaitingServiceCommand;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingQueueResult;
+import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
+import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
+import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class WaitingOwnerService {
+	private final StoreWaitingStatusRepository storeWaitingStatusRepository;
+
+	@Transactional
+	public void startWaitingService(StartWaitingServiceCommand command) {
+		// TODO: 사장님이 storeId의 실제 소유자인지 확인
+
+		Optional<StoreWaitingStatus> existingStatus = storeWaitingStatusRepository.findById(command.storeId());
+
+		if (existingStatus.isPresent()) {
+			// 레코드가 이미 존재하는 경우 (운영 스위치만 ON)
+			StoreWaitingStatus status = existingStatus.get();
+
+			if (status.isOpenForWaiting()) {
+				// 이미 활성화된 상태라면 예외처리
+				throw new AppException(WaitingErrorCode.WAITING_ALREADY_STARTED);
+			}
+			status.startWaiting(command.minHeadCount(), command.maxHeadcount());
+		} else {
+			// 레코드가 없는 경우 (최초 생성 및 초기화)
+			StoreWaitingStatus newStatus = command.toEntity();
+			storeWaitingStatusRepository.save(newStatus);
+		}
+	}
+
 	public List<GetWaitingQueueResult> getStoreWaitingQueue(UUID storeId) {
 		// TODO: Redis ZSET에서 현재 대기 중인 모든 waitingId를 가져와 RDB에서 상세 정보를 조회하는 로직으로 대체
 
