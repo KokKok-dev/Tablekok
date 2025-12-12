@@ -27,15 +27,16 @@ public class WaitingOwnerService {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
 		Optional<StoreWaitingStatus> existingStatus = findStoreWaitingStatus(command.storeId());
 
-		if (existingStatus.isPresent()) {
-			// 레코드가 이미 존재하는 경우 (운영 스위치만 ON)
-			StoreWaitingStatus status = existingStatus.get();
-			status.startWaiting(command.minHeadCount(), command.maxHeadcount());
-		} else {
-			// 레코드가 없는 경우 (최초 생성 및 초기화)
+		// 레코드가 없는 경우 (최초 생성 및 초기화)
+		if (existingStatus.isEmpty()) {
 			StoreWaitingStatus newStatus = command.toEntity();
 			storeWaitingStatusRepository.save(newStatus);
+			return;
 		}
+
+		// 레코드가 이미 존재하는 경우 (운영 스위치만 ON)
+		StoreWaitingStatus status = existingStatus.get();
+		status.startWaiting(command.minHeadCount(), command.maxHeadcount());
 	}
 
 	@Transactional
