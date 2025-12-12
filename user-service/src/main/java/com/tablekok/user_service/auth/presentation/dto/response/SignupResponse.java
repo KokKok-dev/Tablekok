@@ -8,16 +8,15 @@ public record SignupResponse(
 	UUID userId,
 	String email,
 	String username,
-	String role,
-	String accessToken
+	String role
+
 ) {
 	public static SignupResponse from(SignupResult result) {
 		return new SignupResponse(
 			result.userId(),
 			result.email(),
 			result.username(),
-			result.role(),
-			result.accessToken()
+			result.role()
 		);
 	}
 }
