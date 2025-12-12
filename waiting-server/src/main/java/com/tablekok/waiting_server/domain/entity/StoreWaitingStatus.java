@@ -3,6 +3,8 @@ package com.tablekok.waiting_server.domain.entity;
 import java.util.UUID;
 
 import com.tablekok.entity.BaseEntity;
+import com.tablekok.exception.AppException;
+import com.tablekok.waiting_server.domain.exception.WaitingDomainErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -80,12 +82,22 @@ public class StoreWaitingStatus extends BaseEntity {
 	}
 
 	public void startWaiting(int minHeadcount, int maxHeadcount) {
+		// 이미 활성화된 상태라면 예외처리
+		if (this.isOpenForWaiting()) {
+			throw new AppException(WaitingDomainErrorCode.WAITING_ALREADY_STARTED);
+		}
+
 		this.isOpenForWaiting = true;
 		this.minHeadcount = minHeadcount;
 		this.maxHeadcount = maxHeadcount;
 	}
 
 	public void stopWaiting() {
+		// 이미 비활성화된 상태라면 예외처리
+		if (!this.isOpenForWaiting()) {
+			throw new AppException(WaitingDomainErrorCode.WAITING_ALREADY_CLOSED);
+		}
+
 		this.isOpenForWaiting = false;
 	}
 }

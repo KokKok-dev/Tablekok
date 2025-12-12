@@ -30,11 +30,6 @@ public class WaitingOwnerService {
 		if (existingStatus.isPresent()) {
 			// 레코드가 이미 존재하는 경우 (운영 스위치만 ON)
 			StoreWaitingStatus status = existingStatus.get();
-
-			if (status.isOpenForWaiting()) {
-				// 이미 활성화된 상태라면 예외처리
-				throw new AppException(WaitingErrorCode.WAITING_ALREADY_STARTED);
-			}
 			status.startWaiting(command.minHeadCount(), command.maxHeadcount());
 		} else {
 			// 레코드가 없는 경우 (최초 생성 및 초기화)
@@ -53,10 +48,6 @@ public class WaitingOwnerService {
 		}
 
 		StoreWaitingStatus status = existingStatus.get();
-		// 이미 비활성화된 상태라면 예외처리
-		if (!status.isOpenForWaiting()) {
-			throw new AppException(WaitingErrorCode.WAITING_ALREADY_CLOSED);
-		}
 		status.stopWaiting();
 	}
 
