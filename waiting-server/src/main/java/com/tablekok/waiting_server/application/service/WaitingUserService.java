@@ -16,6 +16,7 @@ import com.tablekok.waiting_server.domain.entity.Waiting;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
 import com.tablekok.waiting_server.domain.repository.WaitingCachePort;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
+import com.tablekok.waiting_server.domain.service.WaitingUserDomainService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +27,7 @@ public class WaitingUserService {
 	private final WaitingCachePort waitingCache;
 	private final StoreWaitingStatusRepository storeWaitingStatusRepository;
 	private final WaitingRepository waitingRepository;
+	private final WaitingUserDomainService waitingUserDomainService;
 
 	@Transactional
 	public CreateWaitingResult createWaiting(CreateWaitingCommand command) {
@@ -35,8 +37,9 @@ public class WaitingUserService {
 		StoreWaitingStatus status = storeWaitingStatusRepository.findByIdWithLock(command.storeId())
 			.orElseThrow(() -> new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND));
 
-		validateStoreStatus(status); // status 활성화 확인
-		validateHeadcountPolicy(command.headcount(), status.getMinHeadcount(), status.getMaxHeadcount()); // 인원수 유효성 검사
+		waitingUserDomainService.validateStoreStatus(status); // status 활성화 확인
+		waitingUserDomainService.validateHeadcountPolicy(command.headcount(), status.getMinHeadcount(),
+			status.getMaxHeadcount()); // 인원수 유효성 검사
 		// TODO: 고객 웨이팅 중복 확인
 
 		status.incrementNumber();
@@ -59,7 +62,7 @@ public class WaitingUserService {
 		int rank = (rankZeroBased != null) ? rankZeroBased.intValue() + 1 : 1;
 
 		// ((현재 대기 팀 수) / (테이블 수))* (팀당 평균 소요 시간) 공식을 사용하여 estimatedWaitMinutes를 계산
-		int estimatedTime = calculateEstimateWaitMinutes(rank, status);
+		int estimatedTime = waitingUserDomainService.calculateEstimateWaitMinutes(rank, status);
 
 		// CreateWaitingResult DTO를 반환
 		return CreateWaitingResult.of(
@@ -71,30 +74,6 @@ public class WaitingUserService {
 			savedWaiting.getStatus().name(), // WAITING
 			savedWaiting.getQueuedAt()
 		);
-	}
-
-	private void validateStoreStatus(StoreWaitingStatus status) {
-		if (!status.isOpenForWaiting()) {
-			throw new AppException(WaitingErrorCode.WAITING_CLOSED);
-		}
-	}
-
-	private void validateHeadcountPolicy(int headcount, int min, int max) {
-		if (headcount < min) {
-			throw new AppException(WaitingErrorCode.HEADCOUNT_BELOW_MIN);
-		}
-
-		if (headcount > max) {
-			throw new AppException(WaitingErrorCode.HEADCOUNT_ABOVE_MAX);
-		}
-	}
-
-	private int calculateEstimateWaitMinutes(int rank, StoreWaitingStatus status) {
-		int teamsAhead = rank - 1;
-		int totalTables = status.getTotalTables();
-		int requiredTableTurns = (teamsAhead + totalTables - 1) / totalTables;
-
-		return requiredTableTurns * status.getTurnoverRateMinutes();
 	}
 
 	public GetWaitingResult getWaiting(UUID waitingId) {
