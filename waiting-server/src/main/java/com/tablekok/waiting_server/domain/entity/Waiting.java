@@ -60,9 +60,6 @@ public class Waiting extends BaseEntity {
 	@Column(name = "status", nullable = false, length = 20)
 	private WaitingStatus status;
 
-	@Column(name = "estimated_wait_minutes")
-	private Integer estimatedWaitMinutes; // 예상 대기 시간 (분 단위)
-
 	// 시간 정보 (queued_at = created_at)
 	@CreatedDate
 	@Column(name = "queued_at", nullable = false, updatable = false)
@@ -92,7 +89,6 @@ public class Waiting extends BaseEntity {
 		this.memberId = memberId;
 		this.nonMemberName = nonMemberName;
 		this.nonMemberPhone = nonMemberPhone;
-		this.estimatedWaitMinutes = estimatedWaitMinutes;
 
 	}
 
@@ -117,7 +113,6 @@ public class Waiting extends BaseEntity {
 			.nonMemberPhone(nonMemberPhone)
 			.headcount(headcount)
 			.status(WaitingStatus.WAITING)
-			.estimatedWaitMinutes(null)
 			.build();
 	}
 
