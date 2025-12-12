@@ -16,7 +16,6 @@ import com.tablekok.waiting_server.application.dto.result.GetWaitingQueueResult;
 import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
-import com.tablekok.waiting_server.domain.entity.WaitingStatus;
 import com.tablekok.waiting_server.domain.repository.NotificationPort;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
@@ -30,8 +29,6 @@ public class WaitingOwnerService {
 	private final WaitingRepository waitingRepository;
 	private final NotificationPort notificationPort;
 	private final WaitingQueueManagerService waitingQueueManagerService;
-
-	final long NO_SHOW_TIMEOUT_MINUTES = 5;
 
 	@Transactional
 	public void startWaitingService(StartWaitingServiceCommand command) {
@@ -83,33 +80,17 @@ public class WaitingOwnerService {
 	@Transactional
 	public void callWaiting(UUID storeId, UUID callingWaitingId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		// waitingId 조회하여 상태가 WAITING 상태인지 확인
 		Waiting waiting = findWaiting(callingWaitingId);
-		if (waiting.getStatus() != WaitingStatus.WAITING) {
-			throw new AppException(WaitingErrorCode.INVALID_WAITING_STATUS);
-		}
+		StoreWaitingStatus status = getStoreWaitingStatus(storeId);
+
+		// 상태를 WAITING -> CALLED으로 변경
+		waiting.callCustomer();
 
 		// StoreWaitingStatus 업데이트 (currentCallingNumber)
-		StoreWaitingStatus status = storeWaitingStatusRepository.findById(storeId)
-			.orElseThrow(() -> new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND));
-		int callingNumber = waiting.getWaitingNumber();
-		status.setCurrentCallingNumber(callingNumber);
-
-		// 상태를 WAITING -> CALLING으로 변경
-		waiting.callCustomer();
-		waitingRepository.save(waiting);
+		status.setCurrentCallingNumber(waiting.getWaitingNumber());
 
 		// DB 상태가 커밋된 이후에 알람, 스케줄러 등록
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-			@Override
-			public void afterCommit() {
-				// 호출 알림
-				notificationPort.sendWaitingCall(callingWaitingId, callingNumber);
-				// 스케줄러 등록
-				waitingQueueManagerService.scheduleNoShow(callingWaitingId);
-			}
-		});
-
+		registerPostCommitActions(callingWaitingId, waiting.getWaitingNumber());
 	}
 
 	public void enterWaiting(UUID storeId, UUID waitingId) {
@@ -156,5 +137,22 @@ public class WaitingOwnerService {
 	private Waiting findWaiting(UUID waitingId) {
 		return waitingRepository.findById(waitingId)
 			.orElseThrow(() -> new AppException(WaitingErrorCode.WAITING_NOT_FOUND));
+	}
+
+	private StoreWaitingStatus getStoreWaitingStatus(UUID storeId) {
+		return storeWaitingStatusRepository.findById(storeId)
+			.orElseThrow(() -> new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND));
+	}
+
+	private void registerPostCommitActions(UUID waitingId, int callingNumber) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				// 호출 알림
+				notificationPort.sendWaitingCall(waitingId, callingNumber);
+				// 스케줄러 등록
+				waitingQueueManagerService.scheduleNoShow(waitingId);
+			}
+		});
 	}
 }

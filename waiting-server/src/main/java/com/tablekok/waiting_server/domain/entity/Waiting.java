@@ -140,10 +140,16 @@ public class Waiting extends BaseEntity {
 	}
 
 	public void callCustomer() {
+		if (this.getStatus() != WaitingStatus.WAITING) {
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
+
 		this.status = WaitingStatus.CALLED;
+		this.calledAt = LocalDateTime.now();
 	}
 
 	public void noShow() {
 		this.status = WaitingStatus.NO_SHOW;
+		this.canceledAt = LocalDateTime.now();
 	}
 }
