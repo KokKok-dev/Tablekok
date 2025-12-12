@@ -13,7 +13,6 @@ import com.tablekok.user_service.auth.presentation.dto.response.SignupResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-
 @RestController
 @RequestMapping("/v1/auth")
 @RequiredArgsConstructor
@@ -29,8 +28,7 @@ public class AuthController {
 		SignupResponse response = SignupResponse.from(result);
 
 		return ResponseEntity.status(HttpStatus.CREATED)
+			.header("Authorization", "Bearer " + result.accessToken())
 			.body(ApiResponse.success("회원가입이 완료되었습니다.", response, HttpStatus.CREATED));
-
 	}
-
 }
