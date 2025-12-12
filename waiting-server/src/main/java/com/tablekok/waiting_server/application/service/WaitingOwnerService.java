@@ -25,8 +25,7 @@ public class WaitingOwnerService {
 	@Transactional
 	public void startWaitingService(StartWaitingServiceCommand command) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-
-		Optional<StoreWaitingStatus> existingStatus = storeWaitingStatusRepository.findById(command.storeId());
+		Optional<StoreWaitingStatus> existingStatus = findStoreWaitingStatus(command.storeId());
 
 		if (existingStatus.isPresent()) {
 			// 레코드가 이미 존재하는 경우 (운영 스위치만 ON)
@@ -47,8 +46,7 @@ public class WaitingOwnerService {
 	@Transactional
 	public void stopWaitingService(UUID storeId, UUID ownerId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		Optional<StoreWaitingStatus> existingStatus = storeWaitingStatusRepository.findById(storeId);
-
+		Optional<StoreWaitingStatus> existingStatus = findStoreWaitingStatus(storeId);
 		// 해당 매장의 웨이팅 시스템이 아예 설정된 적이 없음.
 		if (existingStatus.isEmpty()) {
 			throw new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND);
@@ -127,5 +125,9 @@ public class WaitingOwnerService {
 		// TODO: 노쇼 자동 처리 타이머가 혹시라도 남아있다면 중단
 		// TODO: 고객에게 노쇼 처리되었음을 알립
 		// TODO: 남은 대기 고객들에게 순위가 변경되었음을 알림
+	}
+
+	private Optional<StoreWaitingStatus> findStoreWaitingStatus(UUID storeId) {
+		return storeWaitingStatusRepository.findById(storeId);
 	}
 }
