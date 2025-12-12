@@ -3,6 +3,7 @@ package com.tablekok.waiting_server.presentation.dto.request;
 import java.util.UUID;
 
 import com.tablekok.waiting_server.application.dto.command.CreateWaitingCommand;
+import com.tablekok.waiting_server.domain.entity.CustomerType;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -21,10 +22,26 @@ public record CreateWaitingRequest(
 	String nonMemberPhone
 ) {
 
-	public CreateWaitingCommand toCommand(UUID storeId) {
+	public CreateWaitingCommand toCommand(UUID storeId, UUID authenticatedMemberId) {
+		CustomerType customerType;
+		UUID finalMemberId;
+
+		// 1. 로그인 여부 확인
+		if (authenticatedMemberId != null) {
+			// 회원 로그인 상태
+			customerType = CustomerType.MEMBER;
+			finalMemberId = authenticatedMemberId;
+		} else {
+			// 비회원 상태
+			customerType = CustomerType.NON_MEMBER;
+			finalMemberId = null;
+		}
+
 		return CreateWaitingCommand.builder()
 			.storeId(storeId)
 			.headcount(headcount)
+			.customerType(customerType) // 결정된 타입 주입
+			.memberId(finalMemberId)    // 결정된 memberId 주입
 			.nonMemberName(nonMemberName)
 			.nonMemberPhone(nonMemberPhone)
 			.build();
