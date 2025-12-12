@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.tablekok.exception.AppException;
 import com.tablekok.waiting_server.application.dto.command.StartWaitingServiceCommand;
@@ -27,6 +29,7 @@ public class WaitingOwnerService {
 	private final StoreWaitingStatusRepository storeWaitingStatusRepository;
 	private final WaitingRepository waitingRepository;
 	private final NotificationPort notificationPort;
+	private final WaitingQueueManagerService waitingQueueManagerService;
 
 	final long NO_SHOW_TIMEOUT_MINUTES = 5;
 
@@ -96,14 +99,17 @@ public class WaitingOwnerService {
 		waiting.callCustomer();
 		waitingRepository.save(waiting);
 
-		// TODO: 입장 호출 알림 푸시 후, 5분 내에 응답(confirm)하지 않으면 노쇼 처리한다는 내용 전달
-		notificationPort.sendWaitingCall(callingWaitingId, callingNumber);
+		// DB 상태가 커밋된 이후에 알람, 스케줄러 등록
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				// 호출 알림
+				notificationPort.sendWaitingCall(callingWaitingId, callingNumber);
+				// 스케줄러 등록
+				waitingQueueManagerService.scheduleNoShow(callingWaitingId);
+			}
+		});
 
-		// TODO: 5분 뒤에 실행되 ㄹ노쇼 자동 처리 배치/스케줄러 작업 등록
-
-		// TODO: StoreWaitingStatus의 currentCallingNumber를 호출된 고객의 waitingNumber로 업데이트
-
-		// TODO: 남은 대기 고객들에게 현재 호출 번호가 변경
 	}
 
 	public void enterWaiting(UUID storeId, UUID waitingId) {
