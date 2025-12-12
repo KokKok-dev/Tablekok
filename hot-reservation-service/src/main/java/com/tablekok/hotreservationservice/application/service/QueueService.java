@@ -15,9 +15,11 @@ import com.tablekok.exception.AppException;
 import com.tablekok.hotreservationservice.application.exception.HotReservationErrorCode;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QueueService {
 
 	// 사용자 ID를 키로, SseEmitter를 값으로 저장하여 관리
@@ -146,7 +148,7 @@ public class QueueService {
 		} catch (IOException e) {
 			emitter.completeWithError(e);
 			emitters.remove(userId);
-			throw new AppException(HotReservationErrorCode.COMMUNICATOR_SEND_FAILED);
+			log.warn(e.getMessage());
 		}
 
 	}
