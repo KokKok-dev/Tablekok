@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.tablekok.exception.AppException;
 import com.tablekok.waiting_server.application.dto.command.CreateWaitingCommand;
@@ -13,6 +14,7 @@ import com.tablekok.waiting_server.application.dto.result.GetWaitingResult;
 import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
+import com.tablekok.waiting_server.domain.repository.NotificationPort;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
 import com.tablekok.waiting_server.domain.repository.WaitingCachePort;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
@@ -28,6 +30,7 @@ public class WaitingUserService {
 	private final StoreWaitingStatusRepository storeWaitingStatusRepository;
 	private final WaitingRepository waitingRepository;
 	private final WaitingUserDomainService waitingUserDomainService;
+	private final NotificationPort notificationPort;
 
 	@Transactional
 	public CreateWaitingResult createWaiting(CreateWaitingCommand command) {
@@ -111,6 +114,39 @@ public class WaitingUserService {
 		// TODO: entity 상태 변경 ( -> USER_CANCELED)
 		// TODO: Redis ZSET에서 제거
 		// TODO: 노쇼 타이머 중단 (필요시)
-		
+
+	}
+
+	public SseEmitter connectWaitingNotification(UUID waitingId, UUID memberId, String nonMemberName,
+		String nonMemberPhone) {
+		Waiting waiting = findWaiting(waitingId);
+
+		// Member ID가 일치하지 않으면 권한 없음
+		validateAccessPermission(waiting, memberId, nonMemberName, nonMemberPhone);
+
+		return notificationPort.connect(waitingId);
+	}
+
+	private Waiting findWaiting(UUID waitingId) {
+		return waitingRepository.findById(waitingId)
+			.orElseThrow(() -> new AppException(WaitingErrorCode.WAITING_NOT_FOUND));
+	}
+
+	private void validateAccessPermission(Waiting waiting, UUID memberId, String nonMemberName, String nonMemberPhone) {
+		if (waiting.isMember()) {
+			// 1. 회원(MEMBER)인 경우: memberId로 검증 (기존 로직)
+			if (!waiting.getMemberId().equals(memberId)) {
+				throw new AppException(WaitingErrorCode.CONNECT_FORBIDDEN);
+			}
+		} else if (waiting.isNonMember()) {
+			// 2. 비회원(NON_MEMBER)인 경우: 이름과 전화번호로 검증 (새 로직)
+			if (!waiting.getNonMemberName().equals(nonMemberName) || !waiting.getNonMemberPhone()
+				.equals(nonMemberPhone)) {
+				throw new AppException(WaitingErrorCode.CONNECT_FORBIDDEN);
+			}
+		} else {
+			// 예외: 정의되지 않은 CustomerType
+			throw new AppException(WaitingErrorCode.INVALID_CUSTOMER_TYPE);
+		}
 	}
 }

@@ -131,6 +131,14 @@ public class Waiting extends BaseEntity {
 		}
 	}
 
+	public boolean isMember() {
+		return this.customerType == CustomerType.MEMBER;
+	}
+
+	public boolean isNonMember() {
+		return this.customerType == CustomerType.NON_MEMBER;
+	}
+
 	public void callCustomer() {
 		this.status = WaitingStatus.CALLED;
 	}

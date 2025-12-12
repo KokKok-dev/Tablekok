@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
@@ -56,6 +58,19 @@ public class WaitingUserController {
 		GetWaitingResult result = waitingService.getWaiting(waitingId);
 		return ResponseEntity.ok(
 			ApiResponse.success("웨이팅 정보 조회 성공", GetWaitingResponse.from(result), HttpStatus.OK)
+		);
+	}
+
+	@GetMapping("/{waitingId}/connect")
+	public SseEmitter connectNotification(
+		@PathVariable UUID waitingId,
+		// TODO: userId 받아야함 @AuthenticationPrincipal UUID memberId
+		@RequestParam(required = false) String nonMemberName,
+		@RequestParam(required = false) String nonMemberPhone
+	) {
+		UUID memberId = UUID.fromString("986b5a2a-dc96-4920-afec-0d4ef7903ef6");
+		return waitingService.connectWaitingNotification(
+			waitingId, memberId, nonMemberName, nonMemberPhone
 		);
 	}
 
