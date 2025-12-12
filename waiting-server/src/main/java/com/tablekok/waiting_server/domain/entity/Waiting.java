@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.springframework.data.annotation.CreatedDate;
 
 import com.tablekok.entity.BaseEntity;
+import com.tablekok.exception.AppException;
+import com.tablekok.waiting_server.domain.exception.WaitingDomainErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -122,14 +124,14 @@ public class Waiting extends BaseEntity {
 	private static void validateCustomerInfo(
 		CustomerType customerType, UUID memberId, String nonMemberName, String nonMemberPhone
 	) {
-		if (customerType == CustomerType.MEMBER) {
-			if (memberId == null) {
-				throw new IllegalArgumentException("회원(MEMBER) 타입은 memberId가 필수입니다.");
-			}
-		} else if (customerType == CustomerType.NON_MEMBER) {
+		if (customerType == CustomerType.MEMBER && memberId == null) {
+			throw new AppException(WaitingDomainErrorCode.MEMBER_ID_REQUIRED);
+		}
+
+		if (customerType == CustomerType.NON_MEMBER) {
 			if (nonMemberName == null || nonMemberName.isBlank() || nonMemberPhone == null
 				|| nonMemberPhone.isBlank()) {
-				throw new IllegalArgumentException("비회원(NON_MEMBER) 타입은 이름과 전화번호가 필수입니다.");
+				throw new AppException(WaitingDomainErrorCode.NON_MEMBER_INFO_REQUIRED);
 			}
 		}
 	}
