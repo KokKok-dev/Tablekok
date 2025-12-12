@@ -4,10 +4,18 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.tablekok.exception.AppException;
 import com.tablekok.waiting_server.application.dto.command.CreateWaitingCommand;
 import com.tablekok.waiting_server.application.dto.result.CreateWaitingResult;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingResult;
+import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
+import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
+import com.tablekok.waiting_server.domain.entity.Waiting;
+import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
+import com.tablekok.waiting_server.domain.repository.WaitingCachePort;
+import com.tablekok.waiting_server.domain.repository.WaitingRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,38 +23,78 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WaitingUserService {
 
-	// @Transactional
+	private final WaitingCachePort waitingCache;
+	private final StoreWaitingStatusRepository storeWaitingStatusRepository;
+	private final WaitingRepository waitingRepository;
+
+	@Transactional
 	public CreateWaitingResult createWaiting(CreateWaitingCommand command) {
 		// TODO: 매장 접수 가능 상태 확인 (StoreClient - waitingOpenTime 조회)
+
+		// 다음웨이팅 번호 발급 (StoreWaitingStatus에서 latest_assigned_number 증가, 새로운번호 확보)
+		StoreWaitingStatus status = storeWaitingStatusRepository.findByIdWithLock(command.storeId())
+			.orElseThrow(() -> new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND));
+
+		validateStoreStatus(status); // status 활성화 확인
+		validateHeadcountPolicy(command.headcount(), status.getMinHeadcount(), status.getMaxHeadcount()); // 인원수 유효성 검사
 		// TODO: 고객 웨이팅 중복 확인
-		// TODO: 인원수 유효성 확인
 
-		// TODO: 다음웨이팅 번호 발급 (StoreWaitingStatus에서 latest_assigned_number 증가, 새로운번호 확보)
+		status.incrementNumber();
+		int assignedNumber = status.getLatestAssignedNumber();
 
-		// TODO: WaitingQueue 엔티티 생성 후 저장
-		// TODO: 발급된 번호(Score)와 WaitingId를 Redis ZSET에 등록
+		// Waiting 엔티티 생성 후 저장
+		Waiting newWaiting = command.toEntity(assignedNumber);
+		UUID newWaitingId = newWaiting.getId();
+		Waiting savedWaiting = waitingRepository.save(newWaiting);
 
-		// TODO: Redis ZSET에서 현재 등록된 모든 웨이팅 팀 수(ZCARD)와 본인의 순위(ZRANK)를 조회
-		// TODO: (현재 대기 팀 수) * (팀당 평균 소요 시간) 공식을 사용하여 estimatedWaitMinutes를 계산
-		// TODO: CreateWaitingResult DTO를 반환
+		// 발급된 번호(Score)와 WaitingId를 Redis ZSET에 등록
+		waitingCache.addWaiting(
+			command.storeId(),
+			assignedNumber,
+			newWaitingId.toString()
+		);
 
-		UUID newWaitingId = UUID.randomUUID(); // 새로 생성된 웨이팅 ID
-		int assignedNumber = 105; // 발급된 번호
-		int rank = 3; // Redis ZRANK 결과
-		int totalTeams = 5; // Redis ZCARD 결과
-		int estimatedTime = 25; // 계산된 예상 시간
+		// Redis ZSET에서 본인의 순위(ZRANK)를 조회
+		Long rankZeroBased = waitingCache.getRank(command.storeId(), newWaitingId.toString());
+		int rank = (rankZeroBased != null) ? rankZeroBased.intValue() + 1 : 1;
 
-		// 2. of() 메서드를 사용하여 결과 객체 생성
+		// ((현재 대기 팀 수) / (테이블 수))* (팀당 평균 소요 시간) 공식을 사용하여 estimatedWaitMinutes를 계산
+		int estimatedTime = calculateEstimateWaitMinutes(rank, status);
+
+		// CreateWaitingResult DTO를 반환
 		return CreateWaitingResult.of(
 			newWaitingId,
 			command.storeId(),
 			assignedNumber,
 			rank,
-			totalTeams,
 			estimatedTime,
-			"WAITING",
-			LocalDateTime.now()
+			savedWaiting.getStatus().name(), // WAITING
+			savedWaiting.getQueuedAt()
 		);
+	}
+
+	private void validateStoreStatus(StoreWaitingStatus status) {
+		if (!status.isOpenForWaiting()) {
+			throw new AppException(WaitingErrorCode.WAITING_CLOSED);
+		}
+	}
+
+	private void validateHeadcountPolicy(int headcount, int min, int max) {
+		if (headcount < min) {
+			throw new AppException(WaitingErrorCode.HEADCOUNT_BELOW_MIN);
+		}
+
+		if (headcount > max) {
+			throw new AppException(WaitingErrorCode.HEADCOUNT_ABOVE_MAX);
+		}
+	}
+
+	private int calculateEstimateWaitMinutes(int rank, StoreWaitingStatus status) {
+		int teamsAhead = rank - 1;
+		int totalTables = status.getTotalTables();
+		int requiredTableTurns = (teamsAhead + totalTables - 1) / totalTables;
+
+		return requiredTableTurns * status.getTurnoverRateMinutes();
 	}
 
 	public GetWaitingResult getWaiting(UUID waitingId) {
