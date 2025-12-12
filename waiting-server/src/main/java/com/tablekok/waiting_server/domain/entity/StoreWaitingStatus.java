@@ -25,6 +25,9 @@ public class StoreWaitingStatus extends BaseEntity {
 	@Column(name = "is_open_for_waiting", nullable = false)
 	private boolean isOpenForWaiting;
 
+	@Column(name = "total_tables", nullable = false)
+	private int totalTables;
+
 	@Column(name = "latest_assigned_number", nullable = false)
 	private int latestAssignedNumber = 0; // 마지막으로 발급된 웨이팅 번호
 
@@ -42,11 +45,12 @@ public class StoreWaitingStatus extends BaseEntity {
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private StoreWaitingStatus(
-		UUID storeId, boolean isOpenForWaiting, int latestAssignedNumber, int currentCallingNumber,
+		UUID storeId, boolean isOpenForWaiting, int totalTables, int latestAssignedNumber, int currentCallingNumber,
 		int turnoverRateMinutes, int minHeadcount, int maxHeadcount) {
 
 		this.storeId = storeId;
 		this.isOpenForWaiting = isOpenForWaiting;
+		this.totalTables = totalTables;
 		this.latestAssignedNumber = latestAssignedNumber;
 		this.currentCallingNumber = currentCallingNumber;
 		this.turnoverRateMinutes = turnoverRateMinutes;
@@ -56,11 +60,13 @@ public class StoreWaitingStatus extends BaseEntity {
 
 	}
 
-	public static StoreWaitingStatus create(UUID storeId, int turnoverRateMinutes, int minHeadcount, int maxHeadcount) {
+	public static StoreWaitingStatus create(UUID storeId, int totalTables, int turnoverRateMinutes, int minHeadcount,
+		int maxHeadcount) {
 
 		return StoreWaitingStatus.builder()
 			.storeId(storeId)
 			.isOpenForWaiting(true)
+			.totalTables(totalTables)
 			.latestAssignedNumber(0)
 			.currentCallingNumber(0)
 			.turnoverRateMinutes(turnoverRateMinutes)
