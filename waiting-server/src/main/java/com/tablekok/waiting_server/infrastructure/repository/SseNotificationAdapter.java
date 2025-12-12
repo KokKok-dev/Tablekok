@@ -10,9 +10,11 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import com.tablekok.waiting_server.domain.repository.NotificationPort;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SseNotificationAdapter implements NotificationPort {
 
 	private final SseEmitterRepository sseEmitterRepository;
@@ -34,6 +36,7 @@ public class SseNotificationAdapter implements NotificationPort {
 
 			} catch (IOException e) {
 				// 전송 실패 시 (클라이언트 연결 끊김 등) 연결 삭제
+				log.error("SSE 전송 실패 (waiting-call). WaitingId: {}", waitingId, e);
 				sseEmitterRepository.deleteById(waitingId);
 			}
 		});
@@ -55,6 +58,7 @@ public class SseNotificationAdapter implements NotificationPort {
 
 			} catch (IOException e) {
 				// 전송 실패 시 (클라이언트 연결 끊김 등) 연결 삭제
+				log.error("SSE 전송 실패 (waiting-noshow-timeout). WaitingId: {}", waitingId, e);
 				sseEmitterRepository.deleteById(waitingId);
 			}
 		});
@@ -65,9 +69,18 @@ public class SseNotificationAdapter implements NotificationPort {
 		SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
 
 		// 연결 종료(타임아웃, 에러 발생) 시 Emitter 제거
-		emitter.onCompletion(() -> sseEmitterRepository.deleteById(waitingId));
-		emitter.onTimeout(() -> sseEmitterRepository.deleteById(waitingId));
-		emitter.onError((e) -> sseEmitterRepository.deleteById(waitingId));
+		emitter.onCompletion(() -> {
+			log.info("SSE 연결 완료/종료. WaitingId: {}", waitingId);
+			sseEmitterRepository.deleteById(waitingId);
+		});
+		emitter.onTimeout(() -> {
+			log.warn("SSE 연결 타임아웃 발생. WaitingId: {}", waitingId);
+			sseEmitterRepository.deleteById(waitingId);
+		});
+		emitter.onError((e) -> {
+			log.error("SSE 연결 중 에러 발생. WaitingId: {}", waitingId, e);
+			sseEmitterRepository.deleteById(waitingId);
+		});
 
 		// 연결 저장
 		sseEmitterRepository.save(waitingId, emitter);
@@ -80,6 +93,7 @@ public class SseNotificationAdapter implements NotificationPort {
 				.id(waitingId.toString())
 			);
 		} catch (IOException e) {
+			log.error("SSE 최초 연결 데이터 전송 실패. WaitingId: {}", waitingId, e);
 			sseEmitterRepository.deleteById(waitingId);
 		}
 
