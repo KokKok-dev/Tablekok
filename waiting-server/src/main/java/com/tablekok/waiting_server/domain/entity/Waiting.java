@@ -130,4 +130,8 @@ public class Waiting extends BaseEntity {
 			}
 		}
 	}
+
+	public void callCustomer() {
+		this.status = WaitingStatus.CALLED;
+	}
 }

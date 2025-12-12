@@ -13,7 +13,10 @@ import com.tablekok.waiting_server.application.dto.command.StartWaitingServiceCo
 import com.tablekok.waiting_server.application.dto.result.GetWaitingQueueResult;
 import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
+import com.tablekok.waiting_server.domain.entity.Waiting;
+import com.tablekok.waiting_server.domain.entity.WaitingStatus;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
+import com.tablekok.waiting_server.domain.repository.WaitingRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WaitingOwnerService {
 	private final StoreWaitingStatusRepository storeWaitingStatusRepository;
+	private final WaitingRepository waitingRepository;
 
 	@Transactional
 	public void startWaitingService(StartWaitingServiceCommand command) {
@@ -71,7 +75,21 @@ public class WaitingOwnerService {
 
 	public void callWaiting(UUID storeId, UUID waitingId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		// TODO: waitingId 조회하여 상태가 WAITING 상태인지 확인
+		// waitingId 조회하여 상태가 WAITING 상태인지 확인
+		Waiting waiting = findWaiting(waitingId);
+		if (waiting.getStatus() != WaitingStatus.WAITING) {
+			throw new AppException(WaitingErrorCode.INVALID_WAITING_STATUS);
+		}
+
+		// StoreWaitingStatus 업데이트 (currentCallingNumber)
+		StoreWaitingStatus status = storeWaitingStatusRepository.findById(storeId)
+			.orElseThrow(() -> new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND));
+		int callingNumber = waiting.getWaitingNumber();
+		status.setCurrentCallingNumber(callingNumber);
+
+		// 상태를 WAITING -> CALLING으로 변경
+		waiting.callCustomer();
+		waitingRepository.save(waiting);
 
 		// TODO: 입장 호출 알림 푸시 후, 5분 내에 응답(confirm)하지 않으면 노쇼 처리한다는 내용 전달
 
@@ -121,5 +139,10 @@ public class WaitingOwnerService {
 
 	private Optional<StoreWaitingStatus> findStoreWaitingStatus(UUID storeId) {
 		return storeWaitingStatusRepository.findById(storeId);
+	}
+
+	private Waiting findWaiting(UUID waitingId) {
+		return waitingRepository.findById(waitingId)
+			.orElseThrow(() -> new AppException(WaitingErrorCode.WAITING_NOT_FOUND));
 	}
 }
