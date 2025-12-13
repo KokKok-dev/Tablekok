@@ -16,7 +16,7 @@ public record GetStoreReservationPolicyResponse(
 	LocalTime dailyReservationStartTime,
 	LocalTime dailyReservationEndTime,
 
-	int minHeadCount,
+	int minHeadcount,
 	int maxHeadcount,
 
 	boolean isDepositRequired,
@@ -24,7 +24,7 @@ public record GetStoreReservationPolicyResponse(
 	boolean isActive
 ) {
 	public static StoreReservationPolicy toVo(GetStoreReservationPolicyResponse response) {
-		return StoreReservationPolicy.of(response.isActive, response.maxHeadcount, response.minHeadCount,
+		return StoreReservationPolicy.of(response.isActive, response.maxHeadcount, response.minHeadcount,
 			response.monthlyOpenDay,
 			response.openTime);
 	}

@@ -1,4 +1,4 @@
-package com.tablekok.hotreservationservice.application.service;
+package com.tablekok.hotreservationservice.domain.repository;
 
 import java.util.Map;
 import java.util.Set;

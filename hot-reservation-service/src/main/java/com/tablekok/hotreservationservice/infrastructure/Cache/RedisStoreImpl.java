@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import com.tablekok.hotreservationservice.application.service.CacheStore;
+import com.tablekok.hotreservationservice.domain.repository.CacheStore;
 
 import lombok.RequiredArgsConstructor;
 

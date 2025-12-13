@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.tablekok.exception.AppException;
 import com.tablekok.hotreservationservice.application.exception.HotReservationErrorCode;
+import com.tablekok.hotreservationservice.domain.repository.CacheStore;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
