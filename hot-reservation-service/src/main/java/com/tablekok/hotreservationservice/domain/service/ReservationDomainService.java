@@ -27,7 +27,7 @@ public class ReservationDomainService {
 		ReservationPolicy policy) {
 
 		// 음식점이 예약을 허용하는지
-		if (!policy.getEnable()) {
+		if (!policy.isActive()) {
 			throw new AppException(ReservationDomainErrorCode.STORE_RESERVATION_DISABLED);
 		}
 
@@ -69,7 +69,7 @@ public class ReservationDomainService {
 
 	// 다음 달 예약일 때, 다음 달 예약이 가능한 날이 지났는지 확인
 	private void validateOpenTime(ReservationPolicy policy, LocalDateTime now) {
-		LocalDate openDate = policy.getOpenDate();
+		LocalDate openDate = LocalDate.now().withDayOfMonth(policy.getMonthlyOpenDay());
 		LocalTime openTime = policy.getOpenTime();
 
 		LocalDateTime openDateTime = LocalDateTime.of(openDate, openTime);
@@ -93,19 +93,19 @@ public class ReservationDomainService {
 		}
 	}
 
-	// 인기 음식점의 예약이면 거절
+	// 인기 음식점의 예약일 떄만 요청 허용
 	public void validateHotStore(List<UUID> hotStoreList, UUID storeId) {
-		if (hotStoreList.contains(storeId)) {
+		if (!hotStoreList.contains(storeId)) {
 			throw new AppException(ReservationDomainErrorCode.HOT_STORE_RESERVATION_NOT_ALLOWED);
 		}
 	}
 
 	// 인원수 체크
 	public void validateHeadcount(Integer headcount, ReservationPolicy policy) {
-		if (headcount > policy.getMaxPeople()) {
+		if (headcount > policy.getMaxHeadcount()) {
 			throw new AppException(ReservationDomainErrorCode.INVALID_RESERVATION_POLICY);
 		}
-		if (headcount < policy.getMinPeople()) {
+		if (headcount < policy.getMinHeadCount()) {
 			throw new AppException(ReservationDomainErrorCode.INVALID_RESERVATION_POLICY);
 		}
 	}

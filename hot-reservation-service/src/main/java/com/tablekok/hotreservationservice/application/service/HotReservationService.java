@@ -6,12 +6,14 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tablekok.hotreservationservice.application.client.SearchClient;
+import com.tablekok.hotreservationservice.application.client.StoreClient;
+import com.tablekok.hotreservationservice.application.client.dto.GetStoreReservationPolicyResponse;
 import com.tablekok.hotreservationservice.application.dto.command.CreateReservationCommand;
 import com.tablekok.hotreservationservice.application.dto.result.CreateReservationResult;
 import com.tablekok.hotreservationservice.domain.entity.Reservation;
 import com.tablekok.hotreservationservice.domain.repository.ReservationRepository;
 import com.tablekok.hotreservationservice.domain.service.ReservationDomainService;
+import com.tablekok.hotreservationservice.domain.vo.ReservationPolicy;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class HotReservationService {
 	private final ReservationDomainService reservationDomainService;
-	private final SearchClient searchClient;
+	private final StoreClient storeClient;
 	private final ReservationRepository reservationRepository;
 
 	// 예약 생성(접수)
@@ -48,7 +50,7 @@ public class HotReservationService {
 	private void createValidate(CreateReservationCommand command) {
 		// 도메인 서비스에서 검증하는게 맞나
 		// 인기 음식점의 요청인지 확인
-		List<UUID> hotStores = searchClient.getHotStores();
+		List<UUID> hotStores = storeClient.getHotStores();
 		reservationDomainService.validateHotStore(
 			hotStores,
 			command.storeId()
@@ -61,12 +63,12 @@ public class HotReservationService {
 		);
 
 		// 예약할 음식점의 예약 정책에 준수하는지			TODO 내부호출 구현 후 테스트
-		// ReservationPolicy policy = GetReservationPolicyResponse.toVo(
-		// 	searchClient.getStoreReservationPolicy(command.storeId()));
-		// reservationDomainService.validateReservationPolicy(
-		// 	command.headcount(),
-		// 	command.reservationDateTime(),
-		// 	policy
-		// );
+		ReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
+			storeClient.getStoreReservationPolicy(command.storeId()));
+		reservationDomainService.validateReservationPolicy(
+			command.headcount(),
+			command.reservationDateTime(),
+			policy
+		);
 	}
 }

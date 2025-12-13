@@ -61,7 +61,6 @@ public class HotReservationController {
 		queueService.validateToken(userId.toString(), request.token());
 
 		// 예약 진행
-		// TODO 예약 중 에러 시 토큰, 테이블, 이미터 삭제
 		CreateReservationResult result = hotReservationService.createReservation(request.toCommand(userId));
 
 		// 예약 요청 후 토큰, 해시테이블, emitter 삭제
