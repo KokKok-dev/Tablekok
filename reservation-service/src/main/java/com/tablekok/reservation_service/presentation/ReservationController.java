@@ -57,8 +57,8 @@ public class ReservationController {
 
 	// 단건 예약 조회(리뷰에서 호출 용도)
 	@GetMapping("/{reservationId}")
-	public GetReservationResponse getReservation(@PathVariable("reservationId") UUID reservationId) {
-		return GetReservationResponse.fromResult(reservationService.getReservation(reservationId));
+	public ResponseEntity<GetReservationResponse> getReservation(@PathVariable("reservationId") UUID reservationId) {
+		return ResponseEntity.ok(GetReservationResponse.fromResult(reservationService.getReservation(reservationId)));
 	}
 
 	// 예약 인원수 변경
