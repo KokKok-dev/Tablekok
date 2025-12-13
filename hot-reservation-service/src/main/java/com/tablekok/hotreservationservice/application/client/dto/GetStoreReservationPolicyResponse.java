@@ -3,7 +3,7 @@ package com.tablekok.hotreservationservice.application.client.dto;
 import java.time.LocalTime;
 import java.util.UUID;
 
-import com.tablekok.hotreservationservice.domain.vo.ReservationPolicy;
+import com.tablekok.hotreservationservice.domain.vo.StoreReservationPolicy;
 
 public record GetStoreReservationPolicyResponse(
 	UUID policyId,
@@ -23,8 +23,8 @@ public record GetStoreReservationPolicyResponse(
 	int depositAmount,
 	boolean isActive
 ) {
-	public static ReservationPolicy toVo(GetStoreReservationPolicyResponse response) {
-		return ReservationPolicy.of(response.isActive, response.maxHeadcount, response.minHeadCount,
+	public static StoreReservationPolicy toVo(GetStoreReservationPolicyResponse response) {
+		return StoreReservationPolicy.of(response.isActive, response.maxHeadcount, response.minHeadCount,
 			response.monthlyOpenDay,
 			response.openTime);
 	}

@@ -13,7 +13,7 @@ import com.tablekok.hotreservationservice.application.dto.result.CreateReservati
 import com.tablekok.hotreservationservice.domain.entity.Reservation;
 import com.tablekok.hotreservationservice.domain.repository.ReservationRepository;
 import com.tablekok.hotreservationservice.domain.service.ReservationDomainService;
-import com.tablekok.hotreservationservice.domain.vo.ReservationPolicy;
+import com.tablekok.hotreservationservice.domain.vo.StoreReservationPolicy;
 
 import lombok.RequiredArgsConstructor;
 
@@ -62,10 +62,10 @@ public class HotReservationService {
 			command.reservationDateTime()
 		);
 
-		// 예약할 음식점의 예약 정책에 준수하는지			TODO 내부호출 구현 후 테스트
-		ReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
+		// 예약할 음식점의 예약 정책에 준수하는지
+		StoreReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
 			storeClient.getStoreReservationPolicy(command.storeId()));
-		reservationDomainService.validateReservationPolicy(
+		reservationDomainService.validateStoreReservationPolicy(
 			command.headcount(),
 			command.reservationDateTime(),
 			policy

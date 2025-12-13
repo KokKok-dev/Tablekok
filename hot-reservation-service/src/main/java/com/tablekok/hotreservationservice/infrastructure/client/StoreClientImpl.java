@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class StoreClientImpl implements StoreClient {
-	private final StoreFeignClient storeFeignClient; //TODO 서치클라이언트 호출
+	private final StoreFeignClient storeFeignClient;
 
 	@Override
 	public GetStoreReservationPolicyResponse getStoreReservationPolicy(UUID storeId) {

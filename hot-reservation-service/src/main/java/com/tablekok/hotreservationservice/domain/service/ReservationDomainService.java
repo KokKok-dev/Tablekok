@@ -13,7 +13,7 @@ import com.tablekok.exception.AppException;
 import com.tablekok.hotreservationservice.domain.exception.ReservationDomainErrorCode;
 import com.tablekok.hotreservationservice.domain.repository.ReservationRepository;
 import com.tablekok.hotreservationservice.domain.vo.ReservationDateTime;
-import com.tablekok.hotreservationservice.domain.vo.ReservationPolicy;
+import com.tablekok.hotreservationservice.domain.vo.StoreReservationPolicy;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,8 +23,8 @@ public class ReservationDomainService {
 	private final ReservationRepository reservationRepository;
 
 	// 예약 정책 검증
-	public void validateReservationPolicy(Integer headcount, ReservationDateTime reservationDateTime,
-		ReservationPolicy policy) {
+	public void validateStoreReservationPolicy(Integer headcount, ReservationDateTime reservationDateTime,
+		StoreReservationPolicy policy) {
 
 		// 음식점이 예약을 허용하는지
 		if (!policy.isActive()) {
@@ -39,7 +39,7 @@ public class ReservationDomainService {
 	}
 
 	// 예약 가능한 달인지 검증
-	private void validateMonthRule(ReservationDateTime reservationDateTime, ReservationPolicy policy) {
+	private void validateMonthRule(ReservationDateTime reservationDateTime, StoreReservationPolicy policy) {
 		LocalDateTime now = LocalDateTime.now();
 		LocalDate reservationDate = reservationDateTime.getReservationDate();
 
@@ -68,7 +68,7 @@ public class ReservationDomainService {
 	}
 
 	// 다음 달 예약일 때, 다음 달 예약이 가능한 날이 지났는지 확인
-	private void validateOpenTime(ReservationPolicy policy, LocalDateTime now) {
+	private void validateOpenTime(StoreReservationPolicy policy, LocalDateTime now) {
 		LocalDate openDate = LocalDate.now().withDayOfMonth(policy.getMonthlyOpenDay());
 		LocalTime openTime = policy.getOpenTime();
 
@@ -101,7 +101,7 @@ public class ReservationDomainService {
 	}
 
 	// 인원수 체크
-	public void validateHeadcount(Integer headcount, ReservationPolicy policy) {
+	public void validateHeadcount(Integer headcount, StoreReservationPolicy policy) {
 		if (headcount > policy.getMaxHeadcount()) {
 			throw new AppException(ReservationDomainErrorCode.INVALID_RESERVATION_POLICY);
 		}
