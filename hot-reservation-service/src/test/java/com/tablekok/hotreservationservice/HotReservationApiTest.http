@@ -1,0 +1,107 @@
+### SSE 연결 및 대기열
+GET http://localhost:8085/v1/hot-reservations/queue
+
+
+### 토큰 검증
+POST http://localhost:8085/v1/hot-reservations/validation/358279c4-c4ba-4875-a863-cc50cd4816fc
+
+
+### 예약 생성 (예약 접수)
+POST http://localhost:8085/v1/hot-reservations
+Content-Type: application/json
+
+{
+  "token": "ef462d45-2c45-4418-9b17-dd405c8b687a",
+  "storeId": "a0c33cc2-bafc-4031-8173-c95ad7fb7621",
+  "reservationDateTime": "2025-12-26T19:00:00",
+  "headcount": 3
+}
+
+### 카테고리 생성
+POST http://localhost:8082/v1/categories
+Content-Type: application/json
+
+{
+  "name": "한식"
+}
+
+### 음식점 생성
+POST http://localhost:8082/v1/stores
+Content-Type: application/json
+
+{
+  "name": "테이블콕 맛집",
+  "phoneNumber": "02-1234-5678",
+  "address": "서울시 강남구 역삼동 123-45",
+  "latitude": 37.500000,
+  "longitude": 127.030000,
+  "description": "최고급 재료로 만든 정갈한 한식 전문점입니다.",
+  "totalCapacity": 50,
+  "turnoverRateMinutes": 60,
+  "imageUrl": "https://example.com/store/image1.jpg",
+  "categoryIds": [
+    "64c5b537-1862-4f27-9933-8d0cf72a1673"
+  ],
+  "operatingHours": [
+    {
+      "day": "MONDAY",
+      "openTime": "11:00",
+      "closeTime": "22:00",
+      "isClosed": false
+    },
+    {
+      "day": "TUESDAY",
+      "openTime": "11:00",
+      "closeTime": "22:00",
+      "isClosed": false
+    },
+    {
+      "day": "WEDNESDAY",
+      "openTime": "11:00",
+      "closeTime": "22:00",
+      "isClosed": false
+    },
+    {
+      "day": "THURSDAY",
+      "openTime": "11:00",
+      "closeTime": "22:00",
+      "isClosed": false
+    },
+    {
+      "day": "FRIDAY",
+      "openTime": "11:00",
+      "closeTime": "23:00",
+      "isClosed": false
+    },
+    {
+      "day": "SATURDAY",
+      "openTime": "10:00",
+      "closeTime": "23:00",
+      "isClosed": false
+    },
+    {
+      "day": "SUNDAY",
+      "openTime": null,
+      "closeTime": null,
+      "isClosed": true
+    }
+  ]
+}
+
+
+### 예약 정책 생성
+POST http://localhost:8082/v1/stores/a0c33cc2-bafc-4031-8173-c95ad7fb7621/reservation-policy
+Content-Type: application/json
+
+{
+  "monthlyOpenDay": 15,
+  "openTime": "13:00",
+  "reservationInterval": 30,
+  "dailyReservationStartTime": "13:00",
+  "dailyReservationEndTime": "21:00",
+  "minHeadCount": 2,
+  "maxHeadcount": 8,
+  "isDepositRequired": true,
+  "depositAmount": 50000,
+  "isActive": true
+}
