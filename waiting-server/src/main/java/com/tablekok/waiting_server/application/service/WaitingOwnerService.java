@@ -14,6 +14,7 @@ import com.tablekok.exception.AppException;
 import com.tablekok.waiting_server.application.dto.command.StartWaitingServiceCommand;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingQueueResult;
 import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
+import com.tablekok.waiting_server.application.port.NoShowSchedulerPort;
 import com.tablekok.waiting_server.application.port.NotificationPort;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
@@ -28,6 +29,7 @@ public class WaitingOwnerService {
 	private final StoreWaitingStatusRepository storeWaitingStatusRepository;
 	private final WaitingRepository waitingRepository;
 	private final NotificationPort notificationPort;
+	private final NoShowSchedulerPort noShowSchedulerPort;
 	private final WaitingQueueManagerService waitingQueueManagerService;
 
 	@Transactional
@@ -151,7 +153,7 @@ public class WaitingOwnerService {
 				// 호출 알림
 				notificationPort.sendWaitingCall(waitingId, callingNumber);
 				// 스케줄러 등록
-				waitingQueueManagerService.scheduleNoShow(waitingId);
+				noShowSchedulerPort.scheduleNoShowProcessing(waitingId);
 			}
 		});
 	}
