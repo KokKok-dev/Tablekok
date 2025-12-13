@@ -1,19 +1,31 @@
 package com.tablekok.reservation_service.application.client.dto.response;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.UUID;
 
 import com.tablekok.reservation_service.domain.vo.StoreReservationPolicy;
 
 public record GetStoreReservationPolicyResponse(
-	Boolean enable,        // 예약 가능 여부
-	Integer maxPeople,  // 예약 최대 인원
-	Integer minPeople,    // 예약 최소 인원
-	LocalDate openDate,    // 다음 달 예약이 풀리는 일
-	LocalTime openTime  // 다음 달 예약이 풀리는 시간
+	UUID policyId,
+	UUID storeId,
+
+	int monthlyOpenDay,
+	LocalTime openTime,
+
+	int reservationInterval,
+	LocalTime dailyReservationStartTime,
+	LocalTime dailyReservationEndTime,
+
+	int minHeadCount,
+	int maxHeadcount,
+
+	boolean isDepositRequired,
+	int depositAmount,
+	boolean isActive
 ) {
 	public static StoreReservationPolicy toVo(GetStoreReservationPolicyResponse response) {
-		return StoreReservationPolicy.of(response.enable, response.maxPeople, response.minPeople, response.openDate,
+		return StoreReservationPolicy.of(response.isActive, response.maxHeadcount, response.minHeadCount,
+			response.monthlyOpenDay,
 			response.openTime);
 	}
 }
