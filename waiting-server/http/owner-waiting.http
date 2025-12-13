@@ -1,3 +1,19 @@
+### 사장님 웨이팅 시작
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/start
+Content-Type: application/json
+
+{
+  "totalTables": 10,
+  "minHeadcount": 2,
+  "maxHeadcount": 6,
+  "turnoverRateMinutes": 45
+}
+
+### 사장님 웨이팅 중단
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/stop
+Content-Type: application/json
+
+
 
 ### 웨이팅 큐 조회
 GET http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/queue

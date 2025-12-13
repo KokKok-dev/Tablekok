@@ -6,29 +6,29 @@ import java.util.UUID;
 import org.springframework.data.annotation.CreatedDate;
 
 import com.tablekok.entity.BaseEntity;
+import com.tablekok.exception.AppException;
+import com.tablekok.waiting_server.domain.exception.WaitingDomainErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @AllArgsConstructor
-@Table(name = "p_waiting_queue")
+@Table(name = "p_waiting")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class WaitingQueue extends BaseEntity {
+public class Waiting extends BaseEntity {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "waiting_queue_id", updatable = false, nullable = false)
 	private UUID id;
 
@@ -76,4 +76,63 @@ public class WaitingQueue extends BaseEntity {
 
 	@Column(name = "canceled_at")
 	private LocalDateTime canceledAt; // 취소/노쇼 처리 시간
+
+	@Builder(access = AccessLevel.PRIVATE)
+	private Waiting(
+		UUID id, UUID storeId, int waitingNumber, CustomerType customerType, UUID memberId, String nonMemberName,
+		String nonMemberPhone, int headcount, WaitingStatus status, Integer estimatedWaitMinutes) {
+
+		this.id = id;
+		this.storeId = storeId;
+		this.waitingNumber = waitingNumber;
+		this.customerType = customerType;
+		this.headcount = headcount;
+		this.status = status;
+
+		this.memberId = memberId;
+		this.nonMemberName = nonMemberName;
+		this.nonMemberPhone = nonMemberPhone;
+		this.estimatedWaitMinutes = estimatedWaitMinutes;
+
+	}
+
+	public static Waiting create(
+		UUID storeId,
+		int waitingNumber,
+		CustomerType customerType,
+		UUID memberId, // nullable
+		String nonMemberName, // nullable
+		String nonMemberPhone, // nullable
+		int headcount) {
+
+		validateCustomerInfo(customerType, memberId, nonMemberName, nonMemberPhone);
+
+		return Waiting.builder()
+			.id(UUID.randomUUID()) // 객체 생성시 ID 바로 발급
+			.storeId(storeId)
+			.waitingNumber(waitingNumber)
+			.customerType(customerType)
+			.memberId(memberId)
+			.nonMemberName(nonMemberName)
+			.nonMemberPhone(nonMemberPhone)
+			.headcount(headcount)
+			.status(WaitingStatus.WAITING)
+			.estimatedWaitMinutes(null)
+			.build();
+	}
+
+	private static void validateCustomerInfo(
+		CustomerType customerType, UUID memberId, String nonMemberName, String nonMemberPhone
+	) {
+		if (customerType == CustomerType.MEMBER && memberId == null) {
+			throw new AppException(WaitingDomainErrorCode.MEMBER_ID_REQUIRED);
+		}
+
+		if (customerType == CustomerType.NON_MEMBER) {
+			if (nonMemberName == null || nonMemberName.isBlank() || nonMemberPhone == null
+				|| nonMemberPhone.isBlank()) {
+				throw new AppException(WaitingDomainErrorCode.NON_MEMBER_INFO_REQUIRED);
+			}
+		}
+	}
 }

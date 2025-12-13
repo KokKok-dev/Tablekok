@@ -2,17 +2,56 @@ package com.tablekok.waiting_server.application.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.tablekok.exception.AppException;
+import com.tablekok.waiting_server.application.dto.command.StartWaitingServiceCommand;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingQueueResult;
+import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
+import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
+import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class WaitingOwnerService {
+	private final StoreWaitingStatusRepository storeWaitingStatusRepository;
+
+	@Transactional
+	public void startWaitingService(StartWaitingServiceCommand command) {
+		// TODO: 사장님이 storeId의 실제 소유자인지 확인
+		Optional<StoreWaitingStatus> existingStatus = findStoreWaitingStatus(command.storeId());
+
+		// 레코드가 없는 경우 (최초 생성 및 초기화)
+		if (existingStatus.isEmpty()) {
+			StoreWaitingStatus newStatus = command.toEntity();
+			storeWaitingStatusRepository.save(newStatus);
+			return;
+		}
+
+		// 레코드가 이미 존재하는 경우 (운영 스위치만 ON)
+		StoreWaitingStatus status = existingStatus.get();
+		status.startWaiting(command.minHeadCount(), command.maxHeadcount());
+	}
+
+	@Transactional
+	public void stopWaitingService(UUID storeId, UUID ownerId) {
+		// TODO: 사장님이 storeId의 실제 소유자인지 확인
+		Optional<StoreWaitingStatus> existingStatus = findStoreWaitingStatus(storeId);
+		// 해당 매장의 웨이팅 시스템이 아예 설정된 적이 없음.
+		if (existingStatus.isEmpty()) {
+			throw new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND);
+		}
+
+		StoreWaitingStatus status = existingStatus.get();
+		status.stopWaiting();
+	}
+
 	public List<GetWaitingQueueResult> getStoreWaitingQueue(UUID storeId) {
 		// TODO: Redis ZSET에서 현재 대기 중인 모든 waitingId를 가져와 RDB에서 상세 정보를 조회하는 로직으로 대체
 
@@ -39,7 +78,7 @@ public class WaitingOwnerService {
 		// TODO: 5분 뒤에 실행되 ㄹ노쇼 자동 처리 배치/스케줄러 작업 등록
 
 		// TODO: StoreWaitingStatus의 currentCallingNumber를 호출된 고객의 waitingNumber로 업데이트
-		
+
 		// TODO: 남은 대기 고객들에게 현재 호출 번호가 변경
 	}
 
@@ -80,4 +119,7 @@ public class WaitingOwnerService {
 		// TODO: 남은 대기 고객들에게 순위가 변경되었음을 알림
 	}
 
+	private Optional<StoreWaitingStatus> findStoreWaitingStatus(UUID storeId) {
+		return storeWaitingStatusRepository.findById(storeId);
+	}
 }

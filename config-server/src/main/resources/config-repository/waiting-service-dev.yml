@@ -27,6 +27,13 @@ spring:
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: true
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD}
+      # timeout: 2000
+
 
   logging:
     level:

@@ -36,9 +36,10 @@ public class WaitingUserController {
 		@PathVariable UUID storeId,
 		@Valid @RequestBody CreateWaitingRequest request
 	) {
-		// TODO: 회원인지 비회원인지 판별 후 Command 전달
+		UUID memberId = UUID.randomUUID();
 
-		CreateWaitingResult result = waitingService.createWaiting(request.toCommand(storeId));
+		// TODO: 로그인 사용자면 memberId 넘겨주고 아니면 null return
+		CreateWaitingResult result = waitingService.createWaiting(request.toCommand(storeId, memberId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{waitingId}")
 			.buildAndExpand(result.waitingId())

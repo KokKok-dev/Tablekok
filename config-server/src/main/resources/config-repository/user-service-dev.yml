@@ -29,7 +29,7 @@ spring:
 # ✅ JWT 설정 (환경변수 처리)
 jwt:
   secret: ${JWT_SECRET:} # env 파일화
-  access-token-expiration: ${JWT_ACCESS_EXPIRATION:3600000}     # 1시간
+  access-token-expiration: ${JWT_ACCESS_EXPIRATION:86400000}     # 24시간
   refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7일
 
 # Eureka 클라이언트 설정

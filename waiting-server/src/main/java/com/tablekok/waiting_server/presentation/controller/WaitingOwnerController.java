@@ -9,14 +9,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingQueueResult;
 import com.tablekok.waiting_server.application.service.WaitingOwnerService;
+import com.tablekok.waiting_server.presentation.dto.request.StartWaitingServiceRequest;
 import com.tablekok.waiting_server.presentation.dto.response.GetWaitingQueueResponse;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,6 +28,33 @@ import lombok.RequiredArgsConstructor;
 public class WaitingOwnerController {
 
 	private final WaitingOwnerService waitingOwnerService;
+
+	// 사장님이 해당 매장의 웨이팅 기능을 활성화합니다.
+	@PostMapping("/start")
+	public ResponseEntity<ApiResponse<Void>> startWaitingService(
+		// TODO: 사장님 UUID
+		@PathVariable UUID storeId,
+		@Valid @RequestBody StartWaitingServiceRequest request
+	) {
+		UUID ownerId = UUID.randomUUID();
+		waitingOwnerService.startWaitingService(request.toCommand(storeId, ownerId));
+		return ResponseEntity.ok(
+			ApiResponse.success("음식점 웨이팅 시작합니다.", HttpStatus.OK)
+		);
+	}
+
+	// 사장님이 해당 매장의 웨이팅 기능을 비활성화합니다.
+	@PostMapping("/stop")
+	public ResponseEntity<ApiResponse<Void>> stopWaitingService(
+		// TODO: 사장님 UUID
+		@PathVariable UUID storeId
+	) {
+		UUID ownerId = UUID.randomUUID();
+		waitingOwnerService.stopWaitingService(storeId, ownerId);
+		return ResponseEntity.ok(
+			ApiResponse.success("음식점 웨이팅 중단합니다.", HttpStatus.OK)
+		);
+	}
 
 	// 웨이팅 큐(대기열) 조회 (Current Queue Status)
 	@GetMapping("/queue")

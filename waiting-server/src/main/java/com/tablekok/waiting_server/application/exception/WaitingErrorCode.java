@@ -1,0 +1,18 @@
+package com.tablekok.waiting_server.application.exception;
+
+import org.springframework.http.HttpStatus;
+
+import com.tablekok.exception.ErrorCode;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public enum WaitingErrorCode implements ErrorCode {
+
+	STORE_WAITING_STATUS_NOT_FOUND("WAITING100", "매장 웨이팅 상태 정보가 초기화되지 않았거나 존재하지 않습니다.", HttpStatus.NOT_FOUND);
+	private final String code;
+	private final String message;
+	private final HttpStatus status;
+}
