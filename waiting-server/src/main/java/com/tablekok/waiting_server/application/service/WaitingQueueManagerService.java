@@ -5,11 +5,11 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tablekok.waiting_server.application.port.NoShowSchedulerPort;
+import com.tablekok.waiting_server.application.port.NotificationPort;
 import com.tablekok.waiting_server.domain.entity.Waiting;
 import com.tablekok.waiting_server.domain.entity.WaitingStatus;
 import com.tablekok.waiting_server.domain.repository.NoShowProcessor;
-import com.tablekok.waiting_server.domain.repository.NoShowSchedulerPort;
-import com.tablekok.waiting_server.domain.repository.NotificationPort;
 import com.tablekok.waiting_server.domain.repository.WaitingCachePort;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
 

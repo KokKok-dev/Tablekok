@@ -1,4 +1,4 @@
-package com.tablekok.waiting_server.domain.repository;
+package com.tablekok.waiting_server.application.port;
 
 import java.util.UUID;
 

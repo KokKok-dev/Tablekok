@@ -7,8 +7,8 @@ import java.util.UUID;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
+import com.tablekok.waiting_server.application.port.NoShowSchedulerPort;
 import com.tablekok.waiting_server.domain.repository.NoShowProcessor;
-import com.tablekok.waiting_server.domain.repository.NoShowSchedulerPort;
 
 import jakarta.inject.Provider;
 import lombok.RequiredArgsConstructor;

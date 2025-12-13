@@ -14,9 +14,9 @@ import com.tablekok.exception.AppException;
 import com.tablekok.waiting_server.application.dto.command.StartWaitingServiceCommand;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingQueueResult;
 import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
+import com.tablekok.waiting_server.application.port.NotificationPort;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
-import com.tablekok.waiting_server.domain.repository.NotificationPort;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
 
