@@ -1,14 +1,11 @@
 package com.tablekok.user_service.config;
 
-import com.tablekok.user_service.security.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -17,10 +14,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
-
-	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -30,16 +24,9 @@ public class SecurityConfig {
 			.sessionManagement(session ->
 				session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers(
-					"/v1/auth/**",
-					"/v1/users/findid",
-					"/v1/users/findpassword",
-					"/actuator/health",
-					"/actuator/info"
-				).permitAll()
-				.anyRequest().authenticated()
+				// Gateway 경유 시 이미 인증 완료 → 전체 permitAll 으로 리팩토링 진행
+				.anyRequest().permitAll()
 			)
-			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.httpBasic(httpBasic -> httpBasic.disable())
 			.formLogin(formLogin -> formLogin.disable())
 			.logout(logout -> logout.disable());
@@ -53,6 +40,7 @@ public class SecurityConfig {
 		configuration.setAllowedOriginPatterns(Arrays.asList(
 			"http://localhost:3000",
 			"http://localhost:8080",
+			"http://localhost:19091",
 			"https://*.tablekok.com",
 			"https://tablekok.vercel.app"
 		));
@@ -64,7 +52,9 @@ public class SecurityConfig {
 			"Content-Type",
 			"X-Requested-With",
 			"X-User-Id",
-			"X-User-Role"
+			"X-User-Email",
+			"X-User-Role",
+			"X-Gateway-Verified"
 		));
 		configuration.setAllowCredentials(true);
 		configuration.setMaxAge(3600L);
