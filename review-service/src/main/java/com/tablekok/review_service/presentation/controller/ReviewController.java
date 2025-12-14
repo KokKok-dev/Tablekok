@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.tablekok.cursor.dto.request.CursorRequest;
 import com.tablekok.cursor.dto.response.Cursor;
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
@@ -25,6 +24,8 @@ import com.tablekok.review_service.application.dto.result.GetReviewResult;
 import com.tablekok.review_service.application.service.ReviewService;
 import com.tablekok.review_service.domain.entity.ReviewSortCriteria;
 import com.tablekok.review_service.presentation.dto.request.CreateReviewRequest;
+import com.tablekok.review_service.presentation.dto.request.GetMyReviewCursorRequest;
+import com.tablekok.review_service.presentation.dto.request.GetStoreReviewCursorRequest;
 import com.tablekok.review_service.presentation.dto.request.UpdateReviewRequest;
 import com.tablekok.review_service.presentation.dto.response.CreateReviewResponse;
 import com.tablekok.review_service.presentation.dto.response.GetMyReviewsResponse;
@@ -98,10 +99,9 @@ public class ReviewController {
 	@GetMapping("/stores/{storeId}/reviews")
 	public ResponseEntity<ApiResponse<Cursor<GetStoreReviewsResponse, UUID>>> findStoreReviews(
 		@PathVariable("storeId") UUID storeId,
-		@ModelAttribute CursorRequest<UUID> request,
-		@RequestParam(defaultValue = "NEWEST") ReviewSortCriteria sortBy
+		@ModelAttribute GetStoreReviewCursorRequest request
 	) {
-		Cursor<GetStoreReviewsResponse, UUID> response = reviewService.findStoreReviews(storeId, request, sortBy)
+		Cursor<GetStoreReviewsResponse, UUID> response = reviewService.findStoreReviews(storeId, request.toCursorRequest(), request.sortBy())
 			.map(GetStoreReviewsResponse::from);
 
 		return ResponseEntity.ok(
@@ -116,12 +116,12 @@ public class ReviewController {
 	public ResponseEntity<ApiResponse<Cursor<GetMyReviewsResponse, UUID>>> findMyReviews(
 		//@RequestHeader("XXX-USER-ID") UUID userId,
 		@RequestParam UUID userId,
-		@ModelAttribute CursorRequest<UUID> request
+		@ModelAttribute GetMyReviewCursorRequest request
 	) {
 		// 임시로 id 지정
 		// UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677");
 
-		Cursor<GetMyReviewsResponse, UUID> response = reviewService.findMyReviews(userId, request)
+		Cursor<GetMyReviewsResponse, UUID> response = reviewService.findMyReviews(userId, request.toCursorRequest())
 			.map(GetMyReviewsResponse::from);
 
 		return ResponseEntity.ok(
