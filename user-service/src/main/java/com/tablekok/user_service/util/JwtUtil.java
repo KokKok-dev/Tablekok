@@ -34,4 +34,24 @@ public class JwtUtil {
 			.signWith(getSigningKey(), SignatureAlgorithm.HS256)
 			.compact();
 	}
+
+	public UUID getUserId(String token) {
+		String subject = Jwts.parserBuilder()
+			.setSigningKey(getSigningKey())
+			.build()
+			.parseClaimsJws(token)
+			.getBody()
+			.getSubject();
+
+		return UUID.fromString(subject);
+	}
+
+	public String getRole(String token) {
+		return Jwts.parserBuilder()
+			.setSigningKey(getSigningKey())
+			.build()
+			.parseClaimsJws(token)
+			.getBody()
+			.get("role", String.class);
+	}
 }
