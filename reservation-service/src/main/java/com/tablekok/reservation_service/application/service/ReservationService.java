@@ -10,7 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
-import com.tablekok.reservation_service.application.client.SearchClient;
+import com.tablekok.reservation_service.application.client.StoreClient;
+import com.tablekok.reservation_service.application.client.dto.request.OwnerVerificationRequest;
 import com.tablekok.reservation_service.application.client.dto.response.GetStoreReservationPolicyResponse;
 import com.tablekok.reservation_service.application.dto.command.CreateReservationCommand;
 import com.tablekok.reservation_service.application.dto.result.CreateReservationResult;
@@ -33,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class ReservationService {
 	private final ReservationRepository reservationRepository;
 	private final ReservationDomainService reservationDomainService;
-	private final SearchClient searchClient;
+	private final StoreClient storeClient;
 	private final StrategyFactory strategyFactory;
 
 	// 예약 생성(접수)
@@ -60,7 +61,7 @@ public class ReservationService {
 	// 생성 전 검증
 	private void validateReservationConstraints(CreateReservationCommand command) {
 		// 인기 음식점의 요청인지 확인
-		List<UUID> hotStores = searchClient.getHotStores();
+		List<UUID> hotStores = storeClient.getHotStores();
 		reservationDomainService.validateHotStore(
 			hotStores,
 			command.storeId()
@@ -72,10 +73,9 @@ public class ReservationService {
 			command.reservationDateTime()
 		);
 
-		// 예약할 음식점의 예약 정책에 준수하는지			TODO 내부호출 구현 후 테스트
+		// 예약할 음식점의 예약 정책에 준수하는지
 		StoreReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
-			searchClient.getStoreReservationPolicy(command.storeId()));
-
+			storeClient.getStoreReservationPolicy(command.storeId()));
 		reservationDomainService.validateStoreReservationPolicy(
 			command.headcount(),
 			command.reservationDateTime(),
@@ -95,9 +95,9 @@ public class ReservationService {
 	public void updateHeadcount(UUID userId, UUID reservationId, Integer headcount) {
 		Reservation findReservation = reservationRepository.findByIdAndUserId(reservationId, userId);
 
-		// 인원수 정책 검증							TODO 내부호출 구현 후 테스트
+		// 인원수 정책 검증
 		StoreReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
-			searchClient.getStoreReservationPolicy(findReservation.getStoreId()));
+			storeClient.getStoreReservationPolicy(findReservation.getStoreId()));
 		reservationDomainService.validateHeadcount(headcount, policy);
 
 		findReservation.updateHeadcount(headcount);
@@ -106,7 +106,7 @@ public class ReservationService {
 	// 예약 취소
 	@Transactional
 	public void cancelReservation(UUID userId, UserRole userRole, UUID reservationId) {
-		RoleStrategy strategy = strategyFactory.getStrategy(userRole); //TODO 유저 구현 후 Role값으로
+		RoleStrategy strategy = strategyFactory.getStrategy(userRole);
 		strategy.cancelReservation(userId, reservationId);
 	}
 
@@ -149,7 +149,8 @@ public class ReservationService {
 
 	// 해당 예약의 음식점이 사용자 소유인지
 	private void validateStoreOwner(UUID userId, UUID storeId) {
-		if (!searchClient.checkStoreOwner(userId, storeId)) {
+		OwnerVerificationRequest request = OwnerVerificationRequest.of(storeId, userId);
+		if (!storeClient.checkStoreOwner(request)) {
 			throw new AppException(ReservationErrorCode.FORBIDDEN_STORE_ACCESS);
 		}
 	}

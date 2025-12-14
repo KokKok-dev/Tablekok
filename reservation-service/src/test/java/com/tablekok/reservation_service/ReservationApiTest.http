@@ -1,0 +1,42 @@
+### 예약 생성 (예약 접수)
+POST http://localhost:8084/v1/reservations
+Content-Type: application/json
+
+{
+  "storeId": "a0c33cc2-bafc-4031-8173-c95ad7fb7621",
+  "reservationDateTime": "2025-12-27T15:00:00",
+  "headcount": 3
+}
+
+
+### 단건 예약 조회 (리뷰용)
+GET http://localhost:8084/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8
+
+
+### 예약 인원 변경
+PATCH http://localhost:8084/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8
+Content-Type: application/json
+
+{
+  "headcount": 4
+}
+
+
+### 예약 취소 (고객/오너 전략 적용)
+PATCH http://localhost:8084/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8/cancel
+
+
+### 예약 노쇼 처리 (오너)
+PATCH http://localhost:8084/v1/reservations/owner/796b9651-5305-4616-9319-ec8cb440b547/noshow
+
+
+### 예약 확인(DONE, 오너)
+PATCH http://localhost:8084/v1/reservations/owner/1b35833d-657c-4104-aecf-a13023f779a8/done
+
+
+### 예약 조회 (고객)
+GET http://localhost:8084/v1/reservations
+
+
+### 예약 조회 (오너)
+GET http://localhost:8084/v1/reservations/owner?storeId=8f3c6a5e-9e84-4c3f-9b80-7c2dd1a4e2c1
