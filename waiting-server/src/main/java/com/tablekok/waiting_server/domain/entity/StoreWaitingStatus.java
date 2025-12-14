@@ -100,4 +100,8 @@ public class StoreWaitingStatus extends BaseEntity {
 
 		this.isOpenForWaiting = false;
 	}
+
+	public void setCurrentCallingNumber(int callingNumber) {
+		this.currentCallingNumber = callingNumber;
+	}
 }

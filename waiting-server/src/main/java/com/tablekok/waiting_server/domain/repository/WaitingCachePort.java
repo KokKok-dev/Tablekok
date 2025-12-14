@@ -11,4 +11,6 @@ public interface WaitingCachePort {
 	Long getRank(UUID storeId, String memberKey);
 
 	Long getCardinality(UUID storeId);
+
+	void removeWaiting(UUID storeId, String toString);
 }

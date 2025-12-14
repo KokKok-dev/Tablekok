@@ -1,5 +1,8 @@
 package com.tablekok.waiting_server.infrastructure.repository;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.stereotype.Repository;
 
 import com.tablekok.waiting_server.domain.entity.Waiting;
@@ -16,4 +19,10 @@ public class WaitingRepositoryAdapter implements WaitingRepository {
 	public Waiting save(Waiting waiting) {
 		return waitingJpaRepository.save(waiting);
 	}
+
+	@Override
+	public Optional<Waiting> findById(UUID waitingId) {
+		return waitingJpaRepository.findById(waitingId);
+	}
+
 }
