@@ -14,6 +14,12 @@ public enum HotReservationErrorCode implements ErrorCode {
 		"HOT-RESERVATION100",
 		"유효하지 않은 입장 토큰입니다.",
 		HttpStatus.BAD_REQUEST
+	),
+
+	COMMUNICATOR_SEND_FAILED(
+		"HOT-RESERVATION101",
+		"이벤트 송신에 실패하였습니다. 재연결을 시도하세요.",
+		HttpStatus.INTERNAL_SERVER_ERROR
 	);
 
 	private final String code;

@@ -60,9 +60,6 @@ public class Waiting extends BaseEntity {
 	@Column(name = "status", nullable = false, length = 20)
 	private WaitingStatus status;
 
-	@Column(name = "estimated_wait_minutes")
-	private Integer estimatedWaitMinutes; // 예상 대기 시간 (분 단위)
-
 	// 시간 정보 (queued_at = created_at)
 	@CreatedDate
 	@Column(name = "queued_at", nullable = false, updatable = false)
@@ -92,7 +89,6 @@ public class Waiting extends BaseEntity {
 		this.memberId = memberId;
 		this.nonMemberName = nonMemberName;
 		this.nonMemberPhone = nonMemberPhone;
-		this.estimatedWaitMinutes = estimatedWaitMinutes;
 
 	}
 
@@ -117,7 +113,6 @@ public class Waiting extends BaseEntity {
 			.nonMemberPhone(nonMemberPhone)
 			.headcount(headcount)
 			.status(WaitingStatus.WAITING)
-			.estimatedWaitMinutes(null)
 			.build();
 	}
 
@@ -134,5 +129,27 @@ public class Waiting extends BaseEntity {
 				throw new AppException(WaitingDomainErrorCode.NON_MEMBER_INFO_REQUIRED);
 			}
 		}
+	}
+
+	public boolean isMember() {
+		return this.customerType == CustomerType.MEMBER;
+	}
+
+	public boolean isNonMember() {
+		return this.customerType == CustomerType.NON_MEMBER;
+	}
+
+	public void callCustomer() {
+		if (this.getStatus() != WaitingStatus.WAITING) {
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
+
+		this.status = WaitingStatus.CALLED;
+		this.calledAt = LocalDateTime.now();
+	}
+
+	public void noShow() {
+		this.status = WaitingStatus.NO_SHOW;
+		this.canceledAt = LocalDateTime.now();
 	}
 }

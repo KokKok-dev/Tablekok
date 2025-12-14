@@ -15,62 +15,70 @@ spring:
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
       - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
 
-  # ✅ Spring Cloud Gateway 설정 (인증 라우팅 추가)
+  # ✅ Spring Cloud Gateway 설정
   cloud:
     gateway:
-      server:
-        webflux:
-          # CORS 설정
-          globalcors:
-            cors-configurations:
-              '[/**]':
-                allowed-origins: "*"
-                allowed-methods: "*"
-                allowed-headers: "*"
-                allow-credentials: true
-                max-age: 3600
+      # CORS 설정
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origin-patterns: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
 
-          # 라우팅 설정 (인증 라우팅 추가)
-          routes:
-            # 🔐 User Service - 인증 관련 (우선순위 높음)
-            - id: user-service-auth
-              uri: lb://USER-SERVICE
-              predicates:
-                - Path=/v1/auth/**
+      # 라우팅 설정
+      routes:
+        # 🔐 User Service - 인증 관련 (JWT 필터 없음)
+        - id: user-service-auth
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/v1/auth/**
 
-            # 👤 User Service - 사용자 관리
-            - id: user-service
-              uri: lb://USER-SERVICE
-              predicates:
-                - Path=/v1/users/**, /internal/v1/users/**
+        # 👤 User Service - 사용자 관리 (JWT 필터 필요)
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/v1/users/**, /internal/v1/users/**
+          filters:
+            - name: JwtAuthenticationFilter
 
-            # 🏪 Store Service
-            - id: store-service
-              uri: lb://STORE-SERVICE
-              predicates:
-                - Path=/v1/stores/**, /v1/categories/**
+        # 🏪 Store Service
+        - id: store-service
+          uri: lb://STORE-SERVICE
+          predicates:
+            - Path=/v1/stores/**, /v1/categories/**
+          filters:
+            - name: JwtAuthenticationFilter
 
-            # 🔍 Search Service
-            - id: search-service
-              uri: lb://SEARCH-SERVICE
-              predicates:
-                - Path=/v1/search/**
+        # 🔍 Search Service
+        - id: search-service
+          uri: lb://SEARCH-SERVICE
+          predicates:
+            - Path=/v1/search/**
+          filters:
+            - name: JwtAuthenticationFilter
 
-            # 📅 Reservation Service
-            - id: reservation-service
-              uri: lb://RESERVATION-SERVICE
-              predicates:
-                - Path=/v1/reservations/**
+        # 📅 Reservation Service
+        - id: reservation-service
+          uri: lb://RESERVATION-SERVICE
+          predicates:
+            - Path=/v1/reservations/**
+          filters:
+            - name: JwtAuthenticationFilter
 
-            # ⭐ Review Service
-            - id: review-service
-              uri: lb://REVIEW-SERVICE
-              predicates:
-                - Path=/v1/reviews/**
+        # ⭐ Review Service
+        - id: review-service
+          uri: lb://REVIEW-SERVICE
+          predicates:
+            - Path=/v1/reviews/**
+          filters:
+            - name: JwtAuthenticationFilter
 
-          # 기본 필터
-          default-filters:
-            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      # 기본 필터
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
 
 # ✅ JWT 설정 (환경변수 처리)
 jwt:

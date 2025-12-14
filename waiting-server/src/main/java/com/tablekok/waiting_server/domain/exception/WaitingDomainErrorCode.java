@@ -16,7 +16,9 @@ public enum WaitingDomainErrorCode implements ErrorCode {
 	MEMBER_ID_REQUIRED("WAITING003", "회원(MEMBER) 타입은 memberId가 필수입니다.", HttpStatus.BAD_REQUEST),
 	NON_MEMBER_INFO_REQUIRED("WAITING004", "비회원(NON_MEMBER) 타입은 이름과 전화번호가 필수입니다.", HttpStatus.BAD_REQUEST),
 	WAITING_ALREADY_STARTED("WAITING005", "매장 웨이팅은 이미 시작되었습니다.", HttpStatus.BAD_REQUEST),
-	WAITING_ALREADY_CLOSED("WAITING006", "이미 웨이팅 접수가 중단된 상태입니다.", HttpStatus.BAD_REQUEST);;
+	WAITING_ALREADY_CLOSED("WAITING006", "이미 웨이팅 접수가 중단된 상태입니다.", HttpStatus.BAD_REQUEST),
+	INVALID_WAITING_STATUS("WAITING102", "웨이팅 상태가 유효하지 않아 요청을 처리할 수 없습니다.", HttpStatus.BAD_REQUEST),
+	;
 
 	private final String code;
 	private final String message;
