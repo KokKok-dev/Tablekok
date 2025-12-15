@@ -1,0 +1,128 @@
+# Gateway Service 설정 (Spring Boot 3.5.x 완전 호환)
+server:
+  port: 19091
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: gateway-service
+
+  # ✅ DataSource/JPA 자동 설정 완전 비활성화
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+
+  # ✅ Spring Cloud Gateway 설정
+  cloud:
+    gateway:
+      # CORS 설정
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origin-patterns: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
+
+      # 라우팅 설정
+      #      routes:
+      #        # 🔐 User Service - 인증 관련 (JWT 필터 없음)
+      #        - id: user-service-auth
+      #          uri: lb://USER-SERVICE
+      #          order: 100
+      #          predicates:
+      #            - Path=/v1/auth/**
+      #
+      #        # 👤 User Service - 사용자 관리 (JWT 필터 필요)
+      #        - id: user-service
+      #          uri: lb://USER-SERVICE
+      #          order: 100
+      #          predicates:
+      #            - Path=/v1/users/**, /internal/v1/users/**
+      #          filters:
+      #            - name: JwtAuthenticationFilter
+      #
+      #        # 🏪 Store Service
+      #        - id: store-service
+      #          uri: lb://STORE-SERVICE
+      #          order: 100
+      #          predicates:
+      #            - Path=/v1/stores/**, /v1/categories/**
+      #          filters:
+      #            - name: JwtAuthenticationFilter
+      #
+      #        # 🔍 Search Service
+      #        - id: search-service
+      #          uri: lb://SEARCH-SERVICE
+      #          order: 100
+      #          predicates:
+      #            - Path=/v1/search/**
+      #          filters:
+      #            - name: JwtAuthenticationFilter
+      #
+      #        # 📅 Reservation Service
+      #        - id: reservation-service
+      #          uri: lb://RESERVATION-SERVICE
+      #          order: 100
+      #          predicates:
+      #            - Path=/v1/reservations/**
+      #          filters:
+      #            - name: JwtAuthenticationFilter
+      #
+      #        # ⭐ Review Service
+      #        - id: review-service
+      #          uri: lb://REVIEW-SERVICE
+      #          order: 100
+      #          predicates:
+      #            - Path=/v1/reviews/**
+      ##            - , /v1/stores/{storeId}/reviews/**, /v1/users/me/reviews/**
+      #          filters:
+      #            - name: JwtAuthenticationFilter
+
+      # 기본 필터
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+
+# ✅ JWT 설정 (환경변수 처리)
+jwt:
+  secret: ${JWT_SECRET:}
+  header: Authorization
+  prefix: "Bearer "
+
+gateway:
+  uris:
+    review: lb://REVIEW-SERVICE
+    user: lb://USER-SERVICE
+    store: lb://STORE-SERVICE
+    reservation: lb://RESERVATION-SERVICE
+    search: lb://SEARCH-SERVICE
+
+# Eureka 클라이언트 설정
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:19090/eureka
+  instance:
+    prefer-ip-address: true
+
+# ✅ Actuator 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,routes
+  endpoint:
+    health:
+      show-details: always
+# 로깅 설정
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.tablekok.gateway_service: DEBUG

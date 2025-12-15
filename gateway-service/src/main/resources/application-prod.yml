@@ -75,12 +75,7 @@ spring:
 #            - Path=/v1/reviews/**, /v1/stores/{storeId}/reviews/**, /v1/users/me/reviews/**
 #          filters:
 #            - name: JwtAuthenticationFilter
-      uris:
-        review: lb://REVIEW-SERVICE
-        user: ${USER_URI}
-        store: ${STORE_URI}
-        reservation: ${RESERVATION_URI}
-        search: lb://SEARCH-SERVICE
+
 
       # 기본 필터
       default-filters:
@@ -91,6 +86,14 @@ jwt:
   secret: ${JWT_SECRET:}
   header: Authorization
   prefix: "Bearer "
+
+gateway:
+  uris:
+    review: lb://REVIEW-SERVICE
+    user: ${USER_URI}
+    store: ${STORE_URI}
+    reservation: ${RESERVATION_URI}
+    search: lb://SEARCH-SERVICE
 
 # Eureka 클라이언트 설정
 eureka:

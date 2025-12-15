@@ -1,17 +1,13 @@
 package com.tablekok.gateway_service.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
-import lombok.Getter;
-
-@Component
 @ConfigurationProperties(prefix = "gateway.uris")
-@Getter
-public class GatewayUriProperties {
-	private String review;
-	private String user;
-	private String store;
-	private String reservation;
-	private String search;
+public record GatewayUriProperties(
+	String review,
+	String user,
+	String store,
+	String reservation,
+	String search
+) {
 }
