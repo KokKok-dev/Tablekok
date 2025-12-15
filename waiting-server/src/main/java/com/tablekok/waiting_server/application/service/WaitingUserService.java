@@ -95,7 +95,7 @@ public class WaitingUserService {
 		StoreWaitingStatus status = findStoreWaitingStatus(waiting.getStoreId());
 
 		// Redis 앞에 대기팀 수, 예상 시간 조회/계산
-		Long rankZeroBased = waitingCache.getRank(waiting.getStoreId(), command.memberId().toString());
+		Long rankZeroBased = waitingCache.getRank(waiting.getStoreId(), waiting.getId().toString());
 		int rank = 0;
 		int estimatedTime = 0;
 
@@ -133,7 +133,7 @@ public class WaitingUserService {
 		noShowSchedulerPort.cancelNoShowProcessing(command.waitingId());
 
 		// 고객이 입장을 확정했음을 사장님(Store Owner)에게 실시간으로 알림 & 다시 5분 내로 입장해야함.
-		registerPostCommitActions(command.waitingId(), waiting.getWaitingNumber(), waiting.getStoreId());
+		registerPostConfirmActions(command.waitingId(), waiting.getWaitingNumber(), waiting.getStoreId());
 	}
 
 	@Transactional
@@ -194,7 +194,7 @@ public class WaitingUserService {
 		}
 	}
 
-	private void registerPostCommitActions(UUID waitingId, int callingNumber, UUID storeId) {
+	private void registerPostConfirmActions(UUID waitingId, int callingNumber, UUID storeId) {
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 			@Override
 			public void afterCommit() {
