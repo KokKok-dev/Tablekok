@@ -92,9 +92,15 @@ public class WaitingUserController {
 
 	@PostMapping("/{waitingId}/cancel")
 	public ResponseEntity<ApiResponse<Void>> cancelWaiting(
-		@PathVariable UUID waitingId
+		@PathVariable UUID waitingId,
+		// TODO: userId 받아야함 @AuthenticationPrincipal UUID memberId
+		@RequestParam(required = false) String nonMemberName,
+		@RequestParam(required = false) String nonMemberPhone
 	) {
-		waitingUserService.cancelWaiting(waitingId);
+		UUID memberId = UUID.fromString("986b5a2a-dc96-4920-afec-0d4ef7903ef6");
+		GetWaitingCommand command = GetWaitingCommand.of(waitingId, memberId, nonMemberName, nonMemberPhone);
+
+		waitingUserService.cancelWaiting(command);
 		return ResponseEntity.ok(
 			ApiResponse.success("웨이팅 cancel 상태 변경 성공", HttpStatus.OK)
 		);

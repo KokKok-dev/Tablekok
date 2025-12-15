@@ -124,12 +124,23 @@ public class WaitingUserService {
 		// TODO: 고객이 입장을 확정했음을 사장님(Store Owner)에게 실시간으로 알림
 	}
 
-	public void cancelWaiting(UUID waitingId) {
-		// TODO: waitingId를 사용하여 WaitingQueue를 조회
-		// TODO: 고객 본인 확인
-		// TODO: entity 상태 변경 ( -> USER_CANCELED)
+	@Transactional
+	public void cancelWaiting(GetWaitingCommand command) {
+		Waiting waiting = findWaiting(command.waitingId());
+
+		// TODO: memberId 바꿔야함
+		validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(), command.nonMemberPhone());
+
+		// USER_CANCELED 상태변경
+		waiting.cancelByUser();
+
 		// TODO: Redis ZSET에서 제거
-		// TODO: 노쇼 타이머 중단 (필요시)
+		waitingCache.removeWaiting(waiting.getStoreId(), command.waitingId().toString());
+
+		// TODO: 노쇼 타이머 중단
+		// if (waiting.getStatus() == WaitingStatus.CALLED) {
+		//
+		// }
 
 	}
 
