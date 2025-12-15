@@ -8,6 +8,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.tablekok.exception.AppException;
 import com.tablekok.waiting_server.application.dto.command.CreateWaitingCommand;
+import com.tablekok.waiting_server.application.dto.command.GetWaitingCommand;
 import com.tablekok.waiting_server.application.dto.result.CreateWaitingResult;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingResult;
 import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
@@ -78,18 +79,18 @@ public class WaitingUserService {
 		);
 	}
 
-	public GetWaitingResult getWaiting(UUID waitingId, UUID memberId, String nonMemberName, String nonMemberPhone) {
-		Waiting waiting = findWaiting(waitingId);
+	public GetWaitingResult getWaiting(GetWaitingCommand command) {
+		Waiting waiting = findWaiting(command.waitingId());
 
 		// Member ID가 일치하지 않으면 권한 없음
 		// TODO: memberId 바꿔야함
-		validateAccessPermission(waiting, waiting.getMemberId(), nonMemberName, nonMemberPhone);
+		validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(), command.nonMemberPhone());
 
 		// 매장 ID 및 상태 확인 (회전식사시간 확인)
 		StoreWaitingStatus status = findStoreWaitingStatus(waiting.getStoreId());
 
 		// Redis 앞에 대기팀 수, 예상 시간 조회/계산
-		Long rankZeroBased = waitingCache.getRank(waiting.getStoreId(), waitingId.toString());
+		Long rankZeroBased = waitingCache.getRank(waiting.getStoreId(), command.memberId().toString());
 		int rank = 0;
 		int estimatedTime = 0;
 
@@ -103,7 +104,7 @@ public class WaitingUserService {
 		}
 
 		return GetWaitingResult.of(
-			waitingId,
+			command.waitingId(),
 			waiting.getStoreId(),
 			waiting.getWaitingNumber(),
 			rank,
@@ -132,15 +133,14 @@ public class WaitingUserService {
 
 	}
 
-	public SseEmitter connectWaitingNotification(UUID waitingId, UUID memberId, String nonMemberName,
-		String nonMemberPhone) {
-		Waiting waiting = findWaiting(waitingId);
+	public SseEmitter connectWaitingNotification(GetWaitingCommand command) {
+		Waiting waiting = findWaiting(command.waitingId());
 
 		// Member ID가 일치하지 않으면 권한 없음
 		// TODO: memberId 바꿔야함
-		validateAccessPermission(waiting, waiting.getMemberId(), nonMemberName, nonMemberPhone);
+		validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(), command.nonMemberPhone());
 
-		return notificationPort.connect(waitingId);
+		return notificationPort.connect(command.waitingId());
 	}
 
 	private StoreWaitingStatus findStoreWaitingStatus(UUID storeId) {
