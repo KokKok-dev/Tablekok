@@ -1,0 +1,17 @@
+### 웨이팅 생성1
+POST http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1
+Content-Type: application/json
+
+{
+  "headcount": 3,
+  "nonMemberName": "김철수1",
+  "nonMemberPhone": "01012345678"
+}
+
+### 고객1 호출 CALLED
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/27284d94-545c-4899-b1a0-49506be29f87/call
+Content-Type: application/json
+
+### 고객1 웨이팅 상태 변경 (CONFIRM)
+POST http://localhost:8086/v1/waiting/27284d94-545c-4899-b1a0-49506be29f87/confirm
+Content-Type: application/json

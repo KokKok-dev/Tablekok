@@ -163,4 +163,16 @@ public class Waiting extends BaseEntity {
 		validateUserCancelableStatus();
 		this.status = WaitingStatus.USER_CANCELED;
 	}
+
+	private void validateUserConfirmableStatus() {
+		if (this.status != WaitingStatus.CALLED) {
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
+	}
+
+	public void confirmByUser() {
+		// 현재 상태가 CALLED 인지 확인
+		validateUserConfirmableStatus();
+		this.status = WaitingStatus.CONFIRMED;
+	}
 }

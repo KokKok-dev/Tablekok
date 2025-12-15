@@ -82,9 +82,15 @@ public class WaitingUserController {
 
 	@PostMapping("/{waitingId}/confirm")
 	public ResponseEntity<ApiResponse<Void>> confirmWaiting(
-		@PathVariable UUID waitingId
+		@PathVariable UUID waitingId,
+		// TODO: userId 받아야함 @AuthenticationPrincipal UUID memberId
+		@RequestParam(required = false) String nonMemberName,
+		@RequestParam(required = false) String nonMemberPhone
 	) {
-		waitingUserService.confirmWaiting(waitingId);
+		UUID memberId = UUID.fromString("986b5a2a-dc96-4920-afec-0d4ef7903ef6");
+		GetWaitingCommand command = GetWaitingCommand.of(waitingId, memberId, nonMemberName, nonMemberPhone);
+
+		waitingUserService.confirmWaiting(command);
 		return ResponseEntity.ok(
 			ApiResponse.success("웨이팅 confirm 상태 변경 성공", HttpStatus.OK)
 		);
