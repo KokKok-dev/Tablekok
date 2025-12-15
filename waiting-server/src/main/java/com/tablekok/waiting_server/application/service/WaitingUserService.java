@@ -81,6 +81,7 @@ public class WaitingUserService {
 		);
 	}
 
+	@Transactional(readOnly = true)
 	public GetWaitingResult getWaiting(GetWaitingCommand command) {
 		Waiting waiting = findWaiting(command.waitingId());
 
