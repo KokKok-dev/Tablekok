@@ -2,6 +2,7 @@ package com.tablekok.user_service.auth.domain.repository;
 
 import com.tablekok.user_service.auth.domain.entity.Owner;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,4 +13,6 @@ public interface OwnerRepository {
 	Optional<Owner> findByUserId(UUID userId);
 
 	boolean existsByBusinessNumber(String businessNumber);
+
+	List<Owner> findByUserIdIn(List<UUID> userIds);
 }
