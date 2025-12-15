@@ -5,7 +5,9 @@ import java.util.UUID;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 public interface NotificationPort {
-	SseEmitter connect(UUID waitingId);
+	SseEmitter connectCustomer(UUID waitingId);
+
+	SseEmitter connectOwner(UUID storeId);
 
 	void sendWaitingCall(UUID waitingId, int waitingNumber);
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingQueueResult;
@@ -41,6 +42,12 @@ public class WaitingOwnerController {
 		return ResponseEntity.ok(
 			ApiResponse.success("음식점 웨이팅 시작합니다.", HttpStatus.OK)
 		);
+	}
+
+	@GetMapping("/connect")
+	public SseEmitter connectNotification(
+		@PathVariable UUID storeId) {
+		return waitingOwnerService.connectOwnerWaitingNotification(storeId);
 	}
 
 	// 사장님이 해당 매장의 웨이팅 기능을 비활성화합니다.

@@ -77,7 +77,7 @@ public class WaitingUserController {
 		UUID memberId = UUID.fromString("986b5a2a-dc96-4920-afec-0d4ef7903ef6");
 		GetWaitingCommand command = GetWaitingCommand.of(waitingId, memberId, nonMemberName, nonMemberPhone);
 
-		return waitingUserService.connectWaitingNotification(command);
+		return waitingUserService.connectUserWaitingNotification(command);
 	}
 
 	@PostMapping("/{waitingId}/confirm")

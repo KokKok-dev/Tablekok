@@ -156,14 +156,14 @@ public class WaitingUserService {
 
 	}
 
-	public SseEmitter connectWaitingNotification(GetWaitingCommand command) {
+	public SseEmitter connectUserWaitingNotification(GetWaitingCommand command) {
 		Waiting waiting = findWaiting(command.waitingId());
 
 		// Member ID가 일치하지 않으면 권한 없음
 		// TODO: memberId 바꿔야함
 		validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(), command.nonMemberPhone());
 
-		return notificationPort.connect(command.waitingId());
+		return notificationPort.connectCustomer(command.waitingId());
 	}
 
 	private StoreWaitingStatus findStoreWaitingStatus(UUID storeId) {
