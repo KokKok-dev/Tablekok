@@ -36,6 +36,9 @@ public class WaitingQueueManagerService implements NoShowProcessingPort {
 
 				// Noshow 알림
 				notificationPort.sendNoShowAlert(waitingId);
+
+				// 사장님에게 큐 상태 변경 알림
+				notificationPort.sendOwnerQueueUpdate(waiting.getStoreId());
 			}
 		}
 	}

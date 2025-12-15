@@ -14,4 +14,6 @@ public interface NotificationPort {
 	void sendNoShowAlert(UUID waitingId);
 
 	void sendWaitingConfirmed(UUID waitingId, int waitingNumber, UUID storeId);
+
+	void sendOwnerQueueUpdate(UUID storeId);
 }

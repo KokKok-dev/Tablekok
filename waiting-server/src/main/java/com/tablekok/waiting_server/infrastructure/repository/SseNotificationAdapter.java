@@ -90,6 +90,21 @@ public class SseNotificationAdapter implements NotificationPort {
 	}
 
 	@Override
+	public void sendOwnerQueueUpdate(UUID storeId) {
+		sseEmitterRepository.findOwnerEmitter(storeId).ifPresent(emitter -> {
+			try {
+				emitter.send(SseEmitter.event()
+					.name("queue-update")
+					.data(Map.of("message", "노쇼 처리로 인해 웨이팅 큐가 변경되었습니다."))
+				);
+			} catch (IOException e) {
+				log.error("사장님 SSE 알림 전송 실패: StoreId={}", storeId, e);
+				sseEmitterRepository.deleteOwnerEmitter(storeId);
+			}
+		});
+	}
+
+	@Override
 	public SseEmitter connectCustomer(UUID waitingId) {
 		// Emitter 생성 및 타임아웃 설정
 		SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
