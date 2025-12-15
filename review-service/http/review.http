@@ -28,15 +28,15 @@ Content-Type: application/json
 }
 
 ### 리뷰 단건 조회                       reviewId
-GET http://localhost:8087/v1/reviews/49533146-7f53-4887-81be-90f6b957ee2f
+GET http://localhost:8087/v1/reviews/cc4d149c-937a-4e7b-94a2-79d214a79a86
 Content-Type: application/json
 
 ### 리뷰 수정                             reviewId
-PATCH http://localhost:8087/v1/reviews/49533146-7f53-4887-81be-90f6b957ee2f
+PATCH http://localhost:8087/v1/reviews/cc4d149c-937a-4e7b-94a2-79d214a79a86
 Content-Type: application/json
 
 {
-  "rating" : 3.0,
+  "rating" : 1.0,
   "content" : "이딴것도 음식이라고 쳐파는거냐?"
 }
 
@@ -44,10 +44,40 @@ Content-Type: application/json
 DELETE http://localhost:8087/v1/reviews/49533146-7f53-4887-81be-90f6b957ee2f
 Content-Type: application/json
 
-### 가게에 작성된 리뷰 목록 조회           storeId
-GET http://localhost:8087/v1/stores/8f3c6a5e-9e84-4c3f-9b80-7c2dd1a4e2c1/reviews?sortBy=NEWEST
+#### 가게에 작성된 리뷰 목록 조회           storeId
+#GET http://localhost:8087/v1/stores/8f3c6a5e-9e84-4c3f-9b80-7c2dd1a4e2c1/reviews?sortBy=RATING_HIGH&cursor=5.0&cursorId=0bf0a1b6-a42a-43fb-9316-78e0fd5fcfc3
+#Content-Type: application/json
+#
+#### 내가 작성한 리뷰 목록 조회
+#GET http://localhost:8087/v1/users/me/reviews?userId=641f6c00-6ea3-46dc-875c-aeec53ea8677&cursor=2025-12-14T04:11:08.383548&cursorId=40d1b39d-4532-4468-9b80-107bd0089ecc
+#Content-Type: application/json
+
+### 회원 가입
+POST http://localhost:19091/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "customer111@test.com",
+  "password": "Test1234!",
+  "username": "홍길동",
+  "phoneNumber": "01034567890"
+}
+
+### 로그인
+POST http://localhost:19091/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer111@test.com",
+  "password": "Test1234!"
+}
+
+### 가게별 리뷰 목록 조회
+GET http://localhost:19091/v1/stores/8f3c6a5e-9e84-4c3f-9b80-7c2dd1a4e2c1/reviews?sortBy=NEWEST
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjMTI3MGYyZC1mMWVkLTQ5YzUtYmMxNS00NTJlN2M1ZjQwNzgiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4MTE5NTQsImV4cCI6MTc2NTg5ODM1NH0.RNAU5OKrAKNSwqniZdRFtCnP0_YUC-H9a_rcmkX8-D0
 Content-Type: application/json
 
 ### 내가 작성한 리뷰 목록 조회
-GET http://localhost:8087/v1/users/me/reviews?userId=641f6c00-6ea3-46dc-875c-aeec53ea8677&size=10
+GET http://localhost:19091/v1/users/me/reviews
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjMTI3MGYyZC1mMWVkLTQ5YzUtYmMxNS00NTJlN2M1ZjQwNzgiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4MTE5NTQsImV4cCI6MTc2NTg5ODM1NH0.RNAU5OKrAKNSwqniZdRFtCnP0_YUC-H9a_rcmkX8-D0
 Content-Type: application/json

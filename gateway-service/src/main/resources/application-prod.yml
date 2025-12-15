@@ -33,14 +33,12 @@ spring:
 #        # 🔐 User Service - 인증 관련 (JWT 필터 없음)
 #        - id: user-service-auth
 #          uri: lb://USER-SERVICE
-#          order: 100
 #          predicates:
 #            - Path=/v1/auth/**
 #
 #        # 👤 User Service - 사용자 관리 (JWT 필터 필요)
 #        - id: user-service
 #          uri: lb://USER-SERVICE
-#          order: 100
 #          predicates:
 #            - Path=/v1/users/**, /internal/v1/users/**
 #          filters:
@@ -49,7 +47,6 @@ spring:
 #        # 🏪 Store Service
 #        - id: store-service
 #          uri: lb://STORE-SERVICE
-#          order: 100
 #          predicates:
 #            - Path=/v1/stores/**, /v1/categories/**
 #          filters:
@@ -58,7 +55,6 @@ spring:
 #        # 🔍 Search Service
 #        - id: search-service
 #          uri: lb://SEARCH-SERVICE
-#          order: 100
 #          predicates:
 #            - Path=/v1/search/**
 #          filters:
@@ -67,7 +63,6 @@ spring:
 #        # 📅 Reservation Service
 #        - id: reservation-service
 #          uri: lb://RESERVATION-SERVICE
-#          order: 100
 #          predicates:
 #            - Path=/v1/reservations/**
 #          filters:
@@ -76,17 +71,15 @@ spring:
 #        # ⭐ Review Service
 #        - id: review-service
 #          uri: lb://REVIEW-SERVICE
-#          order: 100
 #          predicates:
-#            - Path=/v1/reviews/**
-##            - , /v1/stores/{storeId}/reviews/**, /v1/users/me/reviews/**
+#            - Path=/v1/reviews/**, /v1/stores/{storeId}/reviews/**, /v1/users/me/reviews/**
 #          filters:
 #            - name: JwtAuthenticationFilter
       uris:
         review: lb://REVIEW-SERVICE
-        user: lb://USER-SERVICE
-        store: lb://STORE-SERVICE
-        reservation: lb://RESERVATION-SERVICE
+        user: ${USER_URI}
+        store: ${STORE_URI}
+        reservation: ${RESERVATION_URI}
         search: lb://SEARCH-SERVICE
 
       # 기본 필터
@@ -105,7 +98,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:19090/eureka
+      defaultZone: ${EUREKA_SERVER_URL}
   instance:
     prefer-ip-address: true
 

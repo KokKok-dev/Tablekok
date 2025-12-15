@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -22,7 +22,6 @@ import com.tablekok.dto.ApiResponse;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
 import com.tablekok.review_service.application.dto.result.GetReviewResult;
 import com.tablekok.review_service.application.service.ReviewService;
-import com.tablekok.review_service.domain.entity.ReviewSortCriteria;
 import com.tablekok.review_service.presentation.dto.request.CreateReviewRequest;
 import com.tablekok.review_service.presentation.dto.request.GetMyReviewCursorRequest;
 import com.tablekok.review_service.presentation.dto.request.GetStoreReviewCursorRequest;
@@ -44,12 +43,11 @@ public class ReviewController {
 
 	@PostMapping("/reviews")
 	public ResponseEntity<ApiResponse<CreateReviewResponse>> createReview(
-		@RequestBody @Valid CreateReviewRequest request
-		/**@RequestHeader("XXX-USER-ID") UUID userId
-		 * @RequestHeader("XXX-USER-ROLE") String role) */
+		@RequestBody @Valid CreateReviewRequest request,
+		@RequestHeader("X-User-Id") String strUserId
 	) {
 		// 임시로 id 지정
-		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677");
+		UUID userId = UUID.fromString(strUserId);
 
 		CreateReviewResult result = reviewService.createReview(request.toCommand(), userId);
 
@@ -60,7 +58,7 @@ public class ReviewController {
 
 		return ResponseEntity.created(location)
 			.body(ApiResponse.success(
-				"리뷰 생성이 완료되었습니다.",
+				"리뷰가 등록되었습니다.",
 				CreateReviewResponse.from(result),
 				HttpStatus.CREATED
 			));
@@ -77,9 +75,12 @@ public class ReviewController {
 	}
 
 	@DeleteMapping("/reviews/{reviewId}")
-	public ResponseEntity<ApiResponse<Void>> deleteReview(@PathVariable("reviewId") UUID reviewId) {
+	public ResponseEntity<ApiResponse<Void>> deleteReview(
+		@PathVariable("reviewId") UUID reviewId,
+		@RequestHeader("X-User-Id") String strUserId
+	) {
 		// 임시로 id 지정
-		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677");
+		UUID userId = UUID.fromString(strUserId);
 		reviewService.deleteReview(reviewId, userId);
 		return ResponseEntity.ok(
 			ApiResponse.success("리뷰 삭제가 완료되었습니다.", HttpStatus.OK));
@@ -114,12 +115,10 @@ public class ReviewController {
 
 	@GetMapping("/users/me/reviews")
 	public ResponseEntity<ApiResponse<Cursor<GetMyReviewsResponse, UUID>>> findMyReviews(
-		//@RequestHeader("XXX-USER-ID") UUID userId,
-		@RequestParam UUID userId,
+		@RequestHeader("X-User-Id") String strUserId,
 		@ModelAttribute GetMyReviewCursorRequest request
 	) {
-		// 임시로 id 지정
-		// UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677");
+		UUID userId = UUID.fromString(strUserId);
 
 		Cursor<GetMyReviewsResponse, UUID> response = reviewService.findMyReviews(userId, request.toCursorRequest())
 			.map(GetMyReviewsResponse::from);
