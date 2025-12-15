@@ -53,9 +53,13 @@ public class WaitingUserController {
 
 	@GetMapping("/{waitingId}")
 	public ResponseEntity<ApiResponse<GetWaitingResponse>> getWaiting(
-		@PathVariable UUID waitingId
+		@PathVariable UUID waitingId,
+		// TODO: userId 받아야함
+		@RequestParam(required = false) String nonMemberName,
+		@RequestParam(required = false) String nonMemberPhone
 	) {
-		GetWaitingResult result = waitingUserService.getWaiting(waitingId);
+		UUID memberId = UUID.randomUUID();
+		GetWaitingResult result = waitingUserService.getWaiting(waitingId, memberId, nonMemberName, nonMemberPhone);
 		return ResponseEntity.ok(
 			ApiResponse.success("웨이팅 정보 조회 성공", GetWaitingResponse.from(result), HttpStatus.OK)
 		);

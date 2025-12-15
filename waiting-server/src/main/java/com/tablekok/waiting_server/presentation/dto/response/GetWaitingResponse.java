@@ -14,7 +14,6 @@ public record GetWaitingResponse(
 
 	Integer waitingNumber,  // 발급받은 대기 번호 (예: 105번)
 	Integer currentRank,    // 현재 나의 대기 순서 (예: 3번째 팀)
-	Integer currentWaitingTeams, // 현재 전체 대기 중인 팀 수 (예: 5팀)
 	Integer estimatedWaitMinutes, // 예상 대기 시간 (분 단위)
 
 	String status,          // 현재 웨이팅 상태 (WAITING)
@@ -27,7 +26,6 @@ public record GetWaitingResponse(
 			.storeId(result.storeId())
 			.waitingNumber(result.waitingNumber())
 			.currentRank(result.currentRank())
-			.currentWaitingTeams(result.currentWaitingTeams())
 			.estimatedWaitMinutes(result.estimatedWaitMinutes())
 			.status(result.status())
 			.queuedAt(result.queuedAt())
