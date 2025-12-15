@@ -64,6 +64,31 @@ public class SseNotificationAdapter implements NotificationPort {
 		});
 	}
 
+	@Override
+	public void sendWaitingConfirmed(UUID waitingId, int waitingNumber, UUID storeId) {
+		sseEmitterRepository.findById(storeId).ifPresent(emitter -> {
+			try {
+				// 2. 이벤트 빌더를 사용하여 데이터 전송
+				emitter.send(SseEmitter.event()
+					.name("waiting-confirmed") // 사장님 클라이언트가 수신할 이벤트 이름
+					.data(Map.of(
+						"waitingId", waitingId.toString(),
+						"waitingNumber", waitingNumber,
+						"newStatus", "CONFIRMED",
+						"message", waitingNumber + "번 손님이 웨이팅을 확정했습니다. 5분 내로 입장하세요."
+					))
+					// 사장님은 여러 웨이팅 이벤트를 받으므로, ID는 storeId와 이벤트 타입 조합으로 설정 가능
+					.id(storeId.toString() + "-" + waitingId.toString())
+				);
+
+			} catch (IOException e) {
+				// 전송 실패 시 (사장님 클라이언트 연결 끊김 등) 연결 삭제
+				log.error("SSE 전송 실패 (waiting-confirmed). StoreId: {}", storeId, e);
+				sseEmitterRepository.deleteById(storeId);
+			}
+		});
+	}
+
 	public SseEmitter connect(UUID waitingId) {
 		// Emitter 생성 및 타임아웃 설정
 		SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);

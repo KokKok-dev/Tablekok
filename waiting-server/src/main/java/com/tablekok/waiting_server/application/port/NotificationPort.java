@@ -10,4 +10,6 @@ public interface NotificationPort {
 	void sendWaitingCall(UUID waitingId, int waitingNumber);
 
 	void sendNoShowAlert(UUID waitingId);
+
+	void sendWaitingConfirmed(UUID waitingId, int waitingNumber, UUID storeId);
 }

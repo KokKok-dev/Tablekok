@@ -9,9 +9,9 @@ Content-Type: application/json
 }
 
 ### 고객1 호출 CALLED
-POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/27284d94-545c-4899-b1a0-49506be29f87/call
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/9aa9595d-78f1-4e86-bec1-680d844c225b/call
 Content-Type: application/json
 
-### 고객1 웨이팅 상태 변경 (CONFIRM)
-POST http://localhost:8086/v1/waiting/27284d94-545c-4899-b1a0-49506be29f87/confirm
+### 고객1 웨이팅 상태 변경 (CONFIRM) -> 스케줄러 시간 이후에도 계속 confirm 이면(매장 도착하지 않으면) NO_SHOW
+POST http://localhost:8086/v1/waiting/9aa9595d-78f1-4e86-bec1-680d844c225b/confirm
 Content-Type: application/json

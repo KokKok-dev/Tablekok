@@ -26,9 +26,11 @@ public class WaitingQueueManagerService implements NoShowProcessingPort {
 	public void processNoShow(UUID waitingId) {
 		Waiting waiting = waitingRepository.findById(waitingId).orElse(null);
 
-		if (waiting != null && waiting.getStatus() == WaitingStatus.CALLED) {
+		// 여전히 CALLED 또는 CONFIRMED 상태일 때만 노쇼 처리
+		if (waiting != null &&
+			(waiting.getStatus() == WaitingStatus.CALLED || waiting.getStatus() == WaitingStatus.CONFIRMED)) {
+
 			waiting.noShow();
-			waitingRepository.save(waiting);
 
 			// cache에서 waitingQueue 삭제
 			waitingCache.removeWaiting(waiting.getStoreId(), waitingId.toString());

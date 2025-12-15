@@ -31,8 +31,8 @@ public class NoShowSchedulerAdapter implements NoShowSchedulerPort {
 	@Override
 	public void scheduleNoShowProcessing(UUID waitingId) {
 		// timeout 뒤 시점을 계산
-		// Instant startTime = Instant.now().plus(noShowTimeoutMinutes, ChronoUnit.MINUTES);
-		Instant startTime = Instant.now().plus(noShowTimeoutMinutes, ChronoUnit.SECONDS);
+		Instant startTime = Instant.now().plus(noShowTimeoutMinutes, ChronoUnit.MINUTES);
+		// Instant startTime = Instant.now().plus(noShowTimeoutMinutes, ChronoUnit.SECONDS);
 
 		// 스케줄러에 작업 등록
 		ScheduledFuture<?> future = taskScheduler.schedule(() -> {

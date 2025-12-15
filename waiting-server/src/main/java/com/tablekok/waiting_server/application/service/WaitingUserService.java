@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.tablekok.exception.AppException;
@@ -127,8 +129,11 @@ public class WaitingUserService {
 		// entity 상태 변경 (CALLED -> CONFIRMED)
 		waiting.confirmByUser();
 
-		// TODO: 호출 시점부터 시작된 노쇼 자동 처리 타이머를 즉시 중단(취소)
-		// TODO: 고객이 입장을 확정했음을 사장님(Store Owner)에게 실시간으로 알림
+		// 호출(CALLED) 시점부터 시작된 노쇼 자동 처리 타이머를 즉시 중단(취소)
+		noShowSchedulerPort.cancelNoShowProcessing(command.waitingId());
+
+		// 고객이 입장을 확정했음을 사장님(Store Owner)에게 실시간으로 알림 & 다시 5분 내로 입장해야함.
+		registerPostCommitActions(command.waitingId(), waiting.getWaitingNumber(), waiting.getStoreId());
 	}
 
 	@Transactional
@@ -187,5 +192,17 @@ public class WaitingUserService {
 			// 예외: 정의되지 않은 CustomerType
 			throw new AppException(WaitingErrorCode.INVALID_CUSTOMER_TYPE);
 		}
+	}
+
+	private void registerPostCommitActions(UUID waitingId, int callingNumber, UUID storeId) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				// 사장님한테 confirm 했다고 알림
+				notificationPort.sendWaitingConfirmed(waitingId, callingNumber, storeId);
+				// 스케줄러 등록
+				noShowSchedulerPort.scheduleNoShowProcessing(waitingId);
+			}
+		});
 	}
 }
