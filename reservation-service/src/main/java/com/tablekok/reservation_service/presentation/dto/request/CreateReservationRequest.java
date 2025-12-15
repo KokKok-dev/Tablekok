@@ -27,9 +27,9 @@ public record CreateReservationRequest(
 
 ) {
 	// 서비스로 전달할 command로
-	public CreateReservationCommand toCommand(UUID userId) {
+	public CreateReservationCommand toCommand(String strUserId) {
 		return CreateReservationCommand.builder()
-			.userId(userId)
+			.userId(UUID.fromString(strUserId))
 			.storeId(storeId)
 			.reservationDateTime(ReservationDateTime.of(reservationDateTime))
 			.headcount(headcount)
