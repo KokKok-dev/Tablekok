@@ -12,6 +12,7 @@ import com.tablekok.waiting_server.application.dto.command.GetWaitingCommand;
 import com.tablekok.waiting_server.application.dto.result.CreateWaitingResult;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingResult;
 import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
+import com.tablekok.waiting_server.application.port.NoShowSchedulerPort;
 import com.tablekok.waiting_server.application.port.NotificationPort;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
@@ -32,6 +33,7 @@ public class WaitingUserService {
 	private final WaitingRepository waitingRepository;
 	private final WaitingUserDomainService waitingUserDomainService;
 	private final NotificationPort notificationPort;
+	private final NoShowSchedulerPort noShowSchedulerPort;
 
 	@Transactional
 	public CreateWaitingResult createWaiting(CreateWaitingCommand command) {
@@ -134,13 +136,13 @@ public class WaitingUserService {
 		// USER_CANCELED 상태변경
 		waiting.cancelByUser();
 
-		// TODO: Redis ZSET에서 제거
+		// Redis ZSET에서 제거
 		waitingCache.removeWaiting(waiting.getStoreId(), command.waitingId().toString());
 
-		// TODO: 노쇼 타이머 중단
-		// if (waiting.getStatus() == WaitingStatus.CALLED) {
-		//
-		// }
+		// CALLED 상태였다면 노쇼 타이머 중단
+		if (waiting.getStatus() == WaitingStatus.CALLED) {
+			noShowSchedulerPort.cancelNoShowProcessing(command.waitingId());
+		}
 
 	}
 
