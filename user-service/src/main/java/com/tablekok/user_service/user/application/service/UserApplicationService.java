@@ -7,6 +7,7 @@ import com.tablekok.user_service.auth.domain.entity.UserRole;
 import com.tablekok.user_service.auth.domain.repository.OwnerRepository;
 import com.tablekok.user_service.auth.domain.repository.UserRepository;
 import com.tablekok.user_service.user.application.dto.result.ProfileResult;
+import com.tablekok.user_service.user.application.dto.result.UserDetailResult;
 import com.tablekok.user_service.user.application.dto.result.UserListResult;
 import com.tablekok.user_service.user.application.exception.UserErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,7 @@ public class UserApplicationService {
 	}
 
 	private String getBusinessNumberIfOwner(UUID userId, String role) {
-		if (!"OWNER".equals(role)) {
+		if (!UserRole.OWNER.name().equals(role)) {
 			return null;
 		}
 		return ownerRepository.findByUserId(userId)
@@ -52,7 +53,7 @@ public class UserApplicationService {
 
 	public UserListResult getAllUsers(String role, Pageable pageable) {
 		// 1. MASTER 권한 확인
-		if (!"MASTER".equals(role)) {
+		if (!UserRole.MASTER.name().equals(role)) {
 			throw new AppException(UserErrorCode.FORBIDDEN);
 		}
 
@@ -85,6 +86,22 @@ public class UserApplicationService {
 		);
 	}
 
+	public UserDetailResult getUserDetail(String role, UUID targetUserId) {
+		// 1. MASTER 권한 확인
+		if (!UserRole.MASTER.name().equals(role)) {
+			throw new AppException(UserErrorCode.FORBIDDEN);
+		}
+
+		// 2. 사용자 조회
+		User user = userRepository.findByUserId(targetUserId)
+			.orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+
+		// 3. OWNER인 경우 사업자번호 조회
+		String businessNumber = getBusinessNumberIfOwner(targetUserId, user.getRole().name());
+
+		// 4. 결과 반환
+		return UserDetailResult.of(user, businessNumber);
+	}
 	private Map<UUID, String> getBusinessNumberMap(List<UUID> ownerUserIds) {
 		if (ownerUserIds.isEmpty()) {
 			return Map.of();
