@@ -1,5 +1,6 @@
 package com.tablekok.waiting_server.infrastructure.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +29,11 @@ public class WaitingRepositoryAdapter implements WaitingRepository {
 	@Override
 	public Optional<Waiting> findByIdAndStoreId(UUID waitingId, UUID storeId) {
 		return waitingJpaRepository.findByIdAndStoreId(waitingId, storeId);
+	}
+
+	@Override
+	public List<Waiting> findAllByIdIn(List<UUID> waitingIds) {
+		return waitingJpaRepository.findAllByIdIn(waitingIds);
 	}
 
 }

@@ -21,12 +21,12 @@ Content-Type: application/json
 
 
 ### 고객 호출 CALLED
-POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/call
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/74eedb8f-df7b-42dd-9e9a-84b742b77a86/call
 Content-Type: application/json
 
 
 ### 고객 입장 처리 ENTERED
-POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/enter
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/74eedb8f-df7b-42dd-9e9a-84b742b77a86/enter
 Content-Type: application/json
 
 

@@ -1,5 +1,6 @@
 package com.tablekok.waiting_server.domain.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,4 +13,6 @@ public interface WaitingRepository {
 	Optional<Waiting> findById(UUID waitingId);
 
 	Optional<Waiting> findByIdAndStoreId(UUID waitingId, UUID storeId);
+
+	List<Waiting> findAllByIdIn(List<UUID> waitingIds);
 }

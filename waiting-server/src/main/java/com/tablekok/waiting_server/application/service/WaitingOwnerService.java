@@ -1,9 +1,13 @@
 package com.tablekok.waiting_server.application.service;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,22 +64,25 @@ public class WaitingOwnerService {
 		status.stopWaiting();
 	}
 
+	@Transactional(readOnly = true)
 	public List<GetWaitingQueueResult> getStoreWaitingQueue(UUID storeId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		// TODO: Redis ZSET에서 현재 대기 중인 모든 waitingId를 가져와 RDB에서 상세 정보를 조회하는 로직으로 대체
 
-		LocalDateTime now = LocalDateTime.now();
-		return List.of(
-			new GetWaitingQueueResult(
-				UUID.randomUUID(), 101, "CALLED", now.minusMinutes(40), "MEMBER", 2, "김철수", "010-1234-5678"
-			),
-			new GetWaitingQueueResult(UUID.randomUUID(), 102, "WAITING", now.minusMinutes(25), "NON_MEMBER", 4, "이영희",
-				"010-9876-5432"
-			),
-			new GetWaitingQueueResult(UUID.randomUUID(), 102, "WAITING", now.minusMinutes(25), "NON_MEMBER", 4, "이영희",
-				"010-9876-5432"
-			)
-		);
+		// Redis ZSET에서 현재 대기 중인 모든 waitingId를 가져옴
+		List<String> waitingIdStrings = waitingCache.getWaitingIds(storeId);
+		if (waitingIdStrings.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<UUID> waitingIds = waitingIdStrings.stream()
+			.map(UUID::fromString)
+			.toList();
+
+		//  waitingIds 로 RDB에서 waitings 조회
+		List<Waiting> waitings = waitingRepository.findAllByIdIn(waitingIds);
+
+		// Redis의 순서를 보장하며 DTO로 변환
+		return mapToRankedQueueResults(waitingIdStrings, waitings);
 	}
 
 	@Transactional
@@ -239,5 +246,30 @@ public class WaitingOwnerService {
 
 			}
 		});
+	}
+
+	private List<GetWaitingQueueResult> mapToRankedQueueResults(
+		List<String> orderedWaitingIdStrings,
+		List<Waiting> waitings
+	) {
+		// 1. RDB 결과를 Map으로 변환
+		Map<UUID, Waiting> waitingMap = waitings.stream()
+			.collect(Collectors.toMap(Waiting::getId, Function.identity()));
+
+		List<GetWaitingQueueResult> results = new ArrayList<>();
+		int rank = 1;
+
+		// 2. Redis 순서대로 반복하며 맵에서 조회 및 순위 부여
+		for (String waitingIdStr : orderedWaitingIdStrings) {
+			UUID waitingId = UUID.fromString(waitingIdStr);
+			Waiting waiting = waitingMap.get(waitingId);
+
+			if (waiting != null) {
+				results.add(GetWaitingQueueResult.of(waiting, rank));
+			}
+			rank++;
+		}
+
+		return results;
 	}
 }
