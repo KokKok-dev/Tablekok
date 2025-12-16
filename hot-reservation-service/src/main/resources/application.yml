@@ -1,5 +1,6 @@
 spring:
   application:
     name: hot-reservation-service
+
   profiles:
-    active: prod
+    active: dev

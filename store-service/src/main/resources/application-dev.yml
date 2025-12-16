@@ -1,14 +1,14 @@
 server:
-  port: 8086
+  port: 8082
 
 spring:
   application:
-    name: waiting-service
+    name: store-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5436/waiting_db
+    url: ${DB_URL}
     driver-class-name: org.postgresql.Driver
-    username: ${DB_USER}
+    username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
   jpa:
@@ -27,13 +27,6 @@ spring:
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: true
 
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: ${REDIS_PASSWORD}
-      # timeout: 2000
-
 
   logging:
     level:
@@ -45,9 +38,4 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:19090/eureka
-
-
-waiting:
-  noshow:
-    timeout: ${TIME_OUT}
+      defaultZone: ${EUREKA_SERVER_URL}

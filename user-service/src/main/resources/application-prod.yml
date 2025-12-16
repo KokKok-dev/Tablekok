@@ -5,14 +5,12 @@ spring:
   application:
     name: user-service
 
-  # ✅ 데이터베이스 설정 (환경변수 처리)
   datasource:
-    url: ${DB_URL:}
-    username: ${DB_USERNAME:}
-    password: ${DB_PASSWORD:} # env 파일화
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-  # JPA 설정
   jpa:
     hibernate:
       ddl-auto: update
@@ -26,29 +24,26 @@ spring:
         order_inserts: true
         order_updates: true
 
-# ✅ JWT 설정 (환경변수 처리)
 jwt:
-  secret: ${JWT_SECRET:} # env 파일화
-  access-token-expiration: ${JWT_ACCESS_EXPIRATION:86400000}     # 24시간
-  refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}  # 7일
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_EXPIRATION}
+  refresh-token-expiration: ${JWT_REFRESH_EXPIRATION}
 
-# Eureka 클라이언트 설정
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:19090/eureka}
+      defaultZone: ${EUREKA_SERVER_URL}
+
   instance:
     prefer-ip-address: true
     health-check-url-path: /actuator/health
 
-# 로깅 설정
 logging:
   level:
-    org.springframework.security: INFO
-    com.tablekok.user_service: INFO
+    org.springframework.security: DEBUG
+    com.tablekok.user_service: DEBUG
     org.hibernate.SQL: DEBUG
 
-# Actuator 설정
 management:
   endpoints:
     web:
@@ -56,7 +51,4 @@ management:
         include: health,info,metrics
   endpoint:
     health:
-      show-details: when-authorized
-  info:
-    env:
-      enabled: true
+      show-details: always

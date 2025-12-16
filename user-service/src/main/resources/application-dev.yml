@@ -6,9 +6,9 @@ spring:
     name: user-service
 
   datasource:
-    url: ${DB_URL:}
-    username: ${DB_USERNAME:}
-    password: ${DB_PASSWORD:}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -25,14 +25,18 @@ spring:
         order_updates: true
 
 jwt:
-  secret: ${JWT_SECRET:}
-  access-token-expiration: 86400000
-  refresh-token-expiration: 604800000
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_EXPIRATION}
+  refresh-token-expiration: ${JWT_REFRESH_EXPIRATION}
 
-# ✅ Eureka 비활성화 (로컬 테스트용)
 eureka:
   client:
-    enabled: false
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL}
+
+  instance:
+    prefer-ip-address: true
+    health-check-url-path: /actuator/health
 
 logging:
   level:

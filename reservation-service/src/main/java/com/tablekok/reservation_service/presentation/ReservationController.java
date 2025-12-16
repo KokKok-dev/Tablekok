@@ -42,7 +42,7 @@ public class ReservationController {
 	@PostMapping
 	public ResponseEntity<ApiResponse<CreateReservationResponse>> createReservation(
 		@Valid @RequestBody CreateReservationRequest request,
-		@RequestHeader(" X-User-Id") String strUserId
+		@RequestHeader("X-User-Id") String strUserId
 	) {
 		CreateReservationResult result = reservationService.createReservation(
 			request.toCommand(strUserId));
@@ -70,7 +70,7 @@ public class ReservationController {
 	public ResponseEntity<ApiResponse<Void>> updateHeadcount(
 		@PathVariable("reservationId") UUID reservationId,
 		@Valid @RequestBody UpdateHeadcountRequest request,
-		@RequestHeader(" X-User-Id") String strUserId
+		@RequestHeader("X-User-Id") String strUserId
 	) {
 		reservationService.updateHeadcount(UUID.fromString(strUserId), reservationId, request.headcount());
 		return ResponseEntity.ok(
@@ -81,7 +81,7 @@ public class ReservationController {
 	@PatchMapping("/{reservationId}/cancel")
 	public ResponseEntity<ApiResponse<Void>> cancelReservation(
 		@PathVariable("reservationId") UUID reservationId,
-		@RequestHeader(" X-User-Id") String strUserId,
+		@RequestHeader("X-User-Id") String strUserId,
 		@RequestHeader("X-User-Role") String strRole
 	) {
 		reservationService.cancelReservation(UUID.fromString(strUserId), UserRole.fromName(strRole), reservationId);
@@ -93,7 +93,7 @@ public class ReservationController {
 	@PatchMapping("/owner/{reservationId}/noshow")
 	public ResponseEntity<ApiResponse<Void>> noShow(
 		@PathVariable("reservationId") UUID reservationId,
-		@RequestHeader(" X-User-Id") String strUserId
+		@RequestHeader("X-User-Id") String strUserId
 	) {
 		reservationService.noShow(UUID.fromString(strUserId), reservationId);
 		return ResponseEntity.ok(
@@ -104,7 +104,7 @@ public class ReservationController {
 	@PatchMapping("/owner/{reservationId}/done")
 	public ResponseEntity<ApiResponse<Void>> done(
 		@PathVariable("reservationId") UUID reservationId,
-		@RequestHeader(" X-User-Id") String strUserId
+		@RequestHeader("X-User-Id") String strUserId
 	) {
 		reservationService.done(UUID.fromString(strUserId), reservationId);
 		return ResponseEntity.ok(

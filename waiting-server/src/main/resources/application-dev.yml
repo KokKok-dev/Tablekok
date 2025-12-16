@@ -1,12 +1,12 @@
 server:
-  port: 8082
+  port: 8086
 
 spring:
   application:
-    name: store-service
+    name: waiting-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5435/store_db
+    url: ${DB_URL}
     driver-class-name: org.postgresql.Driver
     username: ${DB_USER}
     password: ${DB_PASSWORD}
@@ -27,15 +27,25 @@ spring:
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: true
 
-  
-  logging:
-    level:
-      org.hibernate.SQL: DEBUG
-      org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD}
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:19090/eureka
+      defaultZone: ${EUREKA_SERVER_URL}
+
+
+waiting:
+  noshow:
+    timeout: ${TIME_OUT}

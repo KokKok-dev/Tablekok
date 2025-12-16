@@ -1,10 +1,11 @@
 ### 예약 생성 (예약 접수)
-POST http://tablekok-gateway-service-lb-1957092183.ap-northeast-2.elb.amazonaws.com/v1/reservations
+POST http://localhost:19091/v1/reservations
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4NzYxOTgsImV4cCI6MTc2NTk2MjU5OH0.TiN-AQps4TaqvKt0soaba0qIhxWZ14mcPvWQ-atpObs
 
 {
   "storeId": "f5bf4f7c-ccfc-4741-a7d4-3b1625fcf70e",
-  "reservationDateTime": "2025-12-27T16:00:00",
+  "reservationDateTime": "2025-12-29T16:00:00",
   "headcount": 3
 }
 
@@ -38,7 +39,7 @@ PATCH http://localhost:8084/v1/reservations/owner/1b35833d-657c-4104-aecf-a13023
 GET http://localhost:19091/v1/reservations
 #GET http://tablekok-gateway-service-lb-1957092183.ap-northeast-2.elb.amazonaws.com/v1/reservations
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4MzkwNzIsImV4cCI6MTc2NTkyNTQ3Mn0.iDvYlIcCC-lLPoaZPkBOQa_DzC2JQr0AZ5eLGYQuwhY
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4NzYxOTgsImV4cCI6MTc2NTk2MjU5OH0.TiN-AQps4TaqvKt0soaba0qIhxWZ14mcPvWQ-atpObs
 
 
 ### 예약 조회 (오너)

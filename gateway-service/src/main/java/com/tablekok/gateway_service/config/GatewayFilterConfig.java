@@ -1,13 +1,12 @@
 package com.tablekok.gateway_service.config;
 
-import com.tablekok.gateway_service.filter.JwtAuthenticationFilter;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.web.server.ServerWebExchange;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
 /**
  * Gateway 필터 설정 클래스 (백엔드 개발용)
@@ -26,8 +25,6 @@ import reactor.core.publisher.Mono;
 @Configuration
 @RequiredArgsConstructor
 public class GatewayFilterConfig {
-
-	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	@Bean
 	public GlobalFilter developmentLoggingFilter() {

@@ -1,7 +1,7 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.8'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'org.springframework.boot' version '3.5.8'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.tablekok'
@@ -9,68 +9,67 @@ version = '0.0.1-SNAPSHOT'
 description = 'user-service'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
-	maven { url 'https://jitpack.io'}
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 ext {
-	set('springCloudVersion', "2025.0.0")
+    set('springCloudVersion', "2025.0.0")
 }
 
 dependencies {
-	// Tablekok 공통 모듈
-	implementation 'com.github.KokKok-dev:Tablekok-common:1.0.3'
+    // Tablekok 공통 모듈
+    implementation 'com.github.KokKok-dev:Tablekok-common:1.0.3'
 
-	// Spring Boot Starters
-	implementation 'org.springframework.boot:spring-boot-starter'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-	// JWT 라이브러리 (최적화된 의존성 스코프)
-	compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'      // 컴파일 시에만 인터페이스 필요
-	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'     // 런타임에만 구현체 필요
-	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'  // 런타임에만 JSON 처리 필요
+    // JWT 라이브러리 (최적화된 의존성 스코프)
+    compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'      // 컴파일 시에만 인터페이스 필요
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'     // 런타임에만 구현체 필요
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'  // 런타임에만 JSON 처리 필요
 
-	// Spring Cloud (Netflix 스택)
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
-	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-//	 implementation 'org.springframework.cloud:spring-cloud-starter-config'  // Config Server 사용 시 주석 해제
+    // Spring Cloud (Netflix 스택)
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
-	// Development Tools
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    // Development Tools
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-	// Database
-	runtimeOnly 'org.postgresql:postgresql'
+    // Database
+    runtimeOnly 'org.postgresql:postgresql'
 
-	// Testing
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
