@@ -1,0 +1,31 @@
+### 웨이팅 생성1
+POST http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1
+Content-Type: application/json
+
+{
+  "headcount": 3,
+  "nonMemberName": "김철수",
+  "nonMemberPhone": "01012345678"
+}
+
+### 웨이팅 생성2
+POST http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1
+Content-Type: application/json
+
+{
+  "headcount": 2,
+  "nonMemberName": "김민수",
+  "nonMemberPhone": "01083822722"
+}
+
+### 고객1 호출 CALLED
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/18e65334-b821-4b57-ac72-2b47e7c7f5af/call
+Content-Type: application/json
+
+### 고객2 호출 CALLED
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/4f83e0ed-997a-46df-bb08-3e0c7b1af567/call
+Content-Type: application/json
+
+### 고객1 웨이팅 상태 변경 (USER_CANCELED) -> 스케줄러 시간 지난 후 USER_CANCELED로 되어있어야함.
+POST http://localhost:8086/v1/waiting/18e65334-b821-4b57-ac72-2b47e7c7f5af/cancel
+Content-Type: application/json

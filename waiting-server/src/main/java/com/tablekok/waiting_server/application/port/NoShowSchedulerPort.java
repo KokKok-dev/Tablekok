@@ -4,4 +4,6 @@ import java.util.UUID;
 
 public interface NoShowSchedulerPort {
 	void scheduleNoShowProcessing(UUID waitingId);
+
+	void cancelNoShowProcessing(UUID waitingId);
 }

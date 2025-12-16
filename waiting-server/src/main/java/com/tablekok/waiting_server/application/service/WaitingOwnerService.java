@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.tablekok.exception.AppException;
 import com.tablekok.waiting_server.application.dto.command.StartWaitingServiceCommand;
@@ -156,5 +157,9 @@ public class WaitingOwnerService {
 				noShowSchedulerPort.scheduleNoShowProcessing(waitingId);
 			}
 		});
+	}
+
+	public SseEmitter connectOwnerWaitingNotification(UUID storeId) {
+		return notificationPort.connectOwner(storeId);
 	}
 }

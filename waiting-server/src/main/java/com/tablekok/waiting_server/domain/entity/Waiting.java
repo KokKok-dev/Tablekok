@@ -152,4 +152,27 @@ public class Waiting extends BaseEntity {
 		this.status = WaitingStatus.NO_SHOW;
 		this.canceledAt = LocalDateTime.now();
 	}
+
+	private void validateUserCancelableStatus() {
+		if (this.status != WaitingStatus.WAITING && this.status != WaitingStatus.CALLED) {
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
+	}
+
+	public void cancelByUser() {
+		validateUserCancelableStatus();
+		this.status = WaitingStatus.USER_CANCELED;
+	}
+
+	private void validateUserConfirmableStatus() {
+		if (this.status != WaitingStatus.CALLED) {
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
+	}
+
+	public void confirmByUser() {
+		// 현재 상태가 CALLED 인지 확인
+		validateUserConfirmableStatus();
+		this.status = WaitingStatus.CONFIRMED;
+	}
 }
