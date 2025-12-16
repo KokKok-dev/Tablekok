@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tablekok.cursor.dto.request.CursorRequest;
 import com.tablekok.cursor.dto.response.Cursor;
 import com.tablekok.cursor.util.CursorUtils;
+import com.tablekok.exception.AppException;
 import com.tablekok.review_service.application.client.ReservationClient;
 import com.tablekok.review_service.application.dto.command.CreateReviewCommand;
 import com.tablekok.review_service.application.dto.command.UpdateReviewCommand;
@@ -20,6 +21,7 @@ import com.tablekok.review_service.application.dto.result.GetReviewResult;
 import com.tablekok.review_service.application.dto.result.GetStoreReviewsResult;
 import com.tablekok.review_service.domain.entity.Review;
 import com.tablekok.review_service.domain.entity.ReviewSortCriteria;
+import com.tablekok.review_service.domain.exception.ReviewDomainErrorCode;
 import com.tablekok.review_service.domain.repository.ReviewRepository;
 import com.tablekok.review_service.domain.service.ReviewDomainService;
 import com.tablekok.review_service.domain.vo.Reservation;
@@ -54,19 +56,17 @@ public class ReviewService {
 	}
 
 	@Transactional
-	public void updateReview(UUID reviewId, UpdateReviewCommand command) {
+	public void updateReview(UUID reviewId, UUID userId, UpdateReviewCommand command) {
+		// Review foundReview = findReview(reviewId, userId);
 		Review foundReview = findReview(reviewId);
 		foundReview.updateReview(command.rating(), command.content());
 	}
 
 	@Transactional
 	public void deleteReview(UUID reviewId, UUID userId) {
+		// Review foundReview = findReview(reviewId, userId);
 		Review foundReview = findReview(reviewId);
 		foundReview.softDelete(userId);
-	}
-
-	private Review findReview(UUID reviewId) {
-		return reviewRepository.findById(reviewId);
 	}
 
 	public GetReviewResult getReview(UUID reviewId) {
@@ -84,7 +84,10 @@ public class ReviewService {
 		Page<Review> storeReviews = reviewRepository.findReviewsByStoreId(
 			storeId, sortBy, request.cursor(), request.cursorId(), pageable);
 
+		long totalCount = reviewRepository.countByStoreId(storeId);
+
 		Cursor<Review, UUID> response = CursorUtils.makeResponse(
+			totalCount,
 			storeReviews.getContent(),
 			request.size(),
 			review -> {
@@ -105,7 +108,10 @@ public class ReviewService {
 		Page<Review> myReviews = reviewRepository.findReviewsByUserId(
 			userId, request.cursor(), request.cursorId(), pageable);
 
+		long totalCount = reviewRepository.countByUserId(userId);
+
 		Cursor<Review, UUID> response = CursorUtils.makeResponse(
+			totalCount,
 			myReviews.getContent(),
 			request.size(),
 			review -> review.getCreatedAt().toString(),
@@ -113,5 +119,12 @@ public class ReviewService {
 		);
 
 		return response.map(GetMyReviewsResult::from);
+	}
+
+	// Todo: reviewId, userId로 리뷰 조회하도록 수정
+	private Review findReview(UUID reviewId) {
+		// return reviewRepository.findByIdAndUserId(reviewId, userId).orElseThrow(
+		// 	() -> new AppException(ReviewDomainErrorCode.REVIEW_NOT_FOUND));
+		return reviewRepository.findById(reviewId);
 	}
 }

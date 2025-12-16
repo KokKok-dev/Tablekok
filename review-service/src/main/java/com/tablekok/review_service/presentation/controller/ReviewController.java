@@ -67,9 +67,11 @@ public class ReviewController {
 	@PatchMapping("/reviews/{reviewId}")
 	public ResponseEntity<ApiResponse<Void>> updateReview(
 		@PathVariable("reviewId") UUID reviewId,
+		@RequestHeader("X-User-Id") String strUserId,
 		@RequestBody @Valid UpdateReviewRequest request
 	) {
-		reviewService.updateReview(reviewId, request.toCommand());
+		UUID userId = UUID.fromString(strUserId);
+		reviewService.updateReview(reviewId, userId, request.toCommand());
 		return ResponseEntity.ok(
 			ApiResponse.success("리뷰 수정이 완료되었습니다.", HttpStatus.OK));
 	}
@@ -79,7 +81,6 @@ public class ReviewController {
 		@PathVariable("reviewId") UUID reviewId,
 		@RequestHeader("X-User-Id") String strUserId
 	) {
-		// 임시로 id 지정
 		UUID userId = UUID.fromString(strUserId);
 		reviewService.deleteReview(reviewId, userId);
 		return ResponseEntity.ok(
@@ -119,6 +120,7 @@ public class ReviewController {
 		@ModelAttribute GetMyReviewCursorRequest request
 	) {
 		UUID userId = UUID.fromString(strUserId);
+		// UUID userId = UUID.fromString("c1270f2d-f1ed-49c5-bc15-452e7c5f4078");
 
 		Cursor<GetMyReviewsResponse, UUID> response = reviewService.findMyReviews(userId, request.toCursorRequest())
 			.map(GetMyReviewsResponse::from);

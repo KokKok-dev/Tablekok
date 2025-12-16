@@ -57,4 +57,14 @@ public class ReviewRepositoryAdapter implements ReviewRepository {
 	) {
 		return reviewQuerydslRepository.findReviewsByUserId(userId, cursor, cursorId, pageable);
 	}
+
+	@Override
+	public long countByStoreId(UUID storeId) {
+		return reviewJpaRepository.countByStoreId(storeId);
+	}
+
+	@Override
+	public long countByUserId(UUID userId) {
+		return reviewJpaRepository.countByUserId(userId);
+	}
 }

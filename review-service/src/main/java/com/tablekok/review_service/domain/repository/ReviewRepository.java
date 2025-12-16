@@ -29,4 +29,8 @@ public interface ReviewRepository {
 		String cursor,
 		UUID cursorId,
 		Pageable pageable);
+
+	long countByStoreId(UUID storeId);
+
+	long countByUserId(UUID userId);
 }
