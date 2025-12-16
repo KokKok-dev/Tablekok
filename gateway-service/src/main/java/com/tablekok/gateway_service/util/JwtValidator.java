@@ -1,24 +1,34 @@
 package com.tablekok.gateway_service.util;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import com.tablekok.gateway_service.config.JwtConfig;
+import java.nio.charset.StandardCharsets;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class JwtValidator {
 
-	private final JwtConfig jwtConfig;
+	@Value("${jwt.secret}")
+	private String secretKey;
+
+	public static final String BEARER_PREFIX = "Bearer ";
 
 	private SecretKey getSigningKey() {
-		return Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
+		return Keys.hmacShaKeyFor(
+			secretKey.getBytes(
+				StandardCharsets.UTF_8));
 	}
 
 	public Claims getClaimsFromToken(String token) {
@@ -54,8 +64,8 @@ public class JwtValidator {
 	}
 
 	public String extractTokenFromHeader(String authorizationHeader) {
-		if (authorizationHeader != null && authorizationHeader.startsWith(jwtConfig.getPrefix())) {
-			return authorizationHeader.substring(jwtConfig.getPrefix().length());
+		if (authorizationHeader != null && authorizationHeader.startsWith(BEARER_PREFIX)) {
+			return authorizationHeader.substring(BEARER_PREFIX.length());
 		}
 		return null;
 	}
@@ -74,8 +84,12 @@ public class JwtValidator {
 			case "CUSTOMER":
 				return path.startsWith("/v1/users/profile") ||
 					path.startsWith("/v1/users/findid") ||
-					path.startsWith("/v1/users/findpassword");
-
+					path.startsWith("/v1/users/findpassword") ||
+					path.startsWith("/v1/reservations") ||
+					path.startsWith("/v1/reservations/*") ||
+					path.startsWith("/v1/hot-reservations/queue") ||
+					path.startsWith("/v1/hot-reservations/validation/{token}") ||
+					path.startsWith("/v1/hot-reservations");
 
 			case "OWNER":
 				return path.startsWith("/v1/users/profile") ||
