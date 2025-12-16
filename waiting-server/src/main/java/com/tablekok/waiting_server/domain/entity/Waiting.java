@@ -149,6 +149,10 @@ public class Waiting extends BaseEntity {
 	}
 
 	public void noShow() {
+		if (this.status != WaitingStatus.WAITING && this.status != WaitingStatus.CALLED &&
+			this.status != WaitingStatus.CONFIRMED) {
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
 		this.status = WaitingStatus.NO_SHOW;
 		this.canceledAt = LocalDateTime.now();
 	}

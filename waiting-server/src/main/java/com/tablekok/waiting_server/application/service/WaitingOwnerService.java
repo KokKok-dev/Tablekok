@@ -20,6 +20,7 @@ import com.tablekok.waiting_server.application.port.NotificationPort;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
+import com.tablekok.waiting_server.domain.repository.WaitingCachePort;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class WaitingOwnerService {
 	private final WaitingRepository waitingRepository;
 	private final NotificationPort notificationPort;
 	private final NoShowSchedulerPort noShowSchedulerPort;
-	private final WaitingQueueManagerService waitingQueueManagerService;
+	private final WaitingCachePort waitingCache;
 
 	@Transactional
 	public void startWaitingService(StartWaitingServiceCommand command) {
@@ -121,16 +122,27 @@ public class WaitingOwnerService {
 		// TODO: 남은 대기 고객들에게 순위가 변경되었음을 알림
 	}
 
+	@Transactional
 	public void markNoShow(UUID storeId, UUID waitingId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		// TODO: waitingId 조회하여 상태가 CALLED 또는 CONFIRMED 상태인지 확인
 
-		// TODO: WaitingQueue 엔티티의 상태를 NO_SHOW로 변경
-		// TODO: WaitingId Redis ZSET 에서 제거
+		Waiting waiting = findWaiting(waitingId);
+		if (!waiting.getStoreId().equals(storeId)) {
+			throw new AppException(WaitingErrorCode.WAITING_NOT_IN_STORE);
+		}
 
-		// TODO: 노쇼 자동 처리 타이머가 혹시라도 남아있다면 중단
-		// TODO: 고객에게 노쇼 처리되었음을 알립
-		// TODO: 남은 대기 고객들에게 순위가 변경되었음을 알림
+		// Waiting 엔티티의 상태를 NO_SHOW로 변경
+		waiting.noShow();
+		waitingRepository.save(waiting);
+
+		// WaitingId Redis ZSET 에서 제거
+		waitingCache.removeWaiting(storeId, waitingId.toString());
+
+		// 노쇼 자동 처리 타이머가 혹시라도 남아있다면 중단
+		noShowSchedulerPort.cancelNoShowProcessing(waitingId);
+
+		// 고객에게 노쇼 처리되었음을 알림
+		registerPostMarkNoShowActions(waitingId);
 	}
 
 	private Optional<StoreWaitingStatus> findStoreWaitingStatus(UUID storeId) {
@@ -161,5 +173,15 @@ public class WaitingOwnerService {
 
 	public SseEmitter connectOwnerWaitingNotification(UUID storeId) {
 		return notificationPort.connectOwner(storeId);
+	}
+
+	private void registerPostMarkNoShowActions(UUID waitingId) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				// 고객에게 노쇼 처리되었음을 알림
+				notificationPort.sendNoShowAlert(waitingId);
+			}
+		});
 	}
 }
