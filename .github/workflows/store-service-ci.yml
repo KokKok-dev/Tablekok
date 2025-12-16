@@ -67,7 +67,7 @@ jobs:
       working-directory: ./store-service # ✅ store-service 폴더로 이동하여 빌드
 
     - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: build-libs
         path: ./store-service/build/libs/*.jar # ✅ 아티팩트 경로를 store-service 기준으로 지정
