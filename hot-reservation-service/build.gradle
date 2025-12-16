@@ -24,7 +24,6 @@ repositories {
 
 dependencies {
     implementation 'com.github.KokKok-dev:Tablekok-common:1.0.3'           // 공통 모듈
-    implementation 'org.springframework.cloud:spring-cloud-starter-config' // 컨피그 서버
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'   //jpa
     implementation 'org.springframework.boot:spring-boot-starter-validation' // valid
 
