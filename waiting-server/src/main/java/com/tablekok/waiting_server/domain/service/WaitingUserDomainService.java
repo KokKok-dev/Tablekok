@@ -21,6 +21,12 @@ import lombok.RequiredArgsConstructor;
 public class WaitingUserDomainService {
 
 	private final WaitingRepository waitingRepository;
+	// 현재 활성화 되어있는 웨이팅 조회하기 위해 상태 정보 필요
+	private static final List<WaitingStatus> ACTIVE_STATUSES = List.of(
+		WaitingStatus.WAITING,
+		WaitingStatus.CALLED,
+		WaitingStatus.CONFIRMED
+	);
 
 	public void validateStoreStatus(StoreWaitingStatus status) {
 		if (!status.isOpenForWaiting()) {
@@ -48,64 +54,60 @@ public class WaitingUserDomainService {
 
 	public void validateDuplicateWaiting(UUID storeId, CustomerType customerType, UUID memberId,
 		String nonMemberPhone) {
-		boolean exists = false;
 
-		// 현재 활성화 되어있는 웨이팅 조회하기 위해 상태 정보 필요
-		List<WaitingStatus> activeStatuses = List.of(
-			WaitingStatus.WAITING,
-			WaitingStatus.CALLED,
-			WaitingStatus.CONFIRMED
-		);
+		// 유효하지 않은 CustomerType인 경우 예외 처리
+		if (customerType != CustomerType.MEMBER && customerType != CustomerType.NON_MEMBER) {
+			throw new AppException(WaitingDomainErrorCode.INVALID_CUSTOMER_TYPE);
+		}
 
 		if (customerType == CustomerType.MEMBER) {
-			// --- [회원 중복 확인 로직] ---
 			if (memberId == null) {
 				throw new AppException(WaitingDomainErrorCode.MEMBER_ID_REQUIRED);
 			}
 
-			exists = waitingRepository.existsByStoreIdAndMemberIdAndStatusIn(
-				storeId, memberId, activeStatuses
+			boolean exists = waitingRepository.existsByStoreIdAndMemberIdAndStatusIn(
+				storeId, memberId, ACTIVE_STATUSES
 			);
 
-			if (exists) {
+			if (exists) { // 이미 웨이팅 등록이 되어있다면
 				throw new AppException(WaitingDomainErrorCode.DUPLICATE_MEMBER_WAITING);
 			}
+		}
 
-		} else if (customerType == CustomerType.NON_MEMBER) {
-			// --- [비회원 중복 확인 로직] ---
+		if (customerType == CustomerType.NON_MEMBER) {
 			if (nonMemberPhone == null || nonMemberPhone.isEmpty()) {
 				throw new AppException(WaitingDomainErrorCode.PHONE_NUMBER_REQUIRED);
 			}
 
-			exists = waitingRepository.existsByStoreIdAndNonMemberPhoneAndStatusIn(
-				storeId, nonMemberPhone, activeStatuses
+			boolean exists = waitingRepository.existsByStoreIdAndNonMemberPhoneAndStatusIn(
+				storeId, nonMemberPhone, ACTIVE_STATUSES
 			);
 
-			if (exists) {
-				// 중복 확인 시, 비회원은 전화번호만 사용
-				throw new AppException(WaitingDomainErrorCode.DUPLICATE_MEMBER_WAITING);
+			if (exists) { // 이미 웨이팅 등록이 되어있다면
+				throw new AppException(WaitingDomainErrorCode.DUPLICATE_NON_MEMBER_WAITING);
 			}
-		} else {
-			throw new AppException(WaitingDomainErrorCode.INVALID_CUSTOMER_TYPE);
 		}
-
 	}
 
 	public void validateAccessPermission(Waiting waiting, UUID memberId, String nonMemberName, String nonMemberPhone) {
+		// 유효하지 않은 CustomerType인 경우 예외 처리
+		if (!waiting.isMember() && !waiting.isNonMember()) {
+			throw new AppException(WaitingErrorCode.INVALID_CUSTOMER_TYPE);
+		}
+
 		if (waiting.isMember()) {
-			// 1. 회원(MEMBER)인 경우: memberId로 검증 (기존 로직)
+			// memberId가 없거나 불일치하면 예외 발생
 			if (!waiting.getMemberId().equals(memberId)) {
 				throw new AppException(WaitingErrorCode.CONNECT_FORBIDDEN);
 			}
-		} else if (waiting.isNonMember()) {
-			// 2. 비회원(NON_MEMBER)인 경우: 이름과 전화번호로 검증 (새 로직)
-			if (!waiting.getNonMemberName().equals(nonMemberName) || !waiting.getNonMemberPhone()
-				.equals(nonMemberPhone)) {
+		}
+
+		if (waiting.isNonMember()) {
+			// 이름과 전화번호 중 하나라도 불일치하면 예외 발생
+			if (!waiting.getNonMemberName().equals(nonMemberName) ||
+				!waiting.getNonMemberPhone().equals(nonMemberPhone)) {
 				throw new AppException(WaitingErrorCode.CONNECT_FORBIDDEN);
 			}
-		} else {
-			// 예외: 정의되지 않은 CustomerType
-			throw new AppException(WaitingErrorCode.INVALID_CUSTOMER_TYPE);
 		}
 	}
 }
