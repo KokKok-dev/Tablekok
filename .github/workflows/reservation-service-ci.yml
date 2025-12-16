@@ -29,7 +29,7 @@ name: Deploy to Amazon ECS
 on:
   push:
     branches: [ "develop", "ci/#124-reservation" ]
-    paths: [ 'reservation-service/**' ]
+#    paths: [ 'reservation-service/**' ]
 
 env:
   AWS_REGION: ap-northeast-2                                        # set this to your preferred AWS region, e.g. us-west-1
