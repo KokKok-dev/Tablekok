@@ -20,3 +20,8 @@ Content-Type: application/json
 ### 사장님 수동 노쇼
 POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/7ddf3d5d-ce0c-4759-8cc6-c181a1c441b1/no-show
 Content-Type: application/json
+
+
+### 사장님 수동 취소
+POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/246b5d48-bab7-4b31-b2e0-5abdfd101724/owner-cancel
+Content-Type: application/json

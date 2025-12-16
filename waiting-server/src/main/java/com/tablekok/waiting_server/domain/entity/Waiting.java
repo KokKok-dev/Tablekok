@@ -179,4 +179,19 @@ public class Waiting extends BaseEntity {
 		validateUserConfirmableStatus();
 		this.status = WaitingStatus.CONFIRMED;
 	}
+
+	private void validateOwnerCancelableStatus() {
+		if (this.status == WaitingStatus.ENTERED ||
+			this.status == WaitingStatus.USER_CANCELED ||
+			this.status == WaitingStatus.OWNER_CANCELED ||
+			this.status == WaitingStatus.NO_SHOW) {
+
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
+	}
+
+	public void cancelByOwner() {
+		validateOwnerCancelableStatus();
+		this.status = WaitingStatus.OWNER_CANCELED;
+	}
 }

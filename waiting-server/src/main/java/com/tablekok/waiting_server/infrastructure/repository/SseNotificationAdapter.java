@@ -56,6 +56,9 @@ public class SseNotificationAdapter implements NotificationPort {
 					.id(waitingId.toString()) // 이벤트 ID (재연결 시 유용)
 				);
 
+				// 연결 종료
+				emitter.complete();
+				sseEmitterRepository.deleteCustomerEmitter(waitingId);
 			} catch (IOException e) {
 				// 전송 실패 시 (클라이언트 연결 끊김 등) 연결 삭제
 				log.error("SSE 전송 실패 (waiting-noshow-timeout). WaitingId: {}", waitingId, e);
@@ -77,7 +80,6 @@ public class SseNotificationAdapter implements NotificationPort {
 						"newStatus", "CONFIRMED",
 						"message", waitingNumber + "번 손님이 웨이팅을 확정했습니다. 10분 내로 매장 근처로 온다면 '입장'으로 상태를 변경하세요."
 					))
-					// 사장님은 여러 웨이팅 이벤트를 받으므로, ID는 storeId와 이벤트 타입 조합으로 설정 가능
 					.id(storeId.toString() + "-" + waitingId)
 				);
 
@@ -100,6 +102,28 @@ public class SseNotificationAdapter implements NotificationPort {
 			} catch (IOException e) {
 				log.error("사장님 SSE 알림 전송 실패: StoreId={}", storeId, e);
 				sseEmitterRepository.deleteOwnerEmitter(storeId);
+			}
+		});
+	}
+
+	@Override
+	public void sendOwnerCancelAlert(UUID waitingId) {
+		sseEmitterRepository.findCustomerEmitter(waitingId).ifPresent(emitter -> {
+			try {
+				emitter.send(SseEmitter.event()
+					.name("waiting-canceled-by-owner") // 이벤트 이름: 사장님 취소임을 명확히
+					.data(Map.of(
+						"newStatus", "OWNER_CANCELED",
+						"message", "죄송합니다. 매장 사정으로 웨이팅이 취소되었습니다."
+					))
+					.id(waitingId.toString())
+				);
+				// 연결 종료
+				emitter.complete();
+				sseEmitterRepository.deleteCustomerEmitter(waitingId);
+			} catch (IOException e) {
+				log.error("SSE 전송 실패 (waiting-canceled-by-owner). WaitingId: {}", waitingId, e);
+				sseEmitterRepository.deleteCustomerEmitter(waitingId);
 			}
 		});
 	}

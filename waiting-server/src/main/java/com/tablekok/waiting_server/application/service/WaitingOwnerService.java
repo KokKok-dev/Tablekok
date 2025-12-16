@@ -19,6 +19,7 @@ import com.tablekok.waiting_server.application.port.NoShowSchedulerPort;
 import com.tablekok.waiting_server.application.port.NotificationPort;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
+import com.tablekok.waiting_server.domain.entity.WaitingStatus;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
 import com.tablekok.waiting_server.domain.repository.WaitingCachePort;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
@@ -65,6 +66,7 @@ public class WaitingOwnerService {
 	}
 
 	public List<GetWaitingQueueResult> getStoreWaitingQueue(UUID storeId) {
+		// TODO: 사장님이 storeId의 실제 소유자인지 확인
 		// TODO: Redis ZSET에서 현재 대기 중인 모든 waitingId를 가져와 RDB에서 상세 정보를 조회하는 로직으로 대체
 
 		LocalDateTime now = LocalDateTime.now();
@@ -110,16 +112,25 @@ public class WaitingOwnerService {
 		// TODO: 남은 대기 고객들에게 순위 변경 알림
 	}
 
+	@Transactional
 	public void cancelByOwner(UUID storeId, UUID waitingId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		// TODO: waitingId 조회하여 상태가 이미 ENTERED 등 최종 상태가 아닌지 확인
 
-		// TODO: WaitingQueue 엔티티의 상태를 OWNER_CANCELED 변경
-		// TODO: WaitingId Redis ZSET 에서 제거
+		Waiting waiting = findWaitingForStore(waitingId, storeId);
+		WaitingStatus originalStatus = waiting.getStatus();
 
-		// TODO: 만약 상태가 CALLED였다면, 노쇼 자동 처리 타이머를 중단
-		// TODO: 고객에게 웨이팅이 취소되었음을 알림
-		// TODO: 남은 대기 고객들에게 순위가 변경되었음을 알림
+		// Waiting 엔티티의 상태를 OWNER_CANCELED 변경
+		waiting.cancelByOwner();
+		waitingRepository.save(waiting);
+
+		// WaitingId Redis ZSET 에서 제거
+		waitingCache.removeWaiting(storeId, waitingId.toString());
+
+		// 만약 상태가 CALLED 또는 CONFIRM, 노쇼 자동 처리 타이머를 중단
+		cancelNoShowTimerIfActive(waitingId, originalStatus);
+
+		// 고객에게 웨이팅이 취소되었음을 알림
+		notificationPort.sendOwnerCancelAlert(waitingId);
 	}
 
 	@Transactional
@@ -127,6 +138,7 @@ public class WaitingOwnerService {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
 
 		Waiting waiting = findWaitingForStore(waitingId, storeId);
+		WaitingStatus originalStatus = waiting.getStatus();
 
 		// Waiting 엔티티의 상태를 NO_SHOW로 변경
 		waiting.noShow();
@@ -135,8 +147,8 @@ public class WaitingOwnerService {
 		// WaitingId Redis ZSET 에서 제거
 		waitingCache.removeWaiting(storeId, waitingId.toString());
 
-		// 노쇼 자동 처리 타이머가 혹시라도 남아있다면 중단
-		noShowSchedulerPort.cancelNoShowProcessing(waitingId);
+		// 만약 상태가 CALLED 또는 CONFIRM, 노쇼 자동 처리 타이머를 중단
+		cancelNoShowTimerIfActive(waitingId, originalStatus);
 
 		// 고객에게 노쇼 처리되었음을 알림
 		registerPostMarkNoShowActions(waitingId);
@@ -186,4 +198,12 @@ public class WaitingOwnerService {
 			}
 		});
 	}
+
+	private void cancelNoShowTimerIfActive(UUID waitingId, WaitingStatus originalStatus) {
+		// 웨이팅의 원본 상태가 CALLED 또는 CONFIRMED인 경우,  노쇼 자동 처리 타이머 중단
+		if (originalStatus == WaitingStatus.CALLED || originalStatus == WaitingStatus.CONFIRMED) {
+			noShowSchedulerPort.cancelNoShowProcessing(waitingId);
+		}
+	}
+
 }
