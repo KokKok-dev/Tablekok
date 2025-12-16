@@ -6,8 +6,10 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.tablekok.exception.AppException;
+import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
 import com.tablekok.waiting_server.domain.entity.CustomerType;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
+import com.tablekok.waiting_server.domain.entity.Waiting;
 import com.tablekok.waiting_server.domain.entity.WaitingStatus;
 import com.tablekok.waiting_server.domain.exception.WaitingDomainErrorCode;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
@@ -87,5 +89,23 @@ public class WaitingUserDomainService {
 			throw new AppException(WaitingDomainErrorCode.INVALID_CUSTOMER_TYPE);
 		}
 
+	}
+
+	public void validateAccessPermission(Waiting waiting, UUID memberId, String nonMemberName, String nonMemberPhone) {
+		if (waiting.isMember()) {
+			// 1. 회원(MEMBER)인 경우: memberId로 검증 (기존 로직)
+			if (!waiting.getMemberId().equals(memberId)) {
+				throw new AppException(WaitingErrorCode.CONNECT_FORBIDDEN);
+			}
+		} else if (waiting.isNonMember()) {
+			// 2. 비회원(NON_MEMBER)인 경우: 이름과 전화번호로 검증 (새 로직)
+			if (!waiting.getNonMemberName().equals(nonMemberName) || !waiting.getNonMemberPhone()
+				.equals(nonMemberPhone)) {
+				throw new AppException(WaitingErrorCode.CONNECT_FORBIDDEN);
+			}
+		} else {
+			// 예외: 정의되지 않은 CustomerType
+			throw new AppException(WaitingErrorCode.INVALID_CUSTOMER_TYPE);
+		}
 	}
 }

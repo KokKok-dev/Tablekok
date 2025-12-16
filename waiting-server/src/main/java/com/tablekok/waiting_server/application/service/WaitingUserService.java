@@ -54,7 +54,7 @@ public class WaitingUserService {
 			command.memberId(),
 			command.nonMemberPhone()
 		);
-		
+
 		status.incrementNumber();
 		int assignedNumber = status.getLatestAssignedNumber();
 
@@ -95,7 +95,8 @@ public class WaitingUserService {
 
 		// Member ID가 일치하지 않으면 권한 없음
 		// TODO: memberId 바꿔야함
-		validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(), command.nonMemberPhone());
+		waitingUserDomainService.validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(),
+			command.nonMemberPhone());
 
 		// 매장 ID 및 상태 확인 (회전식사시간 확인)
 		StoreWaitingStatus status = findStoreWaitingStatus(waiting.getStoreId());
@@ -130,7 +131,8 @@ public class WaitingUserService {
 		Waiting waiting = findWaiting(command.waitingId());
 
 		// TODO: memberId 바꿔야함
-		validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(), command.nonMemberPhone());
+		waitingUserDomainService.validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(),
+			command.nonMemberPhone());
 
 		// entity 상태 변경 (CALLED -> CONFIRMED)
 		waiting.confirmByUser();
@@ -147,7 +149,8 @@ public class WaitingUserService {
 		Waiting waiting = findWaiting(command.waitingId());
 
 		// TODO: memberId 바꿔야함
-		validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(), command.nonMemberPhone());
+		waitingUserDomainService.validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(),
+			command.nonMemberPhone());
 
 		// USER_CANCELED 상태변경
 		waiting.cancelByUser();
@@ -167,7 +170,8 @@ public class WaitingUserService {
 
 		// Member ID가 일치하지 않으면 권한 없음
 		// TODO: memberId 바꿔야함
-		validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(), command.nonMemberPhone());
+		waitingUserDomainService.validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(),
+			command.nonMemberPhone());
 
 		return notificationPort.connectCustomer(command.waitingId());
 	}
@@ -180,24 +184,6 @@ public class WaitingUserService {
 	private Waiting findWaiting(UUID waitingId) {
 		return waitingRepository.findById(waitingId)
 			.orElseThrow(() -> new AppException(WaitingErrorCode.WAITING_NOT_FOUND));
-	}
-
-	private void validateAccessPermission(Waiting waiting, UUID memberId, String nonMemberName, String nonMemberPhone) {
-		if (waiting.isMember()) {
-			// 1. 회원(MEMBER)인 경우: memberId로 검증 (기존 로직)
-			if (!waiting.getMemberId().equals(memberId)) {
-				throw new AppException(WaitingErrorCode.CONNECT_FORBIDDEN);
-			}
-		} else if (waiting.isNonMember()) {
-			// 2. 비회원(NON_MEMBER)인 경우: 이름과 전화번호로 검증 (새 로직)
-			if (!waiting.getNonMemberName().equals(nonMemberName) || !waiting.getNonMemberPhone()
-				.equals(nonMemberPhone)) {
-				throw new AppException(WaitingErrorCode.CONNECT_FORBIDDEN);
-			}
-		} else {
-			// 예외: 정의되지 않은 CustomerType
-			throw new AppException(WaitingErrorCode.INVALID_CUSTOMER_TYPE);
-		}
 	}
 
 	private void registerPostConfirmActions(UUID waitingId, int callingNumber, UUID storeId) {
