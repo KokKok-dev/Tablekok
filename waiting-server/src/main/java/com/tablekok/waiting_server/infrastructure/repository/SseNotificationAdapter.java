@@ -129,6 +129,27 @@ public class SseNotificationAdapter implements NotificationPort {
 	}
 
 	@Override
+	public void sendEnteredAlert(UUID waitingId) {
+		sseEmitterRepository.findCustomerEmitter(waitingId).ifPresent(emitter -> {
+			try {
+				emitter.send(SseEmitter.event()
+					.name("waiting-entered")
+					.data(Map.of("newStatus", "ENTERED", "message", "입장 처리되었습니다."))
+					.id(waitingId.toString())
+				);
+
+				// 최종 상태이므로 연결 종료
+				emitter.complete();
+				sseEmitterRepository.deleteCustomerEmitter(waitingId);
+
+			} catch (IOException e) {
+				log.error("SSE 전송 실패 (waiting-entered). WaitingId: {}", waitingId, e);
+				sseEmitterRepository.deleteCustomerEmitter(waitingId);
+			}
+		});
+	}
+
+	@Override
 	public SseEmitter connectCustomer(UUID waitingId) {
 		// Emitter 생성 및 타임아웃 설정
 		SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);

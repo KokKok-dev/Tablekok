@@ -194,4 +194,17 @@ public class Waiting extends BaseEntity {
 		validateOwnerCancelableStatus();
 		this.status = WaitingStatus.OWNER_CANCELED;
 	}
+
+	private void validateCanBeEntered() {
+		if (this.status != WaitingStatus.CALLED && this.status != WaitingStatus.CONFIRMED) {
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
+	}
+
+	public void enter() {
+		validateCanBeEntered();
+
+		this.status = WaitingStatus.ENTERED;
+		this.enteredAt = LocalDateTime.now();
+	}
 }

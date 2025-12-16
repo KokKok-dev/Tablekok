@@ -18,4 +18,6 @@ public interface NotificationPort {
 	void sendOwnerQueueUpdate(UUID storeId);
 
 	void sendOwnerCancelAlert(UUID waitingId);
+
+	void sendEnteredAlert(UUID waitingId);
 }

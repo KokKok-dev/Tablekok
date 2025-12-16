@@ -55,13 +55,8 @@ public class WaitingOwnerService {
 	@Transactional
 	public void stopWaitingService(UUID storeId, UUID ownerId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		Optional<StoreWaitingStatus> existingStatus = findStoreWaitingStatus(storeId);
-		// 해당 매장의 웨이팅 시스템이 아예 설정된 적이 없음.
-		if (existingStatus.isEmpty()) {
-			throw new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND);
-		}
 
-		StoreWaitingStatus status = existingStatus.get();
+		StoreWaitingStatus status = getStoreWaitingStatus(storeId);
 		status.stopWaiting();
 	}
 
@@ -99,17 +94,27 @@ public class WaitingOwnerService {
 		registerPostCommitActions(callingWaitingId, waiting.getWaitingNumber());
 	}
 
+	@Transactional
 	public void enterWaiting(UUID storeId, UUID waitingId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		// TODO: waitingId 조회하여 상태가 CALLED인지 CONFIRMED 상태인지 확인 -> NO_SHOW 여도 바꿀수 있게 할까
+		Waiting waiting = findWaitingForStore(waitingId, storeId);
+		WaitingStatus originalStatus = waiting.getStatus();
 
-		// TODO: WaitingQueue 엔티티의 상태를 ENTERED 변경, 입장 시간(enteredAt) 기록
-		// TODO: WaitingId Redis ZSET 에서 제거
+		// Waiting 엔티티의 상태를 ENTERED 변경, 입장 시간(enteredAt) 기록
+		waiting.enter();
+		waitingRepository.save(waiting);
 
-		// TODO: 만약 상태가 CALLED였다면, 이전에 시작된 노쇼 자동 처리 타이머를 중단
-		// TODO: StoreWaitingStatus의 currentCallingNumber를 waitingNumber로 업데이트
+		// WaitingId Redis ZSET 에서 제거
+		waitingCache.removeWaiting(storeId, waitingId.toString());
 
-		// TODO: 남은 대기 고객들에게 순위 변경 알림
+		//  노쇼 자동 처리 타이머를 중단
+		cancelNoShowTimerIfActive(waitingId, originalStatus);
+
+		// StoreWaitingStatus의 currentCallingNumber를 waitingNumber로 업데이트
+		updateCurrentCallingNumber(storeId, waiting.getWaitingNumber());
+
+		// DB 상태가 커밋된 이후에 알람
+		registerPostEnterActions(waitingId, storeId);
 	}
 
 	@Transactional
@@ -206,4 +211,22 @@ public class WaitingOwnerService {
 		}
 	}
 
+	private void updateCurrentCallingNumber(UUID storeId, int waitingNumber) {
+		StoreWaitingStatus status = getStoreWaitingStatus(storeId);
+		status.setCurrentCallingNumber(waitingNumber);
+		storeWaitingStatusRepository.save(status);
+	}
+
+	private void registerPostEnterActions(UUID waitingId, UUID storeId) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				// 고객에게 입장 처리되었음을 알림 (SSE 연결 종료)
+				notificationPort.sendEnteredAlert(waitingId);
+
+				// 사장님에게 큐 상태 업데이트 알림
+				notificationPort.sendOwnerQueueUpdate(storeId);
+			}
+		});
+	}
 }
