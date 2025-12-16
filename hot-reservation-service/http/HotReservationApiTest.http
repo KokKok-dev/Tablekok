@@ -1,6 +1,6 @@
 ### SSE 연결 및 대기열
 GET http://localhost:19091/v1/hot-reservations/queue
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4Njg0OTQsImV4cCI6MTc2NTk1NDg5NH0.v4idn7KrR7aQiZvey7ThLPYYHDZT-Q9d7LvRqsWc4FQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4NzYxOTgsImV4cCI6MTc2NTk2MjU5OH0.TiN-AQps4TaqvKt0soaba0qIhxWZ14mcPvWQ-atpObs
 
 
 ### 토큰 검증
@@ -10,10 +10,10 @@ POST http://localhost:19091/v1/hot-reservations/validation/358279c4-c4ba-4875-a8
 ### 예약 생성 (예약 접수)
 POST http://localhost:19091/v1/hot-reservations
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4Njg0OTQsImV4cCI6MTc2NTk1NDg5NH0.v4idn7KrR7aQiZvey7ThLPYYHDZT-Q9d7LvRqsWc4FQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4NzYxOTgsImV4cCI6MTc2NTk2MjU5OH0.TiN-AQps4TaqvKt0soaba0qIhxWZ14mcPvWQ-atpObs
 
 {
-  "token": "b4ccfdc5-ac35-42db-8b8b-bfc2be17c4a7",
+  "token": "59f7de6d-6821-40ab-8ca0-86a2de15d4ee",
   "storeId": "f5bf4f7c-ccfc-4741-a7d4-3b1625fcf70e",
   "reservationDateTime": "2025-12-26T19:00:00",
   "headcount": 3
