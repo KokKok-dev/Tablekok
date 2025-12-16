@@ -19,18 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * JWT 인가 필터 (Gateway 전용)
- *
- * 역할: 인가(Authorization) 처리
- * - 공개 경로 검증 스킵
- * - JWT 토큰 유효성 검증
- * - 권한별 접근 제어
- * - 사용자 정보를 헤더로 후속 서비스에 전달
- *
- * 인증(Authentication)은 User Service에서 담당
- * Gateway는 인가 로직에만 집중
- */
 @Slf4j
 @Component
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
@@ -38,11 +26,6 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 	@Autowired
 	private JwtValidator jwtValidator;
 
-	/**
-	 * 인가가 필요없는 공개 경로들
-	 *
-	 * 인증 관련, 헬스체크, API 문서 등 누구나 접근 가능한 경로
-	 */
 	private static final List<String> PUBLIC_PATHS = Arrays.asList(
 		// User Service 인증 경로
 		"/v1/auth/login",
@@ -132,18 +115,12 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 		};
 	}
 
-	/**
-	 * 공개 경로 체크
-	 */
 	private boolean isPublicPath(String path) {
 		return PUBLIC_PATHS.stream().anyMatch(publicPath ->
 			path.startsWith(publicPath) || path.contains(publicPath)
 		);
 	}
 
-	/**
-	 * 401 Unauthorized 응답 (수정된 버전)
-	 */
 	private Mono<Void> handleUnauthorized(ServerWebExchange exchange, String message) {
 		ServerHttpResponse response = exchange.getResponse();
 		response.setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -161,9 +138,6 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 		return response.writeWith(Mono.just(buffer));
 	}
 
-	/**
-	 * 403 Forbidden 응답 (수정된 버전)
-	 */
 	private Mono<Void> handleForbidden(ServerWebExchange exchange, String message) {
 		ServerHttpResponse response = exchange.getResponse();
 		response.setStatusCode(HttpStatus.FORBIDDEN);

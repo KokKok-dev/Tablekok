@@ -29,19 +29,6 @@ public class GatewayFilterConfig {
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-	/**
-	 * 개발용 로깅 필터
-	 *
-	 * 백엔드 개발 시 요청/응답 추적용
-	 * Postman, curl 테스트 시 유용
-	 *
-	 * 기능:
-	 * - 모든 요청의 시작/종료 로깅
-	 * - 응답 시간 측정
-	 * - HTTP 상태 코드 로깅
-	 *
-	 * @return GlobalFilter
-	 */
 	@Bean
 	public GlobalFilter developmentLoggingFilter() {
 		return (exchange, chain) -> {
@@ -70,14 +57,6 @@ public class GatewayFilterConfig {
 		};
 	}
 
-	/**
-	 * 개발용 요청 추적 필터 (간소화)
-	 *
-	 * 분산 추적을 위한 TraceId 생성 및 전파
-	 * 개발 단계에서는 간단한 형태로만 구현
-	 *
-	 * @return GlobalFilter
-	 */
 	@Bean
 	public GlobalFilter developmentTraceFilter() {
 		return (exchange, chain) -> {
@@ -106,14 +85,6 @@ public class GatewayFilterConfig {
 		};
 	}
 
-	/**
-	 * 클라이언트 IP 주소 추출 (개발용)
-	 *
-	 * 로컬 개발환경에서 클라이언트 IP 추출
-	 *
-	 * @param exchange ServerWebExchange
-	 * @return 클라이언트 IP 주소
-	 */
 	private String getClientIP(ServerWebExchange exchange) {
 		// 개발환경에서는 단순한 IP 추출
 		return exchange.getRequest().getRemoteAddress() != null ?
