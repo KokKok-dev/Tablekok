@@ -71,6 +71,13 @@ public class GatewayRoutesConfig {
 				.uri(uris.search())
 			)
 
+			// Hot Reservation Service
+			.route("hot-reservation-service", r -> r
+				.path("/v1/hot-reservations/**")
+				.filters(f -> f.filter(jwtFilter.apply(new JwtAuthenticationFilter.Config())))
+				.uri(uris.hotReservation())
+			)
+
 			.build();
 	}
 }
