@@ -37,9 +37,6 @@ public class ReviewService {
 
 	@Transactional
 	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId) {
-		// reservationClient로 storeId 가져와야함
-		// UUID storeId = UUID.randomUUID();
-
 		// 이미 작성된 리뷰인지 검증
 		reviewDomainService.validReview(command.reservationId());
 

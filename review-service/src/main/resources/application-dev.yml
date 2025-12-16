@@ -1,16 +1,13 @@
-server:
-  port: 8087
-
 spring:
   application:
     name: review-service
-
+  profiles:
+    active: dev
   datasource:
     url: ${DB_DEV_URL}
     driver-class-name: org.postgresql.Driver
     username: ${DB_DEV_USERNAME}
     password: ${DB_DEV_PASSWORD}
-
   jpa:
     hibernate:
       ddl-auto: update

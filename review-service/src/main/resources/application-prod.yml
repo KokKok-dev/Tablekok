@@ -1,19 +1,16 @@
-server:
-  port: 8087
-
 spring:
   application:
     name: review-service
-
+  profiles:
+    active: prod
   datasource:
-    url: ${DB_DEV_URL}
+    url: ${DB_PROD_URL}
     driver-class-name: org.postgresql.Driver
-    username: ${DB_DEV_USERNAME}
-    password: ${DB_DEV_PASSWORD}
-
+    username: ${DB_PROD_USERNAME}
+    password: ${DB_PROD_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto:
     properties:
       hibernate:
         format_sql: true
@@ -22,10 +19,9 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     open-in-view: false
-
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL_DEV}
+      defaultZone: ${EUREKA_SERVER_URL}

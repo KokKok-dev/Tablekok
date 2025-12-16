@@ -3,7 +3,7 @@ DO $$
 i INT := 1;
         -- 1. 조회 테스트를 수행할 실제 가게 ID와 유저 ID를 입력하세요.
         target_store_id UUID := '8f3c6a5e-9e84-4c3f-9b80-7c2dd1a4e2c1';
-        target_user_id UUID := '641f6c00-6ea3-46dc-875c-aeec53ea8677';
+        target_user_id UUID := 'c1270f2d-f1ed-49c5-bc15-452e7c5f4078';
 BEGIN
         -- 50개의 리뷰 데이터 생성
         WHILE i <= 50 LOOP
