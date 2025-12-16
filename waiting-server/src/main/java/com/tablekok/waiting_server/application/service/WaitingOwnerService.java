@@ -135,7 +135,7 @@ public class WaitingOwnerService {
 		cancelNoShowTimerIfActive(waitingId, originalStatus);
 
 		// 고객에게 웨이팅이 취소되었음을 알림
-		notificationPort.sendOwnerCancelAlert(waitingId);
+		registerPostOwnerCancelActions(waitingId);
 	}
 
 	@Transactional
@@ -226,6 +226,17 @@ public class WaitingOwnerService {
 
 				// 사장님에게 큐 상태 업데이트 알림
 				notificationPort.sendOwnerQueueUpdate(storeId);
+			}
+		});
+	}
+
+	private void registerPostOwnerCancelActions(UUID waitingId) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				// 고객에게 취소 알림
+				notificationPort.sendOwnerCancelAlert(waitingId);
+
 			}
 		});
 	}
