@@ -32,7 +32,6 @@ dependencies {
 
 	// ❌ 제거해야 할 의존성들
 //	 implementation 'org.springframework.boot:spring-boot-starter-web'     // MVC와 Gateway 충돌
-//	 implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
 	// ✅ 유지할 의존성들
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'  // 모니터링용
