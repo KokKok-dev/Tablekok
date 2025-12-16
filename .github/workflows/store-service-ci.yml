@@ -36,7 +36,7 @@ env:
   ECR_REPOSITORY: tablekok/store           # set this to your Amazon ECR repository name
   ECS_SERVICE: tablekok-store-task-service-bpaoz4hs                 # set this to your Amazon ECS service name
   ECS_CLUSTER: tablekok-cluster                 # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: .aws/tablekok-store-task-revision1.json # set this to the path to your
+  ECS_TASK_DEFINITION: .aws/tablekok-store-task-revision3.json # set this to the path to your
                                                # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: tablekok-store-container           # set this to the name of the container in the
                                                # containerDefinitions section of your task definition
