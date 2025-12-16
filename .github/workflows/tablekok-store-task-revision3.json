@@ -1,0 +1,107 @@
+{
+    "compatibilities": [
+        "EC2",
+        "FARGATE",
+        "MANAGED_INSTANCES"
+    ],
+    "containerDefinitions": [
+        {
+            "cpu": 0,
+            "environment": [
+                {
+                    "name": "RDS_ENDPOINT_STORE",
+                    "value": "jdbc:postgresql://tablekok-db.ch0umigqozdz.ap-northeast-2.rds.amazonaws.com:5433/store_db"
+                },
+                {
+                    "name": "EUREKA_SERVER_URL",
+                    "value": "http://tablekok-eureka-server-lb-1162347586.ap-northeast-2.elb.amazonaws.com/eureka"
+                },
+                {
+                    "name": "DB_PASSWORD_STORE",
+                    "value": "zhrzhr123"
+                },
+                {
+                    "name": "DB_USER_STORE",
+                    "value": "postgres"
+                }
+            ],
+            "environmentFiles": [],
+            "essential": true,
+            "image": "291433606038.dkr.ecr.ap-northeast-2.amazonaws.com/tablekok/store@sha256:4db560bbc60dcb55c438bcf7e5227a123c090a4acf13d96d8bbceab619fe513b",
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/tablekok-store-task",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "ap-northeast-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "mountPoints": [],
+            "name": "tablekok-store-container",
+            "portMappings": [
+                {
+                    "appProtocol": "http",
+                    "containerPort": 8082,
+                    "hostPort": 8082,
+                    "name": "tablekok-store-container-8084-tcp",
+                    "protocol": "tcp"
+                }
+            ],
+            "systemControls": [],
+            "ulimits": [],
+            "volumesFrom": []
+        }
+    ],
+    "cpu": "1024",
+    "enableFaultInjection": false,
+    "executionRoleArn": "arn:aws:iam::291433606038:role/ecsTaskExecutionRole",
+    "family": "tablekok-store-task",
+    "memory": "3072",
+    "networkMode": "awsvpc",
+    "placementConstraints": [],
+    "registeredAt": "2025-12-15T02:46:26.977Z",
+    "registeredBy": "arn:aws:iam::291433606038:user/Gahyeon",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+        }
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "revision": 3,
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "status": "ACTIVE",
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:291433606038:task-definition/tablekok-store-task:3",
+    "volumes": [],
+    "tags": []
+}
