@@ -50,11 +50,16 @@ public class UserApplicationService {
 			.orElse(null);
 	}
 
-	public UserListResult getAllUsers(Pageable pageable) {
-		// 1. 전체 사용자 조회
+	public UserListResult getAllUsers(String role, Pageable pageable) {
+		// 1. MASTER 권한 확인
+		if (!"MASTER".equals(role)) {
+			throw new AppException(UserErrorCode.FORBIDDEN);
+		}
+
+		// 2. 전체 사용자 조회
 		Page<User> userPage = userRepository.findAll(pageable);
 
-		// 2. OWNER들의 사업자번호 일괄 조회
+		// 3. OWNER들의 사업자번호 일괄 조회
 		List<UUID> ownerUserIds = userPage.getContent().stream()
 			.filter(user -> user.getRole() == UserRole.OWNER)
 			.map(User::getUserId)
@@ -62,7 +67,7 @@ public class UserApplicationService {
 
 		Map<UUID, String> businessNumberMap = getBusinessNumberMap(ownerUserIds);
 
-		// 3. UserInfo 리스트 변환
+		// 4. UserInfo 리스트 변환
 		List<UserListResult.UserInfo> members = userPage.getContent().stream()
 			.map(user -> UserListResult.UserInfo.from(
 				user,
@@ -70,7 +75,7 @@ public class UserApplicationService {
 			))
 			.toList();
 
-		// 4. 결과 반환
+		// 5. 결과 반환
 		return UserListResult.of(
 			members,
 			pageable.getPageNumber() + 1,

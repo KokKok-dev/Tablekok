@@ -40,21 +40,13 @@ public class UserController {
 	}
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<?>> getAllUsers(
+	public ResponseEntity<ApiResponse<UserListResponse>> getAllUsers(
 		@RequestHeader("X-User-Id") String userIdStr,
 		@RequestHeader("X-User-Role") String role,
 		Pageable pageable
 	) {
-		// 1. MASTER 권한 확인
-		if (!"MASTER".equals(role)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN)
-				.body(ApiResponse.error("FORBIDDEN", "접근 권한이 없습니다."));
-		}
+		UserListResult result = userApplicationService.getAllUsers(role, pageable);
 
-		// 2. 전체 회원 조회
-		UserListResult result = userApplicationService.getAllUsers(pageable);
-
-		// 3. 응답 반환
 		UserListResponse response = UserListResponse.from(result);
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("회원 목록을 조회했습니다.", response, HttpStatus.OK));
