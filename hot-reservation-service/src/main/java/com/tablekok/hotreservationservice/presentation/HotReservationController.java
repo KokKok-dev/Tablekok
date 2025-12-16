@@ -1,7 +1,6 @@
 package com.tablekok.hotreservationservice.presentation;
 
 import java.net.URI;
-import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -34,18 +34,19 @@ public class HotReservationController {
 
 	// SSE 연결 실시간 순서 업데이트를 받기 위해 연결 대기 순서도 리턴
 	@GetMapping(value = "/queue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	public SseEmitter connect() {
-		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
-
-		return queueService.enterQueue(userId.toString());
+	public SseEmitter connect(
+		@RequestHeader("X-User-Id") String strUserId
+	) {
+		return queueService.enterQueue(strUserId);
 	}
 
 	// 토큰 검증
 	@PostMapping("/validation/{token}")
-	public ResponseEntity<ApiResponse<Void>> completeReservation(@PathVariable("token") String token) {
-		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
-
-		queueService.validateToken(userId.toString(), token);
+	public ResponseEntity<ApiResponse<Void>> completeReservation(
+		@PathVariable("token") String token,
+		@RequestHeader("X-User-Id") String strUserId
+	) {
+		queueService.validateToken(strUserId, token);
 
 		return ResponseEntity.ok(
 			ApiResponse.success("토큰이 검증되었습니다.", HttpStatus.ACCEPTED));
@@ -54,17 +55,17 @@ public class HotReservationController {
 	// 예약 요청 접수(비동기 처리 시작)
 	@PostMapping
 	public ResponseEntity<ApiResponse<CreateReservationResponse>> createReservation(
-		@Valid @RequestBody CreateReservationRequest request) {
-		UUID userId = UUID.fromString("641f6c00-6ea3-46dc-875c-aeec53ea8677"); //TODO 추후 유저id 구현
-
+		@Valid @RequestBody CreateReservationRequest request,
+		@RequestHeader("X-User-Id") String strUserId
+	) {
 		//토큰 검사
-		queueService.validateToken(userId.toString(), request.token());
+		queueService.validateToken(strUserId, request.token());
 
 		// 예약 진행
-		CreateReservationResult result = hotReservationService.createReservation(request.toCommand(userId));
+		CreateReservationResult result = hotReservationService.createReservation(request.toCommand(strUserId));
 
 		// 예약 요청 후 토큰, 해시테이블, emitter 삭제
-		queueService.completeReservation(userId.toString());
+		queueService.completeReservation(strUserId);
 
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{reservationId}")

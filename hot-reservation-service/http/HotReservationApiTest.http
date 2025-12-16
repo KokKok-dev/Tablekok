@@ -1,18 +1,20 @@
 ### SSE 연결 및 대기열
-GET http://localhost:8085/v1/hot-reservations/queue
+GET http://localhost:19091/v1/hot-reservations/queue
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4Njg0OTQsImV4cCI6MTc2NTk1NDg5NH0.v4idn7KrR7aQiZvey7ThLPYYHDZT-Q9d7LvRqsWc4FQ
 
 
 ### 토큰 검증
-POST http://localhost:8085/v1/hot-reservations/validation/358279c4-c4ba-4875-a863-cc50cd4816fc
+POST http://localhost:19091/v1/hot-reservations/validation/358279c4-c4ba-4875-a863-cc50cd4816fc
 
 
 ### 예약 생성 (예약 접수)
-POST http://localhost:8085/v1/hot-reservations
+POST http://localhost:19091/v1/hot-reservations
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4Njg0OTQsImV4cCI6MTc2NTk1NDg5NH0.v4idn7KrR7aQiZvey7ThLPYYHDZT-Q9d7LvRqsWc4FQ
 
 {
-  "token": "ef462d45-2c45-4418-9b17-dd405c8b687a",
-  "storeId": "a0c33cc2-bafc-4031-8173-c95ad7fb7621",
+  "token": "b4ccfdc5-ac35-42db-8b8b-bfc2be17c4a7",
+  "storeId": "f5bf4f7c-ccfc-4741-a7d4-3b1625fcf70e",
   "reservationDateTime": "2025-12-26T19:00:00",
   "headcount": 3
 }
@@ -104,4 +106,14 @@ Content-Type: application/json
   "isDepositRequired": true,
   "depositAmount": 50000,
   "isActive": true
+}
+
+
+### 로그인
+POST http://localhost:19091/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer5@test.com",
+  "password": "Test1234!"
 }
