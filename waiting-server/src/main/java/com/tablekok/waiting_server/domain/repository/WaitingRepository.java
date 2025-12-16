@@ -10,4 +10,6 @@ public interface WaitingRepository {
 	Waiting save(Waiting waiting);
 
 	Optional<Waiting> findById(UUID waitingId);
+
+	Optional<Waiting> findByIdAndStoreId(UUID waitingId, UUID storeId);
 }

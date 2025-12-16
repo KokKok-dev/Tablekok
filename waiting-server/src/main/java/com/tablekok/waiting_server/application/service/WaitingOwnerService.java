@@ -126,10 +126,7 @@ public class WaitingOwnerService {
 	public void markNoShow(UUID storeId, UUID waitingId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
 
-		Waiting waiting = findWaiting(waitingId);
-		if (!waiting.getStoreId().equals(storeId)) {
-			throw new AppException(WaitingErrorCode.WAITING_NOT_IN_STORE);
-		}
+		Waiting waiting = findWaitingForStore(waitingId, storeId);
 
 		// Waiting 엔티티의 상태를 NO_SHOW로 변경
 		waiting.noShow();
@@ -152,6 +149,11 @@ public class WaitingOwnerService {
 	private Waiting findWaiting(UUID waitingId) {
 		return waitingRepository.findById(waitingId)
 			.orElseThrow(() -> new AppException(WaitingErrorCode.WAITING_NOT_FOUND));
+	}
+
+	private Waiting findWaitingForStore(UUID waitingId, UUID storeId) {
+		return waitingRepository.findByIdAndStoreId(waitingId, storeId)
+			.orElseThrow(() -> new AppException(WaitingErrorCode.WAITING_NOT_IN_STORE));
 	}
 
 	private StoreWaitingStatus getStoreWaitingStatus(UUID storeId) {

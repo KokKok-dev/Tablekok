@@ -25,4 +25,9 @@ public class WaitingRepositoryAdapter implements WaitingRepository {
 		return waitingJpaRepository.findById(waitingId);
 	}
 
+	@Override
+	public Optional<Waiting> findByIdAndStoreId(UUID waitingId, UUID storeId) {
+		return waitingJpaRepository.findByIdAndStoreId(waitingId, storeId);
+	}
+
 }
