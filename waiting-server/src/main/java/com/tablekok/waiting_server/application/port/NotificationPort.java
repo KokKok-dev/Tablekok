@@ -16,4 +16,8 @@ public interface NotificationPort {
 	void sendWaitingConfirmed(UUID waitingId, int waitingNumber, UUID storeId);
 
 	void sendOwnerQueueUpdate(UUID storeId);
+
+	void sendOwnerCancelAlert(UUID waitingId);
+
+	void sendEnteredAlert(UUID waitingId);
 }

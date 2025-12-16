@@ -149,6 +149,10 @@ public class Waiting extends BaseEntity {
 	}
 
 	public void noShow() {
+		if (this.status != WaitingStatus.WAITING && this.status != WaitingStatus.CALLED &&
+			this.status != WaitingStatus.CONFIRMED) {
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
 		this.status = WaitingStatus.NO_SHOW;
 		this.canceledAt = LocalDateTime.now();
 	}
@@ -174,5 +178,33 @@ public class Waiting extends BaseEntity {
 		// 현재 상태가 CALLED 인지 확인
 		validateUserConfirmableStatus();
 		this.status = WaitingStatus.CONFIRMED;
+	}
+
+	private void validateOwnerCancelableStatus() {
+		if (this.status == WaitingStatus.ENTERED ||
+			this.status == WaitingStatus.USER_CANCELED ||
+			this.status == WaitingStatus.OWNER_CANCELED ||
+			this.status == WaitingStatus.NO_SHOW) {
+
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
+	}
+
+	public void cancelByOwner() {
+		validateOwnerCancelableStatus();
+		this.status = WaitingStatus.OWNER_CANCELED;
+	}
+
+	private void validateCanBeEntered() {
+		if (this.status != WaitingStatus.CALLED && this.status != WaitingStatus.CONFIRMED) {
+			throw new AppException(WaitingDomainErrorCode.INVALID_WAITING_STATUS);
+		}
+	}
+
+	public void enter() {
+		validateCanBeEntered();
+
+		this.status = WaitingStatus.ENTERED;
+		this.enteredAt = LocalDateTime.now();
 	}
 }

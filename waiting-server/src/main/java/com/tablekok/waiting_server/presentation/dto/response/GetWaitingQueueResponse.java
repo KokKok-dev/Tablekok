@@ -10,6 +10,7 @@ import lombok.Builder;
 @Builder
 public record GetWaitingQueueResponse(
 	UUID waitingId,
+	Integer rank,
 	Integer waitingNumber,
 	String status,
 	LocalDateTime queuedAt,
@@ -26,10 +27,11 @@ public record GetWaitingQueueResponse(
 	public static GetWaitingQueueResponse from(GetWaitingQueueResult result) {
 		return GetWaitingQueueResponse.builder()
 			.waitingId(result.waitingId())
+			.rank(result.rank())
 			.waitingNumber(result.waitingNumber())
 			.status(result.status())
 			.queuedAt(result.queuedAt())
-			.customerType(result.customerType())
+			.customerType(result.customerType().toString())
 			.headcount(result.headcount())
 			.nonMemberName(result.nonMemberName())
 			.nonMemberPhone(result.nonMemberPhone())

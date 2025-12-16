@@ -1,9 +1,13 @@
 package com.tablekok.waiting_server.application.service;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +23,9 @@ import com.tablekok.waiting_server.application.port.NoShowSchedulerPort;
 import com.tablekok.waiting_server.application.port.NotificationPort;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
+import com.tablekok.waiting_server.domain.entity.WaitingStatus;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
+import com.tablekok.waiting_server.domain.repository.WaitingCachePort;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +37,7 @@ public class WaitingOwnerService {
 	private final WaitingRepository waitingRepository;
 	private final NotificationPort notificationPort;
 	private final NoShowSchedulerPort noShowSchedulerPort;
-	private final WaitingQueueManagerService waitingQueueManagerService;
+	private final WaitingCachePort waitingCache;
 
 	@Transactional
 	public void startWaitingService(StartWaitingServiceCommand command) {
@@ -53,31 +59,30 @@ public class WaitingOwnerService {
 	@Transactional
 	public void stopWaitingService(UUID storeId, UUID ownerId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		Optional<StoreWaitingStatus> existingStatus = findStoreWaitingStatus(storeId);
-		// 해당 매장의 웨이팅 시스템이 아예 설정된 적이 없음.
-		if (existingStatus.isEmpty()) {
-			throw new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND);
-		}
 
-		StoreWaitingStatus status = existingStatus.get();
+		StoreWaitingStatus status = getStoreWaitingStatus(storeId);
 		status.stopWaiting();
 	}
 
+	@Transactional(readOnly = true)
 	public List<GetWaitingQueueResult> getStoreWaitingQueue(UUID storeId) {
-		// TODO: Redis ZSET에서 현재 대기 중인 모든 waitingId를 가져와 RDB에서 상세 정보를 조회하는 로직으로 대체
+		// TODO: 사장님이 storeId의 실제 소유자인지 확인
 
-		LocalDateTime now = LocalDateTime.now();
-		return List.of(
-			new GetWaitingQueueResult(
-				UUID.randomUUID(), 101, "CALLED", now.minusMinutes(40), "MEMBER", 2, "김철수", "010-1234-5678"
-			),
-			new GetWaitingQueueResult(UUID.randomUUID(), 102, "WAITING", now.minusMinutes(25), "NON_MEMBER", 4, "이영희",
-				"010-9876-5432"
-			),
-			new GetWaitingQueueResult(UUID.randomUUID(), 102, "WAITING", now.minusMinutes(25), "NON_MEMBER", 4, "이영희",
-				"010-9876-5432"
-			)
-		);
+		// Redis ZSET에서 현재 대기 중인 모든 waitingId를 가져옴
+		List<String> waitingIdStrings = waitingCache.getWaitingIds(storeId);
+		if (waitingIdStrings.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<UUID> waitingIds = waitingIdStrings.stream()
+			.map(UUID::fromString)
+			.toList();
+
+		//  waitingIds 로 RDB에서 waitings 조회
+		List<Waiting> waitings = waitingRepository.findAllByIdIn(waitingIds);
+
+		// Redis의 순서를 보장하며 DTO로 변환
+		return mapToRankedQueueResults(waitingIdStrings, waitings);
 	}
 
 	@Transactional
@@ -96,41 +101,69 @@ public class WaitingOwnerService {
 		registerPostCommitActions(callingWaitingId, waiting.getWaitingNumber());
 	}
 
+	@Transactional
 	public void enterWaiting(UUID storeId, UUID waitingId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		// TODO: waitingId 조회하여 상태가 CALLED인지 CONFIRMED 상태인지 확인 -> NO_SHOW 여도 바꿀수 있게 할까
+		Waiting waiting = findWaitingForStore(waitingId, storeId);
+		WaitingStatus originalStatus = waiting.getStatus();
 
-		// TODO: WaitingQueue 엔티티의 상태를 ENTERED 변경, 입장 시간(enteredAt) 기록
-		// TODO: WaitingId Redis ZSET 에서 제거
+		// Waiting 엔티티의 상태를 ENTERED 변경, 입장 시간(enteredAt) 기록
+		waiting.enter();
+		waitingRepository.save(waiting);
 
-		// TODO: 만약 상태가 CALLED였다면, 이전에 시작된 노쇼 자동 처리 타이머를 중단
-		// TODO: StoreWaitingStatus의 currentCallingNumber를 waitingNumber로 업데이트
+		// WaitingId Redis ZSET 에서 제거
+		waitingCache.removeWaiting(storeId, waitingId.toString());
 
-		// TODO: 남은 대기 고객들에게 순위 변경 알림
+		//  노쇼 자동 처리 타이머를 중단
+		cancelNoShowTimerIfActive(waitingId, originalStatus);
+
+		// StoreWaitingStatus의 currentCallingNumber를 waitingNumber로 업데이트
+		updateCurrentCallingNumber(storeId, waiting.getWaitingNumber());
+
+		// DB 상태가 커밋된 이후에 알람
+		registerPostEnterActions(waitingId, storeId);
 	}
 
+	@Transactional
 	public void cancelByOwner(UUID storeId, UUID waitingId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		// TODO: waitingId 조회하여 상태가 이미 ENTERED 등 최종 상태가 아닌지 확인
 
-		// TODO: WaitingQueue 엔티티의 상태를 OWNER_CANCELED 변경
-		// TODO: WaitingId Redis ZSET 에서 제거
+		Waiting waiting = findWaitingForStore(waitingId, storeId);
+		WaitingStatus originalStatus = waiting.getStatus();
 
-		// TODO: 만약 상태가 CALLED였다면, 노쇼 자동 처리 타이머를 중단
-		// TODO: 고객에게 웨이팅이 취소되었음을 알림
-		// TODO: 남은 대기 고객들에게 순위가 변경되었음을 알림
+		// Waiting 엔티티의 상태를 OWNER_CANCELED 변경
+		waiting.cancelByOwner();
+		waitingRepository.save(waiting);
+
+		// WaitingId Redis ZSET 에서 제거
+		waitingCache.removeWaiting(storeId, waitingId.toString());
+
+		// 만약 상태가 CALLED 또는 CONFIRM, 노쇼 자동 처리 타이머를 중단
+		cancelNoShowTimerIfActive(waitingId, originalStatus);
+
+		// 고객에게 웨이팅이 취소되었음을 알림
+		registerPostOwnerCancelActions(waitingId);
 	}
 
+	@Transactional
 	public void markNoShow(UUID storeId, UUID waitingId) {
 		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		// TODO: waitingId 조회하여 상태가 CALLED 또는 CONFIRMED 상태인지 확인
 
-		// TODO: WaitingQueue 엔티티의 상태를 NO_SHOW로 변경
-		// TODO: WaitingId Redis ZSET 에서 제거
+		Waiting waiting = findWaitingForStore(waitingId, storeId);
+		WaitingStatus originalStatus = waiting.getStatus();
 
-		// TODO: 노쇼 자동 처리 타이머가 혹시라도 남아있다면 중단
-		// TODO: 고객에게 노쇼 처리되었음을 알립
-		// TODO: 남은 대기 고객들에게 순위가 변경되었음을 알림
+		// Waiting 엔티티의 상태를 NO_SHOW로 변경
+		waiting.noShow();
+		waitingRepository.save(waiting);
+
+		// WaitingId Redis ZSET 에서 제거
+		waitingCache.removeWaiting(storeId, waitingId.toString());
+
+		// 만약 상태가 CALLED 또는 CONFIRM, 노쇼 자동 처리 타이머를 중단
+		cancelNoShowTimerIfActive(waitingId, originalStatus);
+
+		// 고객에게 노쇼 처리되었음을 알림
+		registerPostMarkNoShowActions(waitingId);
 	}
 
 	private Optional<StoreWaitingStatus> findStoreWaitingStatus(UUID storeId) {
@@ -140,6 +173,11 @@ public class WaitingOwnerService {
 	private Waiting findWaiting(UUID waitingId) {
 		return waitingRepository.findById(waitingId)
 			.orElseThrow(() -> new AppException(WaitingErrorCode.WAITING_NOT_FOUND));
+	}
+
+	private Waiting findWaitingForStore(UUID waitingId, UUID storeId) {
+		return waitingRepository.findByIdAndStoreId(waitingId, storeId)
+			.orElseThrow(() -> new AppException(WaitingErrorCode.WAITING_NOT_IN_STORE));
 	}
 
 	private StoreWaitingStatus getStoreWaitingStatus(UUID storeId) {
@@ -161,5 +199,77 @@ public class WaitingOwnerService {
 
 	public SseEmitter connectOwnerWaitingNotification(UUID storeId) {
 		return notificationPort.connectOwner(storeId);
+	}
+
+	private void registerPostMarkNoShowActions(UUID waitingId) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				// 고객에게 노쇼 처리되었음을 알림
+				notificationPort.sendNoShowAlert(waitingId);
+			}
+		});
+	}
+
+	private void cancelNoShowTimerIfActive(UUID waitingId, WaitingStatus originalStatus) {
+		// 웨이팅의 원본 상태가 CALLED 또는 CONFIRMED인 경우,  노쇼 자동 처리 타이머 중단
+		if (originalStatus == WaitingStatus.CALLED || originalStatus == WaitingStatus.CONFIRMED) {
+			noShowSchedulerPort.cancelNoShowProcessing(waitingId);
+		}
+	}
+
+	private void updateCurrentCallingNumber(UUID storeId, int waitingNumber) {
+		StoreWaitingStatus status = getStoreWaitingStatus(storeId);
+		status.setCurrentCallingNumber(waitingNumber);
+		storeWaitingStatusRepository.save(status);
+	}
+
+	private void registerPostEnterActions(UUID waitingId, UUID storeId) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				// 고객에게 입장 처리되었음을 알림 (SSE 연결 종료)
+				notificationPort.sendEnteredAlert(waitingId);
+
+				// 사장님에게 큐 상태 업데이트 알림
+				notificationPort.sendOwnerQueueUpdate(storeId);
+			}
+		});
+	}
+
+	private void registerPostOwnerCancelActions(UUID waitingId) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				// 고객에게 취소 알림
+				notificationPort.sendOwnerCancelAlert(waitingId);
+
+			}
+		});
+	}
+
+	private List<GetWaitingQueueResult> mapToRankedQueueResults(
+		List<String> orderedWaitingIdStrings,
+		List<Waiting> waitings
+	) {
+		// 1. RDB 결과를 Map으로 변환
+		Map<UUID, Waiting> waitingMap = waitings.stream()
+			.collect(Collectors.toMap(Waiting::getId, Function.identity()));
+
+		List<GetWaitingQueueResult> results = new ArrayList<>();
+		int rank = 1;
+
+		// 2. Redis 순서대로 반복하며 맵에서 조회 및 순위 부여
+		for (String waitingIdStr : orderedWaitingIdStrings) {
+			UUID waitingId = UUID.fromString(waitingIdStr);
+			Waiting waiting = waitingMap.get(waitingId);
+
+			if (waiting != null) {
+				results.add(GetWaitingQueueResult.of(waiting, rank));
+			}
+			rank++;
+		}
+
+		return results;
 	}
 }

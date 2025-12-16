@@ -1,5 +1,6 @@
 package com.tablekok.waiting_server.domain.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface WaitingCachePort {
@@ -10,7 +11,7 @@ public interface WaitingCachePort {
 	// ZSET에서 특정 항목의 대기 순위(Rank, 1-based)를 조회합니다.
 	Long getRank(UUID storeId, String memberKey);
 
-	Long getCardinality(UUID storeId);
-
 	void removeWaiting(UUID storeId, String toString);
+
+	List<String> getWaitingIds(UUID storeId);
 }
