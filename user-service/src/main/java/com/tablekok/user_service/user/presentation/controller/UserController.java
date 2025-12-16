@@ -57,7 +57,6 @@ public class UserController {
 
 	@GetMapping("/{userId}")
 	public ResponseEntity<ApiResponse<UserDetailResponse>> getUserDetail(
-		@RequestHeader("X-User-Id") String requestUserIdStr,
 		@RequestHeader("X-User-Role") String role,
 		@PathVariable("userId") UUID targetUserId
 	) {
