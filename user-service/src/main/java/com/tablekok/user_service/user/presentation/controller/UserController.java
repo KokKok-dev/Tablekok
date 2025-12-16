@@ -1,11 +1,14 @@
 package com.tablekok.user_service.user.presentation.controller;
 
 import com.tablekok.dto.ApiResponse;
-import com.tablekok.user_service.auth.domain.entity.UserRole;
 import com.tablekok.user_service.user.application.dto.result.ProfileResult;
+import com.tablekok.user_service.user.application.dto.result.UserListResult;
 import com.tablekok.user_service.user.application.service.UserApplicationService;
 import com.tablekok.user_service.user.presentation.dto.response.ProfileResponse;
+import com.tablekok.user_service.user.presentation.dto.response.UserListResponse;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,5 +37,18 @@ public class UserController {
 
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("내 정보 조회가 완료되었습니다.", response, HttpStatus.OK));
+	}
+
+	@GetMapping
+	public ResponseEntity<ApiResponse<UserListResponse>> getAllUsers(
+		@RequestHeader("X-User-Id") String userIdStr,
+		@RequestHeader("X-User-Role") String role,
+		Pageable pageable
+	) {
+		UserListResult result = userApplicationService.getAllUsers(role, pageable);
+
+		UserListResponse response = UserListResponse.from(result);
+		return ResponseEntity.ok()
+			.body(ApiResponse.success("회원 목록을 조회했습니다.", response, HttpStatus.OK));
 	}
 }

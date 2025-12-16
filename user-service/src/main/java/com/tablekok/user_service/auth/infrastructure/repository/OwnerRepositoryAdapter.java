@@ -5,6 +5,7 @@ import com.tablekok.user_service.auth.domain.repository.OwnerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,5 +28,10 @@ public class OwnerRepositoryAdapter implements OwnerRepository {
 	@Override
 	public boolean existsByBusinessNumber(String businessNumber) {
 		return ownerJpaRepository.existsByBusinessNumber(businessNumber);
+	}
+
+	@Override
+	public List<Owner> findByUserIdIn(List<UUID> userIds) {
+		return ownerJpaRepository.findByUserIdIn(userIds);
 	}
 }

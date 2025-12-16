@@ -10,14 +10,6 @@ import com.tablekok.gateway_service.config.JwtConfig;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 
-/**
- * JWT 토큰 검증 유틸리티 클래스 (Gateway Service용)
- *
- * 역할: 인가(Authorization) 담당
- * - JWT 토큰 유효성 검증
- * - 토큰에서 사용자 정보 추출
- * - 권한별 접근 제어
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -25,16 +17,10 @@ public class JwtValidator {
 
 	private final JwtConfig jwtConfig;
 
-	/**
-	 * JWT 서명 검증에 사용할 비밀키 생성
-	 */
 	private SecretKey getSigningKey() {
 		return Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
 	}
 
-	/**
-	 * JWT 토큰에서 Claims 추출
-	 */
 	public Claims getClaimsFromToken(String token) {
 		try {
 			return Jwts.parserBuilder()
@@ -57,9 +43,6 @@ public class JwtValidator {
 		}
 	}
 
-	/**
-	 * 토큰 유효성 검증
-	 */
 	public boolean validateToken(String token) {
 		try {
 			getClaimsFromToken(token);
@@ -70,9 +53,6 @@ public class JwtValidator {
 		}
 	}
 
-	/**
-	 * HTTP 헤더에서 토큰 추출 (Bearer 접두사 제거)
-	 */
 	public String extractTokenFromHeader(String authorizationHeader) {
 		if (authorizationHeader != null && authorizationHeader.startsWith(jwtConfig.getPrefix())) {
 			return authorizationHeader.substring(jwtConfig.getPrefix().length());
@@ -80,9 +60,6 @@ public class JwtValidator {
 		return null;
 	}
 
-	/**
-	 * 경로별 권한 확인
-	 */
 	public boolean hasPermissionForPath(String path, String role) {
 		log.debug("권한 확인 - 경로: {}, 역할: {}", path, role);
 

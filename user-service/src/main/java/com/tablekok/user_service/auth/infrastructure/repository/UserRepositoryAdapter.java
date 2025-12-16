@@ -3,6 +3,9 @@ package com.tablekok.user_service.auth.infrastructure.repository;
 import com.tablekok.user_service.auth.domain.entity.User;
 import com.tablekok.user_service.auth.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -32,5 +35,10 @@ public class UserRepositoryAdapter implements UserRepository {
 	@Override
 	public boolean existsByEmail(String email) {
 		return userJpaRepository.existsByEmail(email);
+	}
+
+	@Override
+	public Page<User> findAll(Pageable pageable) {
+		return userJpaRepository.findAll(pageable);
 	}
 }
