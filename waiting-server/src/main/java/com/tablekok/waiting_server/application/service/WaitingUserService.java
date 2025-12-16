@@ -47,8 +47,14 @@ public class WaitingUserService {
 		waitingUserDomainService.validateStoreStatus(status); // status 활성화 확인
 		waitingUserDomainService.validateHeadcountPolicy(command.headcount(), status.getMinHeadcount(),
 			status.getMaxHeadcount()); // 인원수 유효성 검사
-		// TODO: 고객 웨이팅 중복 확인
-
+		// 고객 웨이팅 중복 확인
+		waitingUserDomainService.validateDuplicateWaiting(
+			command.storeId(),
+			command.customerType(),
+			command.memberId(),
+			command.nonMemberPhone()
+		);
+		
 		status.incrementNumber();
 		int assignedNumber = status.getLatestAssignedNumber();
 

@@ -42,7 +42,7 @@ public class WaitingUserController {
 		UUID memberId = UUID.randomUUID();
 
 		// TODO: 로그인 사용자면 memberId 넘겨주고 아니면 null return
-		CreateWaitingResult result = waitingUserService.createWaiting(request.toCommand(storeId, memberId));
+		CreateWaitingResult result = waitingUserService.createWaiting(request.toCommand(storeId, null));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{waitingId}")
 			.buildAndExpand(result.waitingId())
