@@ -8,12 +8,12 @@ import lombok.Getter;
 @Component
 public class JwtConfig {
 
-	@Value("${jwt.secret:tablekok-dev-secret-key-for-local-development-only}")
+	@Value("${jwt.secret}")
 	private String secret;
 
-	@Value("${jwt.header:Authorization}")
+	@Value("${jwt.header}")
 	private String header;
 
-	@Value("${jwt.prefix:Bearer }")
+	@Value("${jwt.prefix}")
 	private String prefix;
 }
