@@ -58,4 +58,8 @@ public class User extends BaseEntity {
 			.loginCount(0)
 			.build();
 	}
+
+	public void updatePhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
 }
