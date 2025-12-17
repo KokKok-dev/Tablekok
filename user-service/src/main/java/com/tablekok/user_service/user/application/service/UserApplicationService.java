@@ -6,7 +6,9 @@ import com.tablekok.user_service.auth.domain.entity.User;
 import com.tablekok.user_service.auth.domain.entity.UserRole;
 import com.tablekok.user_service.auth.domain.repository.OwnerRepository;
 import com.tablekok.user_service.auth.domain.repository.UserRepository;
+import com.tablekok.user_service.user.application.dto.command.UpdateProfileCommand;
 import com.tablekok.user_service.user.application.dto.result.ProfileResult;
+import com.tablekok.user_service.user.application.dto.result.UpdateProfileResult;
 import com.tablekok.user_service.user.application.dto.result.UserDetailResult;
 import com.tablekok.user_service.user.application.dto.result.UserListResult;
 import com.tablekok.user_service.user.application.exception.UserErrorCode;
@@ -111,5 +113,34 @@ public class UserApplicationService {
 				Owner::getUserId,
 				Owner::getBusinessNumber
 			));
+	}
+
+	@Transactional
+	public UpdateProfileResult updateProfile(UUID userId, String role, UpdateProfileCommand command) {
+		// 1. 사용자 조회
+		User user = userRepository.findByUserId(userId)
+			.orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+
+		// 2. 휴대폰번호 수정 (CUSTOMER, OWNER 공통)
+		if (command.phoneNumber() != null) {
+			user.updatePhoneNumber(command.phoneNumber());
+		}
+
+		// 3. OWNER인 경우 사업자번호 수정
+		String businessNumber = null;
+		if (UserRole.OWNER.name().equals(role) && command.businessNumber() != null) {
+			Owner owner = ownerRepository.findByUserId(userId)
+				.orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+			owner.updateBusinessNumber(command.businessNumber());
+			businessNumber = owner.getBusinessNumber();
+		} else if (UserRole.OWNER.name().equals(role)) {
+			// 사업자번호 수정 안 했으면 기존 값 조회
+			businessNumber = ownerRepository.findByUserId(userId)
+				.map(Owner::getBusinessNumber)
+				.orElse(null);
+		}
+
+		// 4. 결과 반환
+		return UpdateProfileResult.of(user, businessNumber);
 	}
 }
