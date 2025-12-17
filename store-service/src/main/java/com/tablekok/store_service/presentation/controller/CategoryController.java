@@ -51,7 +51,9 @@ public class CategoryController {
 
 	@GetMapping
 	public ResponseEntity<ApiResponse<Page<GetCategoryResponse>>> getCategories(
-		Pageable pageable
+		Pageable pageable,
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		Page<FindCategoryResult> categoryPage = categoryService.getCategories(pageable);
 		Page<GetCategoryResponse> responsePage = categoryPage.map(GetCategoryResponse::from);
