@@ -91,7 +91,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Download Build Artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build-libs
         path: store-service/build/libs # ✅ 수정: 다운로드 경로를 store-service 기준으로 지정
