@@ -5,17 +5,18 @@ import java.net.URI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.dto.auth.AuthUser;
 import com.tablekok.hotreservationservice.application.dto.result.CreateReservationResult;
 import com.tablekok.hotreservationservice.application.service.HotReservationService;
 import com.tablekok.hotreservationservice.application.service.QueueService;
@@ -35,18 +36,18 @@ public class HotReservationController {
 	// SSE 연결 실시간 순서 업데이트를 받기 위해 연결 대기 순서도 리턴
 	@GetMapping(value = "/queue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public SseEmitter connect(
-		@RequestHeader("X-User-Id") String strUserId
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		return queueService.enterQueue(strUserId);
+		return queueService.enterQueue(authUser.userId());
 	}
 
 	// 토큰 검증
 	@PostMapping("/validation/{token}")
 	public ResponseEntity<ApiResponse<Void>> completeReservation(
 		@PathVariable("token") String token,
-		@RequestHeader("X-User-Id") String strUserId
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		queueService.validateToken(strUserId, token);
+		queueService.validateToken(authUser.userId(), token);
 
 		return ResponseEntity.ok(
 			ApiResponse.success("토큰이 검증되었습니다.", HttpStatus.ACCEPTED));
@@ -56,16 +57,16 @@ public class HotReservationController {
 	@PostMapping
 	public ResponseEntity<ApiResponse<CreateReservationResponse>> createReservation(
 		@Valid @RequestBody CreateReservationRequest request,
-		@RequestHeader("X-User-Id") String strUserId
+		@AuthenticationPrincipal AuthUser authUser
 	) {
 		//토큰 검사
-		queueService.validateToken(strUserId, request.token());
+		queueService.validateToken(authUser.userId(), request.token());
 
 		// 예약 진행
-		CreateReservationResult result = hotReservationService.createReservation(request.toCommand(strUserId));
+		CreateReservationResult result = hotReservationService.createReservation(request.toCommand(authUser.userId()));
 
 		// 예약 요청 후 토큰, 해시테이블, emitter 삭제
-		queueService.completeReservation(strUserId);
+		queueService.completeReservation(authUser.userId());
 
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{reservationId}")
