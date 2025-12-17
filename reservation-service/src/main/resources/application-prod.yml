@@ -30,3 +30,9 @@ eureka:
 lb:
   dns:
     store: ${LB_DNS_STORE}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

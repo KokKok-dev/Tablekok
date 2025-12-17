@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.hotreservationservice.application.client.dto.GetStoreReservationPolicyResponse;
 
-@FeignClient(name = "store-service", url = "${lb.dns.store}")
+@FeignClient(name = "store-service")
 public interface StoreFeignClient {
 
 	@GetMapping("/v1/stores/{storeId}/reservation-policy")
