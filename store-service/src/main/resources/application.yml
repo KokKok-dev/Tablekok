@@ -3,4 +3,4 @@ spring:
     name: store-service
 
   profiles:
-    active: prod
+    active: dev
