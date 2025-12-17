@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -42,7 +43,9 @@ public class StoreController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<CreateStoreResponse>> createStore(
-		@Valid @RequestBody CreateStoreRequest request
+		@Valid @RequestBody CreateStoreRequest request,
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		// store 생성
 		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
