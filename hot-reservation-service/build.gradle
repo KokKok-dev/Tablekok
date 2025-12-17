@@ -23,19 +23,23 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.KokKok-dev:Tablekok-common:1.0.3'           // 공통 모듈
+    implementation 'com.github.KokKok-dev:Tablekok-common:1.0.5'           // 공통 모듈
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'   //jpa
     implementation 'org.springframework.boot:spring-boot-starter-validation' // valid
 
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client' // 유레카 클라이언트
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign' // 페인 클라이언트
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'  // 페인 클라이언트
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'     // actuator
+    implementation 'org.springframework.boot:spring-boot-starter-security'     // 시큐리티
+    
     runtimeOnly 'org.postgresql:postgresql'                                   // postgres
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
