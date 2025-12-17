@@ -3,4 +3,4 @@ spring:
     name: reservation-service
 
   profiles:
-    active: prod
+    active: dev
