@@ -1,15 +1,15 @@
 package com.tablekok.review_service.infrastructure.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import com.tablekok.exception.AppException;
+import com.tablekok.review_service.application.dto.ReviewStatsDto;
 import com.tablekok.review_service.domain.entity.Review;
 import com.tablekok.review_service.domain.entity.ReviewSortCriteria;
-import com.tablekok.review_service.domain.exception.ReviewDomainErrorCode;
 import com.tablekok.review_service.domain.repository.ReviewRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,9 +27,8 @@ public class ReviewRepositoryAdapter implements ReviewRepository {
 	}
 
 	@Override
-	public Review findById(UUID reviewId) {
-		return reviewJpaRepository.findById(reviewId).orElseThrow(
-			() -> new AppException(ReviewDomainErrorCode.REVIEW_NOT_FOUND));
+	public Optional<Review> findById(UUID reviewId) {
+		return reviewJpaRepository.findById(reviewId);
 	}
 
 	@Override

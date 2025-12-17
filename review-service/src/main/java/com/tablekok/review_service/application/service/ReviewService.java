@@ -11,23 +11,27 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tablekok.cursor.dto.request.CursorRequest;
 import com.tablekok.cursor.dto.response.Cursor;
 import com.tablekok.cursor.util.CursorUtils;
+import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
 import com.tablekok.review_service.application.client.ReservationClient;
+import com.tablekok.review_service.application.client.SearchClient;
 import com.tablekok.review_service.application.dto.command.CreateReviewCommand;
 import com.tablekok.review_service.application.dto.command.UpdateReviewCommand;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
 import com.tablekok.review_service.application.dto.result.GetMyReviewsResult;
 import com.tablekok.review_service.application.dto.result.GetReviewResult;
 import com.tablekok.review_service.application.dto.result.GetStoreReviewsResult;
+import com.tablekok.review_service.application.exception.ReviewErrorCode;
 import com.tablekok.review_service.domain.entity.Review;
 import com.tablekok.review_service.domain.entity.ReviewSortCriteria;
-import com.tablekok.review_service.domain.exception.ReviewDomainErrorCode;
 import com.tablekok.review_service.domain.repository.ReviewRepository;
 import com.tablekok.review_service.domain.service.ReviewDomainService;
 import com.tablekok.review_service.domain.vo.Reservation;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -57,20 +61,28 @@ public class ReviewService {
 
 	@Transactional
 	public void updateReview(UUID reviewId, UUID userId, UpdateReviewCommand command) {
-		// Review foundReview = findReview(reviewId, userId);
 		Review foundReview = findReview(reviewId);
+
+		validateReviewAuthor(foundReview, userId);
+
 		foundReview.updateReview(command.rating(), command.content());
+
 	}
 
 	@Transactional
-	public void deleteReview(UUID reviewId, UUID userId) {
-		// Review foundReview = findReview(reviewId, userId);
+	public void deleteReview(UUID reviewId, UUID userId, String role) {
 		Review foundReview = findReview(reviewId);
+
+		if (!role.equals(UserRole.MASTER)) {
+			validateReviewAuthor(foundReview, userId);
+		}
+
 		foundReview.softDelete(userId);
 	}
 
 	public GetReviewResult getReview(UUID reviewId) {
-		Review foundReview = findReview(reviewId);
+		Review foundReview = reviewRepository.findById(reviewId).orElseThrow(
+			() -> new AppException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		return GetReviewResult.fromResult(foundReview);
 	}
 
@@ -121,10 +133,15 @@ public class ReviewService {
 		return response.map(GetMyReviewsResult::from);
 	}
 
-	// Todo: reviewId, userId로 리뷰 조회하도록 수정
 	private Review findReview(UUID reviewId) {
-		// return reviewRepository.findByIdAndUserId(reviewId, userId).orElseThrow(
-		// 	() -> new AppException(ReviewDomainErrorCode.REVIEW_NOT_FOUND));
-		return reviewRepository.findById(reviewId);
+		return reviewRepository.findById(reviewId).orElseThrow(
+			() -> new AppException(ReviewErrorCode.REVIEW_NOT_FOUND));
+	}
+
+	// 리뷰 수정, 삭제 시
+	private void validateReviewAuthor(Review review, UUID userId) {
+		if (!review.getUserId().equals(userId)) {
+			throw new AppException(ReviewErrorCode.FORBIDDEN_ACCESS);
+		}
 	}
 }

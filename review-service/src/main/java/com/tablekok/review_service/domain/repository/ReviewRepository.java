@@ -1,5 +1,6 @@
 package com.tablekok.review_service.domain.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -11,11 +12,11 @@ import com.tablekok.review_service.domain.entity.ReviewSortCriteria;
 public interface ReviewRepository {
 	void save(Review review);
 
-	Review findById(UUID reviewId);
+	Optional<Review> findById(UUID reviewId);
 
 	boolean existsByReservationId(UUID reservationId);
 
-	// Todo: 식당별 리뷰 목록 조회
+	// 가게별 리뷰 목록 조회
 	Page<Review> findReviewsByStoreId(
 		UUID storeId,
 		ReviewSortCriteria sortBy,
@@ -23,7 +24,7 @@ public interface ReviewRepository {
 		UUID cursorId,
 		Pageable pageable);
 
-	// Todo: 내가 작성한 리뷰 목록 조회
+	// 내가 작성한 리뷰 목록 조회
 	Page<Review> findReviewsByUserId(
 		UUID userId,
 		String cursor,
