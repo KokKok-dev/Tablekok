@@ -65,6 +65,10 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build
         working-directory: ./reservation-service
+        env:
+          DB_URL: ${{ secrets.RESERVATION_DB_URL }}
+          DB_USERNAME: ${{ DB_USERNAME }}
+          DB_PASSWORD: ${{ DB_PASSWORD }}
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
