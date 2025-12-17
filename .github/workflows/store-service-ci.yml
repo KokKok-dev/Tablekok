@@ -28,7 +28,7 @@ name: Deploy to Amazon ECS
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop", "gashine20-patch-1" ]
     paths: [ 'store-service/**' ] # 🌳 모노레포: store-service 폴더 변경 시에만 실행
 
 env:
