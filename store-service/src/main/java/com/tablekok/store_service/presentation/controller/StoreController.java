@@ -80,12 +80,14 @@ public class StoreController {
 	@PatchMapping("/{storeId}/status")
 	public ResponseEntity<ApiResponse<Void>> updateStatus(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody UpdateStatusRequest request
+		@Valid @RequestBody UpdateStatusRequest request,
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		// TODO: 추후 userRole 작업
-		UserRole userRole = UserRole.OWNER;
+		UserRole role = UserRole.fromName(userRole);
 		// 음식점 상태 변경
-		storeService.updateStatus(userRole, storeId, request.toCommand());
+		storeService.updateStatus(role, storeId, request.toCommand());
 
 		return ResponseEntity.ok(
 			ApiResponse.success("음식점 상태 수정 성공", HttpStatus.OK)
