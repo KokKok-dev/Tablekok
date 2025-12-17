@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -115,11 +114,11 @@ public class StoreController {
 
 	/* =================== 음식점 날짜 예약 정책 ================ **/
 	@PostMapping("/{storeId}/reservation-policy")
+	@PreAuthorize("hasAnyRole('MASTER', 'OWNER')")
 	public ResponseEntity<ApiResponse<Void>> createStoreReservationPolicy(
 		@PathVariable UUID storeId,
 		@Valid @RequestBody CreateStoreReservationPolicyRequest request,
-		@RequestHeader("X-User-Id") String userId,
-		@RequestHeader("X-User-Role") String userRole
+		@AuthenticationPrincipal AuthUser authUser
 	) {
 		storeService.createStoreReservationPolicy(storeId, request.toCommand(storeId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -132,6 +131,7 @@ public class StoreController {
 	}
 
 	@GetMapping("/{storeId}/reservation-policy")
+	@PreAuthorize("hasAnyRole('MASTER', 'OWNER')")
 	public ResponseEntity<ApiResponse<GetStoreReservationPolicyResponse>> getStoreReservationPolicy(
 		@PathVariable UUID storeId
 	) {
@@ -141,26 +141,31 @@ public class StoreController {
 			.body(ApiResponse.success("예약정책 조회 성공", response, HttpStatus.OK));
 	}
 
+	// 날짜예약 정책 정보 수정
 	@PutMapping("/{storeId}/reservation-policy")
+	@PreAuthorize("hasAnyRole('MASTER', 'OWNER')")
 	public ResponseEntity<ApiResponse<Void>> updateStoreReservationPolicy(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody UpdateStoreReservationPolicyRequest request
+		@Valid @RequestBody UpdateStoreReservationPolicyRequest request,
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		// 날짜예약 정책 정보 수정
-		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+		UUID ownerId = UUID.fromString(authUser.userId());
 
 		storeService.updateStoreReservationPolicy(request.toCommand(ownerId, storeId));
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("예약정책 정보 변경 성공", HttpStatus.OK));
 	}
 
+	// 날짜예약 정책 활성/비활성화
 	@PatchMapping("/{storeId}/reservation-policy/status")
+	@PreAuthorize("hasAnyRole('MASTER', 'OWNER')")
 	public ResponseEntity<ApiResponse<Void>> updateStoreReservationPolicyStatus(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody UpdatePolicyStatusRequest request
+		@Valid @RequestBody UpdatePolicyStatusRequest request,
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		// 날짜예약 정책 활성/비활성화
-		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+		UUID ownerId = UUID.fromString(authUser.userId());
+
 		storeService.updateStoreReservationPolicyStatus(request.toCommand(ownerId, storeId));
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("예약정책 상태 변경 성공", HttpStatus.OK));
