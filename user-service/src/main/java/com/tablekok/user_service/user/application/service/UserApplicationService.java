@@ -1,5 +1,6 @@
 package com.tablekok.user_service.user.application.service;
 
+import com.tablekok.dto.ApiResponse;
 import com.tablekok.exception.AppException;
 import com.tablekok.user_service.auth.domain.entity.Owner;
 import com.tablekok.user_service.auth.domain.entity.User;
@@ -7,17 +8,27 @@ import com.tablekok.user_service.auth.domain.entity.UserRole;
 import com.tablekok.user_service.auth.domain.repository.OwnerRepository;
 import com.tablekok.user_service.auth.domain.repository.UserRepository;
 import com.tablekok.user_service.user.application.dto.command.UpdateProfileCommand;
+import com.tablekok.user_service.user.application.dto.command.ChangePasswordCommand;
 import com.tablekok.user_service.user.application.dto.result.ProfileResult;
 import com.tablekok.user_service.user.application.dto.result.UpdateProfileResult;
 import com.tablekok.user_service.user.application.dto.result.UserDetailResult;
 import com.tablekok.user_service.user.application.dto.result.UserListResult;
 import com.tablekok.user_service.user.application.exception.UserErrorCode;
+import com.tablekok.user_service.user.presentation.dto.request.ChangePasswordRequest;
+import com.tablekok.user_service.user.presentation.dto.response.ChangePasswordResponse;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +42,7 @@ public class UserApplicationService {
 
 	private final UserRepository userRepository;
 	private final OwnerRepository ownerRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	public ProfileResult getProfile(UUID userId, String role) {
 		// 1. 사용자 조회
@@ -142,5 +154,25 @@ public class UserApplicationService {
 
 		// 4. 결과 반환
 		return UpdateProfileResult.of(user, businessNumber);
+	}
+
+	@Transactional
+	public void changePassword(UUID userId, ChangePasswordCommand command) {
+		// 1. 새 비밀번호 확인 일치 검증
+		if (!command.newPassword().equals(command.confirmPassword())) {
+			throw new AppException(UserErrorCode.PASSWORD_NOT_MATCH);
+		}
+
+		// 2. 사용자 조회
+		User user = userRepository.findByUserId(userId)
+			.orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+
+		// 3. 현재 비밀번호 검증
+		if (!passwordEncoder.matches(command.currentPassword(), user.getPassword())) {
+			throw new AppException(UserErrorCode.INVALID_CURRENT_PASSWORD);
+		}
+
+		// 4. 새 비밀번호 암호화 후 저장
+		user.updatePassword(passwordEncoder.encode(command.newPassword()));
 	}
 }
