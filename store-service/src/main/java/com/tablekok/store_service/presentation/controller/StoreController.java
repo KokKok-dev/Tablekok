@@ -113,7 +113,9 @@ public class StoreController {
 	@PostMapping("/{storeId}/reservation-policy")
 	public ResponseEntity<ApiResponse<Void>> createStoreReservationPolicy(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody CreateStoreReservationPolicyRequest request
+		@Valid @RequestBody CreateStoreReservationPolicyRequest request,
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		storeService.createStoreReservationPolicy(storeId, request.toCommand(storeId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
