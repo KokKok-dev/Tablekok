@@ -6,7 +6,9 @@ import com.tablekok.user_service.user.application.dto.result.UpdateProfileResult
 import com.tablekok.user_service.user.application.dto.result.UserDetailResult;
 import com.tablekok.user_service.user.application.dto.result.UserListResult;
 import com.tablekok.user_service.user.application.service.UserApplicationService;
+import com.tablekok.user_service.user.presentation.dto.request.ChangePasswordRequest;
 import com.tablekok.user_service.user.presentation.dto.request.UpdateProfileRequest;
+import com.tablekok.user_service.user.presentation.dto.response.ChangePasswordResponse;
 import com.tablekok.user_service.user.presentation.dto.response.ProfileResponse;
 import com.tablekok.user_service.user.presentation.dto.response.UpdateProfileResponse;
 import com.tablekok.user_service.user.presentation.dto.response.UserDetailResponse;
@@ -87,5 +89,19 @@ public class UserController {
 		UserDetailResponse response = UserDetailResponse.from(result);
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("회원 정보를 조회했습니다.", response, HttpStatus.OK));
+	}
+
+	@PutMapping("/password")
+	public ResponseEntity<ApiResponse<ChangePasswordResponse>> changePassword(
+		@RequestHeader("X-User-Id") String userIdStr,
+		@Valid @RequestBody ChangePasswordRequest request
+	) {
+		UUID userId = UUID.fromString(userIdStr);
+
+		userApplicationService.changePassword(userId, request.toCommand());
+
+		ChangePasswordResponse response = ChangePasswordResponse.success();
+		return ResponseEntity.ok()
+			.body(ApiResponse.success("비밀번호가 성공적으로 변경되었습니다.", response, HttpStatus.OK));
 	}
 }
