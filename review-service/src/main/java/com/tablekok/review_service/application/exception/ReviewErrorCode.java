@@ -17,10 +17,15 @@ public enum ReviewErrorCode implements ErrorCode {
 		"리뷰를 찾을 수 없습니다."
 	),
 
-	FORBIDDEN_ACCESS(
+	REVIEW_INVALID_USER(
 		HttpStatus.FORBIDDEN,
 		"REVIEW-101",
-		"해당 리뷰에 대한 권한이 없습니다."
+		"작성자만 리뷰를 수정, 삭제할 수 있습니다."
+	),
+	FORBIDDEN_ACCESS(
+		HttpStatus.FORBIDDEN,
+		"REVIEW-102",
+		"접근 권한이 없습니다."
 	)
 	;
 

@@ -146,10 +146,10 @@ public class ReviewService {
 			() -> new AppException(ReviewErrorCode.REVIEW_NOT_FOUND));
 	}
 
-	// 리뷰 수정, 삭제 시
+	// 리뷰 수정, 삭제 시 사용자 검증
 	private void validateReviewAuthor(Review review, UUID userId) {
 		if (!review.getUserId().equals(userId)) {
-			throw new AppException(ReviewErrorCode.FORBIDDEN_ACCESS);
+			throw new AppException(ReviewErrorCode.REVIEW_INVALID_USER);
 		}
 	}
 
