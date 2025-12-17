@@ -14,19 +14,18 @@ import com.tablekok.user_service.user.presentation.dto.response.UpdateProfileRes
 import com.tablekok.user_service.user.presentation.dto.response.UserDetailResponse;
 import com.tablekok.user_service.user.presentation.dto.response.UserListResponse;
 
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.UUID;
 
@@ -51,7 +50,7 @@ public class UserController {
 			.body(ApiResponse.success("내 정보 조회가 완료되었습니다.", response, HttpStatus.OK));
 	}
 
-	@PutMapping("/profile")
+	@PatchMapping("/profile")
 	public ResponseEntity<ApiResponse<UpdateProfileResponse>> updateProfile(
 		@RequestHeader("X-User-Id") String userIdStr,
 		@RequestHeader("X-User-Role") String role,
@@ -64,6 +63,20 @@ public class UserController {
 		UpdateProfileResponse response = UpdateProfileResponse.from(result);
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("정보가 성공적으로 수정되었습니다.", response, HttpStatus.OK));
+	}
+
+	@PatchMapping("/password")
+	public ResponseEntity<ApiResponse<ChangePasswordResponse>> changePassword(
+		@RequestHeader("X-User-Id") String userIdStr,
+		@Valid @RequestBody ChangePasswordRequest request
+	) {
+		UUID userId = UUID.fromString(userIdStr);
+
+		userApplicationService.changePassword(userId, request.toCommand());
+
+		ChangePasswordResponse response = ChangePasswordResponse.success();
+		return ResponseEntity.ok()
+			.body(ApiResponse.success("비밀번호가 성공적으로 변경되었습니다.", response, HttpStatus.OK));
 	}
 
 	@GetMapping
@@ -89,19 +102,5 @@ public class UserController {
 		UserDetailResponse response = UserDetailResponse.from(result);
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("회원 정보를 조회했습니다.", response, HttpStatus.OK));
-	}
-
-	@PutMapping("/password")
-	public ResponseEntity<ApiResponse<ChangePasswordResponse>> changePassword(
-		@RequestHeader("X-User-Id") String userIdStr,
-		@Valid @RequestBody ChangePasswordRequest request
-	) {
-		UUID userId = UUID.fromString(userIdStr);
-
-		userApplicationService.changePassword(userId, request.toCommand());
-
-		ChangePasswordResponse response = ChangePasswordResponse.success();
-		return ResponseEntity.ok()
-			.body(ApiResponse.success("비밀번호가 성공적으로 변경되었습니다.", response, HttpStatus.OK));
 	}
 }
