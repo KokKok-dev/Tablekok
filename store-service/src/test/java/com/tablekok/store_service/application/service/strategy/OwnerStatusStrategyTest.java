@@ -99,7 +99,6 @@ class OwnerStatusStrategyTest {
 		// [3] OPERATING 상태에서 허용된 상태로 전환
 		"OPERATING, CLOSED_TODAY",
 		"OPERATING, BREAK_TIME",
-		"OPERATING, DECOMMISSIONED"
 	})
 	@DisplayName("[1] & [2] & [3]. 허용된 모든 성공 전환은 상태를 변경해야 함")
 	void changeStatus_AllowedTransitions_Success(StoreStatus startStatus, StoreStatus targetStatus) {

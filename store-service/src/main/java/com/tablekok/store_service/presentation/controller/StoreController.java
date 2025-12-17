@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -42,7 +43,9 @@ public class StoreController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<CreateStoreResponse>> createStore(
-		@Valid @RequestBody CreateStoreRequest request
+		@Valid @RequestBody CreateStoreRequest request,
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		// store 생성
 		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
@@ -60,7 +63,9 @@ public class StoreController {
 	@PatchMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<Void>> updateStore(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody UpdateStoreRequest request
+		@Valid @RequestBody UpdateStoreRequest request,
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		// store 생성
 		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
@@ -75,12 +80,14 @@ public class StoreController {
 	@PatchMapping("/{storeId}/status")
 	public ResponseEntity<ApiResponse<Void>> updateStatus(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody UpdateStatusRequest request
+		@Valid @RequestBody UpdateStatusRequest request,
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		// TODO: 추후 userRole 작업
-		UserRole userRole = UserRole.OWNER;
+		UserRole role = UserRole.fromName(userRole);
 		// 음식점 상태 변경
-		storeService.updateStatus(userRole, storeId, request.toCommand());
+		storeService.updateStatus(role, storeId, request.toCommand());
 
 		return ResponseEntity.ok(
 			ApiResponse.success("음식점 상태 수정 성공", HttpStatus.OK)
@@ -89,7 +96,9 @@ public class StoreController {
 
 	@DeleteMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<Void>> deleteStore(
-		@PathVariable UUID storeId  // TODO : MASTER만 요청가능
+		@PathVariable UUID storeId,  // TODO : MASTER만 요청가능
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		// 음식점 삭제
 		UUID deleterId = UUID.randomUUID();
@@ -104,7 +113,9 @@ public class StoreController {
 	@PostMapping("/{storeId}/reservation-policy")
 	public ResponseEntity<ApiResponse<Void>> createStoreReservationPolicy(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody CreateStoreReservationPolicyRequest request
+		@Valid @RequestBody CreateStoreReservationPolicyRequest request,
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		storeService.createStoreReservationPolicy(storeId, request.toCommand(storeId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()

@@ -1,24 +1,29 @@
 server:
-  port: 8084
+  port: 8082
 
 spring:
   application:
-    name: reservation-service
+    name: store-service
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${RDS_ENDPOINT_STORE}
     driver-class-name: org.postgresql.Driver
+    username: ${DB_USER_STORE}
+    password: ${DB_PASSWORD_STORE}
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_batch_fetch_size: 500
+        use_sql_comments: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    open-in-view: false
+
+
 
 eureka:
   client:
@@ -27,9 +32,6 @@ eureka:
     service-url:
       defaultZone: ${EUREKA_SERVER_URL}
 
-lb:
-  dns:
-    store: ${LB_DNS_STORE}
 
 management:
   endpoints:

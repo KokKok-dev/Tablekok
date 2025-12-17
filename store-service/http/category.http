@@ -1,0 +1,13 @@
+### 카테고리 조회
+GET http://localhost:19091/v1/categories?page=0&size=10
+Content-Type: application/json
+
+
+### 카테고리 생성
+POST http://localhost:19091/v1/categories
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZGVlOTdmOS0yOWJlLTQyNjEtYjE5ZC00NzA0NDc3NWI2MWMiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzY1OTU0MDE4LCJleHAiOjE3NjYwNDA0MTh9.8lQonXTZe1qqKStAanPULwU6I5bjpIhLhncLNlPLC4U
+
+{
+  "name": "일식"
+}
