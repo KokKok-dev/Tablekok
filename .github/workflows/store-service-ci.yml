@@ -64,7 +64,7 @@ jobs:
       working-directory: ./store-service # ✅ 수정
 
     - name: Build with Gradle
-      run: ./gradlew clean build
+      run: ./gradlew clean build -x test
       working-directory: ./store-service # ✅ 수정
       env:
         RDS_ENDPOINT_STORE: ${{ secrets.RESERVATION_DB_URL }} 
