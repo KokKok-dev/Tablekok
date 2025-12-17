@@ -63,7 +63,9 @@ public class StoreController {
 	@PatchMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<Void>> updateStore(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody UpdateStoreRequest request
+		@Valid @RequestBody UpdateStoreRequest request,
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		// store 생성
 		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
