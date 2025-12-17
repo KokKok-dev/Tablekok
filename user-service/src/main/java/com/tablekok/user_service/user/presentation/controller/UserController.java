@@ -1,6 +1,7 @@
 package com.tablekok.user_service.user.presentation.controller;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.dto.auth.AuthUser;
 import com.tablekok.user_service.user.application.dto.result.ProfileResult;
 import com.tablekok.user_service.user.application.dto.result.UpdateProfileResult;
 import com.tablekok.user_service.user.application.dto.result.UserDetailResult;
@@ -20,11 +21,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,6 +33,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/users")
+@PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -39,10 +41,10 @@ public class UserController {
 
 	@GetMapping("/profile")
 	public ResponseEntity<ApiResponse<ProfileResponse>> getProfile(
-		@RequestHeader("X-User-Id") String userIdStr,
-		@RequestHeader("X-User-Role") String role
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		UUID userId = UUID.fromString(userIdStr);
+		UUID userId = UUID.fromString(authUser.userId());
+		String role = authUser.role();
 
 		ProfileResult result = userApplicationService.getProfile(userId, role);
 		ProfileResponse response = ProfileResponse.from(result);
@@ -52,12 +54,13 @@ public class UserController {
 	}
 
 	@PatchMapping("/profile")
+	@PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
 	public ResponseEntity<ApiResponse<UpdateProfileResponse>> updateProfile(
-		@RequestHeader("X-User-Id") String userIdStr,
-		@RequestHeader("X-User-Role") String role,
+		@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody UpdateProfileRequest request
 	) {
-		UUID userId = UUID.fromString(userIdStr);
+		UUID userId = UUID.fromString(authUser.userId());
+		String role = authUser.role();
 
 		UpdateProfileResult result = userApplicationService.updateProfile(userId, role, request.toCommand());
 
@@ -68,10 +71,10 @@ public class UserController {
 
 	@PatchMapping("/password")
 	public ResponseEntity<ApiResponse<ChangePasswordResponse>> changePassword(
-		@RequestHeader("X-User-Id") String userIdStr,
+		@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody ChangePasswordRequest request
 	) {
-		UUID userId = UUID.fromString(userIdStr);
+		UUID userId = UUID.fromString(authUser.userId());
 
 		userApplicationService.changePassword(userId, request.toCommand());
 
@@ -83,10 +86,11 @@ public class UserController {
 	@GetMapping
 	@PreAuthorize("hasRole('MASTER')")
 	public ResponseEntity<ApiResponse<UserListResponse>> getAllUsers(
-		@RequestHeader("X-User-Id") String userIdStr,
-		@RequestHeader("X-User-Role") String role,
+		@AuthenticationPrincipal AuthUser authUser,
 		Pageable pageable
 	) {
+		String role = authUser.role();
+
 		UserListResult result = userApplicationService.getAllUsers(role, pageable);
 
 		UserListResponse response = UserListResponse.from(result);
@@ -95,10 +99,13 @@ public class UserController {
 	}
 
 	@GetMapping("/{userId}")
+	@PreAuthorize("hasRole('MASTER')")
 	public ResponseEntity<ApiResponse<UserDetailResponse>> getUserDetail(
-		@RequestHeader("X-User-Role") String role,
+		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("userId") UUID targetUserId
 	) {
+		String role = authUser.role();
+
 		UserDetailResult result = userApplicationService.getUserDetail(role, targetUserId);
 
 		UserDetailResponse response = UserDetailResponse.from(result);
