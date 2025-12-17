@@ -90,12 +90,6 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
 				log.debug("JWT 검증 성공 - 사용자: {}, 역할: {}, 경로: {}", userId, role, path);
 
-				// 권한별 접근 제어 체크
-				if (!jwtValidator.hasPermissionForPath(path, role)) {
-					log.warn("권한이 없습니다 - 사용자: {}, 역할: {}, 경로: {}", userId, role, path);
-					return handleForbidden(exchange, "해당 경로에 대한 권한이 없습니다");
-				}
-
 				// 인증된 사용자 정보를 헤더에 추가하여 후속 서비스로 전달
 				ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
 					.header("X-User-Id", userId)
