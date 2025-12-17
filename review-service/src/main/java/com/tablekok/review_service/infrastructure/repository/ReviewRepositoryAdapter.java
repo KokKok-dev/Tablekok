@@ -66,4 +66,9 @@ public class ReviewRepositoryAdapter implements ReviewRepository {
 	public long countByUserId(UUID userId) {
 		return reviewJpaRepository.countByUserId(userId);
 	}
+
+	@Override
+	public ReviewStatsDto getReviewStats(UUID storeId) {
+		return reviewQuerydslRepository.getReviewStats(storeId);
+	}
 }

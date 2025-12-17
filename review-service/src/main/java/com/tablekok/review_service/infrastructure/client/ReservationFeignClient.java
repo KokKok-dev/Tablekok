@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.tablekok.review_service.application.client.dto.GetReservationResponse;
 
-@FeignClient(name = "reservation-service")
+@FeignClient(name = "reservation-service"/**, url = "${lb.dns.reservation}"*/)
 public interface ReservationFeignClient {
 
 	@GetMapping("/v1/reservations/{reservationId}")

@@ -10,8 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tablekok.review_service.application.dto.ReviewStatsDto;
 import com.tablekok.review_service.domain.entity.QReview;
 import com.tablekok.review_service.domain.entity.Review;
 import com.tablekok.review_service.domain.entity.ReviewSortCriteria;
@@ -67,6 +69,22 @@ public class ReviewQuerydslRepositoryAdapter implements ReviewQuerydslRepository
 			.fetch();
 
 		return new PageImpl<>(contents, pageable, 0);
+	}
+
+	@Override
+	public ReviewStatsDto getReviewStats(UUID storeId) {
+		return jpaQueryFactory
+			.select(Projections.constructor(ReviewStatsDto.class,
+				// 1. 평균 평점 (데이터 없으면 null -> 0.0으로 변환)
+				review.rating.avg().coalesce(0.0),
+				// 2. 리뷰 개수
+				review.count()
+			))
+			.from(review)
+			.where(
+				review.storeId.eq(storeId)
+			)
+			.fetchOne();
 	}
 
 	private BooleanExpression createCursorCondition(ReviewSortCriteria sortBy, String cursor, UUID cursorId) {

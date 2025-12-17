@@ -15,6 +15,8 @@ import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
 import com.tablekok.review_service.application.client.ReservationClient;
 import com.tablekok.review_service.application.client.SearchClient;
+import com.tablekok.review_service.application.client.dto.UpdateReviewStats;
+import com.tablekok.review_service.application.dto.ReviewStatsDto;
 import com.tablekok.review_service.application.dto.command.CreateReviewCommand;
 import com.tablekok.review_service.application.dto.command.UpdateReviewCommand;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
@@ -40,6 +42,7 @@ public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final ReservationClient reservationClient;
 	private final ReviewDomainService reviewDomainService;
+	private final SearchClient searchClient;
 
 	@Transactional
 	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId) {
@@ -56,6 +59,8 @@ public class ReviewService {
 
 		reviewRepository.save(newReview);
 
+		syncStoreStats(reservation.storeId());
+
 		return CreateReviewResult.fromEntity(newReview);
 	}
 
@@ -67,6 +72,7 @@ public class ReviewService {
 
 		foundReview.updateReview(command.rating(), command.content());
 
+		syncStoreStats(foundReview.getStoreId());
 	}
 
 	@Transactional
@@ -78,6 +84,8 @@ public class ReviewService {
 		}
 
 		foundReview.softDelete(userId);
+
+		syncStoreStats(foundReview.getStoreId());
 	}
 
 	public GetReviewResult getReview(UUID reviewId) {
@@ -143,5 +151,17 @@ public class ReviewService {
 		if (!review.getUserId().equals(userId)) {
 			throw new AppException(ReviewErrorCode.FORBIDDEN_ACCESS);
 		}
+	}
+
+	// 가게 리뷰수, 평균 평점 -> search-service로 전달
+	// Todo: feignClient로 동기통신 -> 이벤트 기반 비동기 통신으로 리팩토링
+	private void syncStoreStats(UUID storeId) {
+		ReviewStatsDto stats = reviewRepository.getReviewStats(storeId);
+		searchClient.updateStoreStats(storeId,
+			UpdateReviewStats.builder()
+				.averageRating(stats.averageRating())
+				.reviewCount(stats.reviewCount())
+				.build()
+		);
 	}
 }
