@@ -36,7 +36,7 @@ env:
   ECR_REPOSITORY: tablekok/store           # set this to your Amazon ECR repository name
   ECS_SERVICE: tablekok-store-task-service-bpaoz4hs                 # set this to your Amazon ECS service name
   ECS_CLUSTER: tablekok-cluster                 # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: .aws/tablekok-store-task-revision3.json # set this to the path to your
+  ECS_TASK_DEFINITION: .github/workflows/aws/tablekok-store-task-revision3.json # set this to the path to your
                                                # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: tablekok-store-container           # set this to the name of the container in the
                                                # containerDefinitions section of your task definition
@@ -60,17 +60,23 @@ jobs:
         distribution: 'temurin'
 
     - name: Grant execute permission for gradlew
-      run: chmod +x ./store-service/gradlew # ✅ 수정: 현재 디렉토리의 gradlew 파일임을 명확히 지정
+      run: chmod +x gradlew 
+      working-directory: ./store-service # ✅ 수정
 
     - name: Build with Gradle
       run: ./gradlew clean build
-      working-directory: ./store-service
+      working-directory: ./store-service # ✅ 수정
+      env:
+        RDS_ENDPOINT_STORE: ${{ secrets.RESERVATION_DB_URL }} 
+        DB_USER_STORE: ${{ secrets.DB_USERNAME }}
+        DB_PASSWORD_STORE: ${{ secrets.DB_PASSWORD }}
+        EUREKA_SERVER_URL: ${{ secrets.EUREKA_SERVER_URL }}
       
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: build-libs
-        path: ./store-service/build/libs/*.jar # ✅ 아티팩트 경로를 store-service 기준으로 지정
+        path: store-service/build/libs/*.jar # ✅ 아티팩트 경로를 store-service 기준으로 지정
 
 
 
@@ -88,10 +94,10 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: build-libs
-        path: ./store-service/build/libs # ✅ 수정: 다운로드 경로를 store-service 기준으로 지정
+        path: store-service/build/libs # ✅ 수정: 다운로드 경로를 store-service 기준으로 지정
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -99,13 +105,10 @@ jobs:
 
     - name: Login to Amazon ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@v2
 
 
     # --- Docker Build/Push 시작 (Task Definition 업데이트보다 먼저 실행되어야 함) ---
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
@@ -113,11 +116,10 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        # --platform linux/amd64 옵션과 함께, 빌드 컨텍스트를 ./store-service로 지정합니다.
-        docker buildx build --platform linux/amd64 \
-          -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-          --push ./store-service
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./store-service
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
     
     # --- Docker Build/Push 끝 ---
     - name: Fill in the new image ID in the Amazon ECS task definition
