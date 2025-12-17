@@ -96,7 +96,9 @@ public class StoreController {
 
 	@DeleteMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<Void>> deleteStore(
-		@PathVariable UUID storeId  // TODO : MASTER만 요청가능
+		@PathVariable UUID storeId,  // TODO : MASTER만 요청가능
+		@RequestHeader("X-User-Id") String userId,
+		@RequestHeader("X-User-Role") String userRole
 	) {
 		// 음식점 삭제
 		UUID deleterId = UUID.randomUUID();
