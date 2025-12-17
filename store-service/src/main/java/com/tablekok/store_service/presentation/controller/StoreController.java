@@ -20,7 +20,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.dto.auth.AuthUser;
-import com.tablekok.entity.UserRole;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.dto.result.GetStoreReservationPolicyResult;
 import com.tablekok.store_service.application.service.StoreService;
@@ -72,7 +71,7 @@ public class StoreController {
 	) {
 		UUID ownerId = UUID.fromString(authUser.userId());
 
-		storeService.updateStore(request.toCommand(ownerId, storeId));
+		storeService.updateStore(request.toCommand(ownerId, storeId, authUser.role()));
 
 		return ResponseEntity.ok(
 			ApiResponse.success("음식점 정보 수정 성공", HttpStatus.OK)
@@ -87,9 +86,7 @@ public class StoreController {
 		@Valid @RequestBody UpdateStatusRequest request,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
-		UserRole role = UserRole.fromName(authUser.role());
-
-		storeService.updateStatus(role, storeId, request.toCommand());
+		storeService.updateStatus(request.toCommand(storeId, authUser.role()));
 
 		return ResponseEntity.ok(
 			ApiResponse.success("음식점 상태 수정 성공", HttpStatus.OK)
@@ -151,7 +148,7 @@ public class StoreController {
 	) {
 		UUID ownerId = UUID.fromString(authUser.userId());
 
-		storeService.updateStoreReservationPolicy(request.toCommand(ownerId, storeId));
+		storeService.updateStoreReservationPolicy(request.toCommand(ownerId, storeId, authUser.role()));
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("예약정책 정보 변경 성공", HttpStatus.OK));
 	}
@@ -166,7 +163,7 @@ public class StoreController {
 	) {
 		UUID ownerId = UUID.fromString(authUser.userId());
 
-		storeService.updateStoreReservationPolicyStatus(request.toCommand(ownerId, storeId));
+		storeService.updateStoreReservationPolicyStatus(request.toCommand(ownerId, storeId, authUser.role()));
 		return ResponseEntity.ok()
 			.body(ApiResponse.success("예약정책 상태 변경 성공", HttpStatus.OK));
 	}

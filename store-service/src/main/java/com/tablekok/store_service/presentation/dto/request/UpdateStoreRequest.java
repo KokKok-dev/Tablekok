@@ -45,7 +45,7 @@ public record UpdateStoreRequest(
 	@Valid
 	List<CreateOperatingHourRequest> operatingHours
 ) {
-	public UpdateStoreCommand toCommand(UUID ownerId, UUID storeId) {
+	public UpdateStoreCommand toCommand(UUID ownerId, UUID storeId, String userRole) {
 		List<CreateOperatingHourCommand> operatingHourCommands = null;
 		if (this.operatingHours != null) {
 			operatingHourCommands = this.operatingHours.stream()
@@ -56,6 +56,7 @@ public record UpdateStoreRequest(
 		return UpdateStoreCommand.builder()
 			.ownerId(ownerId)
 			.storeId(storeId)
+			.userRole(userRole)
 			.name(name)
 			.phoneNumber(phoneNumber)
 			.address(address)

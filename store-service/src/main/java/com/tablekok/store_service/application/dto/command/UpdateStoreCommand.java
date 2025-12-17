@@ -9,6 +9,7 @@ import lombok.Builder;
 @Builder
 public record UpdateStoreCommand(
 	UUID ownerId,
+	String userRole,
 	UUID storeId,
 	String name,
 	String phoneNumber,

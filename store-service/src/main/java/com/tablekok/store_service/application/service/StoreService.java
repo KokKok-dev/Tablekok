@@ -92,7 +92,7 @@ public class StoreService {
 		checkDuplicateStoreForUpdate(command.name(), command.address(), command.storeId());
 
 		// Store 주인이 ownerId 맞는지 확인
-		checkOwnership(store, command.ownerId());
+		checkOwnership(store, command.ownerId(), command.userRole());
 
 		// 음식점 정보 수정
 		store.updateInfo(
@@ -117,9 +117,11 @@ public class StoreService {
 	}
 
 	@Transactional
-	public void updateStatus(UserRole userRole, UUID storeId, UpdateStoreStatusCommand command) {
-		Store store = findStore(storeId);
+	public void updateStatus(UpdateStoreStatusCommand command) {
+		Store store = findStore(command.storeId());
+
 		StoreStatus newStatus = StoreStatus.valueOf(command.storeStatus());
+		UserRole userRole = UserRole.fromName(command.userRole());
 
 		StoreStatusTransitionStrategy strategy = strategyFactory.getStrategy(userRole);
 		strategy.changeStatus(store, newStatus);
@@ -168,7 +170,7 @@ public class StoreService {
 		Store store = findStore(command.storeId());
 
 		// Store 주인이 ownerId 맞는지 확인
-		checkOwnership(store, command.ownerId());
+		checkOwnership(store, command.ownerId(), command.userRole());
 
 		// 예약 정책 찾기
 		StoreReservationPolicy policy = findPolicy(store);
@@ -204,7 +206,7 @@ public class StoreService {
 	@Transactional
 	public void updateStoreReservationPolicyStatus(UpdateStoreReservationPolicyStatusCommand command) {
 		Store store = findStore(command.storeId());
-		checkOwnership(store, command.ownerId());
+		checkOwnership(store, command.ownerId(), command.userRole());
 
 		StoreReservationPolicy policy = findPolicy(store);
 
@@ -230,7 +232,10 @@ public class StoreService {
 		}
 	}
 
-	private void checkOwnership(Store store, UUID userId) {
+	private void checkOwnership(Store store, UUID userId, String role) {
+		if (UserRole.MASTER.name().equals(role))
+			return;
+
 		if (!store.getOwnerId().equals(userId)) {
 			throw new AppException(StoreErrorCode.FORBIDDEN_ACCESS); // 접근 권한 없음 예외 발생
 		}
