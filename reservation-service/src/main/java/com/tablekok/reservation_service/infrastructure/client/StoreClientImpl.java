@@ -5,9 +5,11 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.tablekok.exception.AppException;
 import com.tablekok.reservation_service.application.client.StoreClient;
 import com.tablekok.reservation_service.application.client.dto.request.OwnerVerificationRequest;
 import com.tablekok.reservation_service.application.client.dto.response.GetStoreReservationPolicyResponse;
+import com.tablekok.reservation_service.application.exception.ReservationErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,17 +20,29 @@ public class StoreClientImpl implements StoreClient {
 
 	@Override
 	public GetStoreReservationPolicyResponse getStoreReservationPolicy(UUID storeId) {
-		return storeFeignClient.getStoreReservationPolicy(storeId).getBody().getData();
+		try {
+			return storeFeignClient.getStoreReservationPolicy(storeId).getBody().getData();
+		} catch (Exception e) {
+			throw new AppException(ReservationErrorCode.INTERNAL_CANNOT_CONNECT);
+		}
 	}
 
 	@Override
 	public boolean checkStoreOwner(OwnerVerificationRequest request) {
-		return storeFeignClient.verifyStoreOwner(request).getBody().booleanValue();
+		try {
+			return storeFeignClient.verifyStoreOwner(request).getBody().booleanValue();
+		} catch (Exception e) {
+			throw new AppException(ReservationErrorCode.INTERNAL_CANNOT_CONNECT);
+		}
 	}
 
 	@Override
 	public List<UUID> getHotStores() {
-		return storeFeignClient.getPopularStores().getBody();
+		try {
+			return storeFeignClient.getPopularStores().getBody();
+		} catch (Exception e) {
+			throw new AppException(ReservationErrorCode.INTERNAL_CANNOT_CONNECT);
+		}
 	}
 
 }
