@@ -61,6 +61,7 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+      working-directory: ./store-service # ✅ store-service 폴더로 이동하여 빌드
 
     - name: Build with Gradle
       run: ./gradlew clean build
