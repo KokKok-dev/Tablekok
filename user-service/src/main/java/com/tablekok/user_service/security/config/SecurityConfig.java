@@ -1,4 +1,4 @@
-package com.tablekok.user_service.config;
+package com.tablekok.user_service.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +40,7 @@ public class SecurityConfig {
 		configuration.setAllowedOriginPatterns(Arrays.asList(
 			"http://localhost:3000",
 			"http://localhost:8080",
+			"http://localhost:8081",
 			"http://localhost:19091",
 			"https://*.tablekok.com",
 			"https://tablekok.vercel.app"
