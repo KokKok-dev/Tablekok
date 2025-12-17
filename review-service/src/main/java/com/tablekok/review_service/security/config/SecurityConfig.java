@@ -8,11 +8,19 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.tablekok.review_service.security.filter.HeaderAuthFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+	private final HeaderAuthFilter headerAuthFilter;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -26,7 +34,10 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				// Gateway 경유 시 이미 인증 완료 → 전체 permitAll 으로 리팩토링 진행
 				.anyRequest().permitAll()
-			);
+			)
+			.addFilterBefore(headerAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+		;
 
 		return http.build();
 	}
