@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.dto.auth.AuthUser;
 import com.tablekok.entity.UserRole;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.dto.result.GetStoreReservationPolicyResult;
@@ -41,14 +44,14 @@ public class StoreController {
 
 	private final StoreService storeService;
 
+	// store 생성
 	@PostMapping
+	@PreAuthorize("hasRole('OWNER')")
 	public ResponseEntity<ApiResponse<CreateStoreResponse>> createStore(
 		@Valid @RequestBody CreateStoreRequest request,
-		@RequestHeader("X-User-Id") String userId,
-		@RequestHeader("X-User-Role") String userRole
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		// store 생성
-		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+		UUID ownerId = UUID.fromString(authUser.userId());
 
 		CreateStoreResult result = storeService.createStore(request.toCommand(ownerId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -60,15 +63,15 @@ public class StoreController {
 			.body(ApiResponse.success("음식점 생성 성공", CreateStoreResponse.from(result), HttpStatus.CREATED));
 	}
 
+	// store 정보 수정
 	@PatchMapping("/{storeId}")
+	@PreAuthorize("hasAnyRole('MASTER', 'OWNER')")
 	public ResponseEntity<ApiResponse<Void>> updateStore(
 		@PathVariable UUID storeId,
 		@Valid @RequestBody UpdateStoreRequest request,
-		@RequestHeader("X-User-Id") String userId,
-		@RequestHeader("X-User-Role") String userRole
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		// store 생성
-		UUID ownerId = UUID.randomUUID(); // TODO: 사장님 ID 가져와야함
+		UUID ownerId = UUID.fromString(authUser.userId());
 
 		storeService.updateStore(request.toCommand(ownerId, storeId));
 
@@ -77,16 +80,16 @@ public class StoreController {
 		);
 	}
 
+	// 음식점 상태 변경
 	@PatchMapping("/{storeId}/status")
+	@PreAuthorize("hasAnyRole('MASTER', 'OWNER')")
 	public ResponseEntity<ApiResponse<Void>> updateStatus(
 		@PathVariable UUID storeId,
 		@Valid @RequestBody UpdateStatusRequest request,
-		@RequestHeader("X-User-Id") String userId,
-		@RequestHeader("X-User-Role") String userRole
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		// TODO: 추후 userRole 작업
-		UserRole role = UserRole.fromName(userRole);
-		// 음식점 상태 변경
+		UserRole role = UserRole.fromName(authUser.role());
+
 		storeService.updateStatus(role, storeId, request.toCommand());
 
 		return ResponseEntity.ok(
@@ -94,14 +97,15 @@ public class StoreController {
 		);
 	}
 
+	// 음식점 삭제
 	@DeleteMapping("/{storeId}")
+	@PreAuthorize("hasRole('MASTER')")
 	public ResponseEntity<ApiResponse<Void>> deleteStore(
-		@PathVariable UUID storeId,  // TODO : MASTER만 요청가능
-		@RequestHeader("X-User-Id") String userId,
-		@RequestHeader("X-User-Role") String userRole
+		@PathVariable UUID storeId,
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		// 음식점 삭제
-		UUID deleterId = UUID.randomUUID();
+
+		UUID deleterId = UUID.fromString(authUser.userId());
 		storeService.deleteStore(storeId, deleterId);
 
 		return ResponseEntity.ok(

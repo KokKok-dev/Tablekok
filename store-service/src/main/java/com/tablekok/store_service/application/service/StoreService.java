@@ -92,8 +92,7 @@ public class StoreService {
 		checkDuplicateStoreForUpdate(command.name(), command.address(), command.storeId());
 
 		// Store 주인이 ownerId 맞는지 확인
-		// TODO : checkOwnership(store, command.ownerId());
-		checkOwnership(store, store.getOwnerId());
+		checkOwnership(store, command.ownerId());
 
 		// 음식점 정보 수정
 		store.updateInfo(
@@ -108,7 +107,7 @@ public class StoreService {
 
 		// OperatingHours 수정이 일어났다면 정보 수정
 		if (command.operatingHours() != null && !command.operatingHours().isEmpty()) {
-			// 1. 요청 데이터를 Map으로 변환: 비교 효율성 증대 (Key: DayOfWeek)
+			// 1. 요청 데이터를 Map으로 변환
 			Map<DayOfWeek, CreateOperatingHourCommand> newHoursMap = command.operatingHours().stream()
 				.collect(Collectors.toMap(CreateOperatingHourCommand::dayOfWeek, Function.identity()));
 
@@ -169,8 +168,7 @@ public class StoreService {
 		Store store = findStore(command.storeId());
 
 		// Store 주인이 ownerId 맞는지 확인
-		// TODO : checkOwnership(store, command.ownerId());
-		checkOwnership(store, store.getOwnerId());
+		checkOwnership(store, command.ownerId());
 
 		// 예약 정책 찾기
 		StoreReservationPolicy policy = findPolicy(store);
@@ -206,8 +204,7 @@ public class StoreService {
 	@Transactional
 	public void updateStoreReservationPolicyStatus(UpdateStoreReservationPolicyStatusCommand command) {
 		Store store = findStore(command.storeId());
-		// TODO : checkOwnership(store, command.ownerId());
-		checkOwnership(store, store.getOwnerId());
+		checkOwnership(store, command.ownerId());
 
 		StoreReservationPolicy policy = findPolicy(store);
 
