@@ -31,4 +31,8 @@ public class Owner extends BaseEntity {
 			.businessNumber(businessNumber)
 			.build();
 	}
+
+	public void updateBusinessNumber(String businessNumber) {
+		this.businessNumber = businessNumber;
+	}
 }
