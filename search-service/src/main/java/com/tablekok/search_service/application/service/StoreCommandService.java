@@ -79,7 +79,7 @@ public class StoreCommandService {
 	// --- Private Helpers ---
 	private void softDeleteStore(String storeId, StoreEvent event) {
 		storeSearchRepository.findById(storeId).ifPresent(store -> {
-			store.softDelete(event.deletedBy());
+			store.softDelete(event.deletedAt(), event.deletedBy());
 			storeSearchRepository.save(store);
 			log.info("Soft deleted store: {}", storeId);
 		});

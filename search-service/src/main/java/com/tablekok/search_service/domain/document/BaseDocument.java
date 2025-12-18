@@ -47,9 +47,9 @@ public abstract class BaseDocument {
 	/**
 	 * 삭제 처리 편의 메서드
 	 */
-	public void delete(UUID deleterId) {
+	public void delete(LocalDateTime deletedAt, UUID deleterId) {
 		this.isDeleted = true;
-		this.deletedAt = LocalDateTime.now();
+		this.deletedAt = deletedAt;
 		this.deletedBy = deleterId;
 	}
 }
