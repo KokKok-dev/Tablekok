@@ -27,6 +27,6 @@ eureka:
     service-url:
       defaultZone: ${EUREKA_SERVER_URL_DEV}
 
-#lb:
-#  dns:
-#    store: ${LB_DNS_STORE}
+lb:
+  dns:
+    store: ""
