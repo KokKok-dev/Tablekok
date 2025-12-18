@@ -1,0 +1,16 @@
+package com.tablekok.waiting_server.infrastructure.client;
+
+import java.util.UUID;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.tablekok.waiting_server.infrastructure.client.dto.StoreOwnerResponse;
+
+@FeignClient(name = "store-service")
+public interface StoreFeignClient {
+	@GetMapping("/v1/internal/stores/{storeId}/owner")
+	ResponseEntity<StoreOwnerResponse> getStoreOwner(@PathVariable("storeId") UUID storeId);
+}
