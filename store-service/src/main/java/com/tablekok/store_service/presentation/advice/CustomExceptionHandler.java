@@ -6,7 +6,6 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.exception.GlobalExceptionHandler;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
@@ -18,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class CustomExceptionHandler extends GlobalExceptionHandler {
-
-	private final ObjectMapper objectMapper;
 
 	@ExceptionHandler(AuthorizationDeniedException.class)
 	public ResponseEntity<ApiResponse<Void>> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {

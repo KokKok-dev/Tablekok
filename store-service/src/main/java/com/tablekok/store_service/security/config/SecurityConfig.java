@@ -3,7 +3,6 @@ package com.tablekok.store_service.security.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,8 +26,7 @@ public class SecurityConfig {
 	private final HeaderAuthFilter headerAuthFilter;
 
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http,
-		DefaultAuthenticationEventPublisher authenticationEventPublisher) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
