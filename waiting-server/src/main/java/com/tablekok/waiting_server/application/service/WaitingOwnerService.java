@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,6 +28,7 @@ import com.tablekok.waiting_server.domain.entity.WaitingStatus;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
 import com.tablekok.waiting_server.domain.repository.WaitingCachePort;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
+import com.tablekok.waiting_server.domain.vo.StoreInfoVo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -44,24 +44,22 @@ public class WaitingOwnerService {
 
 	@Transactional
 	public void startWaitingService(StartWaitingServiceCommand command) {
-		Optional<StoreWaitingStatus> existingStatus = findStoreWaitingStatus(command.storeId());
+		StoreInfoVo storeInfo = storeClient.getStoreDetails(command.storeId());
 
-		// 레코드가 없는 경우 (최초 생성 및 초기화)
-		if (existingStatus.isEmpty()) {
-			// 사장님이 storeId의 실제 소유자인지 확인 (feign 호출)
-			UUID ownerId = storeClient.getStoreOwner(command.storeId());
-			if (!ownerId.equals(command.ownerId())) {
-				throw new AppException(WaitingErrorCode.NOT_STORE_OWNER);
-			}
-
-			StoreWaitingStatus newStatus = command.toEntity(command.ownerId());
-			storeWaitingStatusRepository.save(newStatus);
-			return;
+		// 사장님이 storeId의 실제 소유자인지 확인
+		if (!storeInfo.ownerId().equals(command.ownerId())) {
+			throw new AppException(WaitingErrorCode.NOT_STORE_OWNER);
 		}
 
-		// 레코드가 이미 존재하는 경우 (운영 스위치만 ON)
-		StoreWaitingStatus status = existingStatus.get();
+		// 기존 상태 레코드가 있는지 조회, 없으면 새로 생성
+		StoreWaitingStatus status = getOrCreateStoreWaitingStatus(command);
+
+		// 매장 정보 동기화
+		status.syncStoreInfo(storeInfo);
+
+		// 웨이팅 서비스 활성화
 		status.startWaiting(command.minHeadCount(), command.maxHeadcount());
+		storeWaitingStatusRepository.save(status);
 	}
 
 	@Transactional
@@ -170,8 +168,9 @@ public class WaitingOwnerService {
 		registerPostMarkNoShowActions(waitingId);
 	}
 
-	private Optional<StoreWaitingStatus> findStoreWaitingStatus(UUID storeId) {
-		return storeWaitingStatusRepository.findById(storeId);
+	private StoreWaitingStatus getOrCreateStoreWaitingStatus(StartWaitingServiceCommand command) {
+		return storeWaitingStatusRepository.findById(command.storeId())
+			.orElseGet(() -> command.toEntity(command.ownerId()));
 	}
 
 	private Waiting findWaiting(UUID waitingId) {

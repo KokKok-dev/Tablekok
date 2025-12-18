@@ -7,10 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.tablekok.waiting_server.infrastructure.client.dto.StoreOwnerResponse;
+import com.tablekok.waiting_server.infrastructure.client.dto.StoreWaitingInternalResponse;
 
 @FeignClient(name = "store-service")
 public interface StoreFeignClient {
-	@GetMapping("/v1/internal/stores/{storeId}/owner")
-	ResponseEntity<StoreOwnerResponse> getStoreOwner(@PathVariable("storeId") UUID storeId);
+	@GetMapping("/v1/internal/stores/{storeId}/waiting-details")
+	ResponseEntity<StoreWaitingInternalResponse> getStoreDetails(@PathVariable UUID storeId);
+
 }

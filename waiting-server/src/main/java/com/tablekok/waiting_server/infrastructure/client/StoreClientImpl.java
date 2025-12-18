@@ -4,7 +4,11 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.tablekok.exception.AppException;
 import com.tablekok.waiting_server.application.client.StoreClient;
+import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
+import com.tablekok.waiting_server.domain.vo.StoreInfoVo;
+import com.tablekok.waiting_server.infrastructure.client.dto.StoreWaitingInternalResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +19,19 @@ public class StoreClientImpl implements StoreClient {
 	private final StoreFeignClient storeFeignClient;
 
 	@Override
-	public UUID getStoreOwner(UUID storeId) {
-		return storeFeignClient.getStoreOwner(storeId).getBody().ownerId();
+	public StoreInfoVo getStoreDetails(UUID storeId) {
+		StoreWaitingInternalResponse response = storeFeignClient.getStoreDetails(storeId).getBody();
+
+		if (response == null) {
+			throw new AppException(WaitingErrorCode.STORE_NOT_FOUND);
+		}
+
+		return new StoreInfoVo(
+			response.storeId(),
+			response.ownerId(),
+			response.storeName(),
+			response.openTime(),
+			response.closeTime()
+		);
 	}
 }

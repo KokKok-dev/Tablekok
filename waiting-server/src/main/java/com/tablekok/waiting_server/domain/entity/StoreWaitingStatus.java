@@ -1,10 +1,12 @@
 package com.tablekok.waiting_server.domain.entity;
 
+import java.time.LocalTime;
 import java.util.UUID;
 
 import com.tablekok.entity.BaseEntity;
 import com.tablekok.exception.AppException;
 import com.tablekok.waiting_server.domain.exception.WaitingDomainErrorCode;
+import com.tablekok.waiting_server.domain.vo.StoreInfoVo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,8 +29,17 @@ public class StoreWaitingStatus extends BaseEntity {
 	@Column(name = "owner_id", nullable = false)
 	private UUID ownerId;
 
-	@Column(name = "is_open_for_waiting", nullable = false)
-	private boolean isOpenForWaiting;
+	@Column(name = "store_name", nullable = false)
+	private String storeName;
+
+	@Column(name = "store_open_time", nullable = false)
+	private LocalTime openTime;
+
+	@Column(name = "store_close_time", nullable = false)
+	private LocalTime closeTime;
+
+	@Column(name = "is_waiting_enabled", nullable = false)
+	private boolean isWaitingEnabled;
 
 	@Column(name = "total_tables", nullable = false)
 	private int totalTables;
@@ -50,13 +61,15 @@ public class StoreWaitingStatus extends BaseEntity {
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private StoreWaitingStatus(
-		UUID storeId, UUID ownerId, boolean isOpenForWaiting, int totalTables, int latestAssignedNumber,
+		UUID storeId, UUID ownerId, String storeName, boolean isWaitingEnabled, int totalTables,
+		int latestAssignedNumber,
 		int currentCallingNumber,
 		int turnoverRateMinutes, int minHeadcount, int maxHeadcount) {
 
 		this.storeId = storeId;
 		this.ownerId = ownerId;
-		this.isOpenForWaiting = isOpenForWaiting;
+		this.storeName = storeName;
+		this.isWaitingEnabled = isWaitingEnabled;
 		this.totalTables = totalTables;
 		this.latestAssignedNumber = latestAssignedNumber;
 		this.currentCallingNumber = currentCallingNumber;
@@ -67,14 +80,15 @@ public class StoreWaitingStatus extends BaseEntity {
 
 	}
 
-	public static StoreWaitingStatus create(UUID storeId, UUID ownerId, int totalTables, int turnoverRateMinutes,
+	public static StoreWaitingStatus create(UUID storeId, UUID ownerId, int totalTables,
+		int turnoverRateMinutes,
 		int minHeadcount,
 		int maxHeadcount) {
 
 		return StoreWaitingStatus.builder()
 			.storeId(storeId)
 			.ownerId(ownerId)
-			.isOpenForWaiting(true)
+			.isWaitingEnabled(false)
 			.totalTables(totalTables)
 			.latestAssignedNumber(0)
 			.currentCallingNumber(0)
@@ -84,28 +98,35 @@ public class StoreWaitingStatus extends BaseEntity {
 			.build();
 	}
 
+	public void syncStoreInfo(StoreInfoVo vo) {
+		this.ownerId = vo.ownerId();
+		this.storeName = vo.storeName();
+		this.openTime = vo.openTime();
+		this.closeTime = vo.closeTime();
+	}
+
 	public void incrementNumber() {
 		this.latestAssignedNumber += 1;
 	}
 
 	public void startWaiting(int minHeadcount, int maxHeadcount) {
 		// 이미 활성화된 상태라면 예외처리
-		if (this.isOpenForWaiting()) {
+		if (this.isWaitingEnabled()) {
 			throw new AppException(WaitingDomainErrorCode.WAITING_ALREADY_STARTED);
 		}
 
-		this.isOpenForWaiting = true;
+		this.isWaitingEnabled = true;
 		this.minHeadcount = minHeadcount;
 		this.maxHeadcount = maxHeadcount;
 	}
 
 	public void stopWaiting() {
 		// 이미 비활성화된 상태라면 예외처리
-		if (!this.isOpenForWaiting()) {
+		if (!this.isWaitingEnabled()) {
 			throw new AppException(WaitingDomainErrorCode.WAITING_ALREADY_CLOSED);
 		}
 
-		this.isOpenForWaiting = false;
+		this.isWaitingEnabled = false;
 	}
 
 	public void setCurrentCallingNumber(int callingNumber) {

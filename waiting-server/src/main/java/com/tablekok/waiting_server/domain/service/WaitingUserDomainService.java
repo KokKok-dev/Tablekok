@@ -29,7 +29,7 @@ public class WaitingUserDomainService {
 	);
 
 	public void validateStoreStatus(StoreWaitingStatus status) {
-		if (!status.isOpenForWaiting()) {
+		if (!status.isWaitingEnabled()) {
 			throw new AppException(WaitingDomainErrorCode.WAITING_CLOSED);
 		}
 	}
