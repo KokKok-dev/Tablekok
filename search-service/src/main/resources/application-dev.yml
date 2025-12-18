@@ -38,10 +38,10 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL}
+      defaultZone: ${EUREKA_SERVER_URL_DEV}
 
 logging:
   level:
     root: INFO
-    com.example.searchservice: DEBUG # 내 프로젝트 로그는 자세히 보기
+    com.tablekok.search-service: DEBUG # 내 프로젝트 로그는 자세히 보기
     org.springframework.data.elasticsearch.client.WIRE: TRACE # ES 쿼리 로그 확인용 (개발 시 유용)

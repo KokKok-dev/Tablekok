@@ -1,0 +1,19 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+### Elasticsearch 상태 확인
+GET http://localhost:9200
+
+### 인덱스 목록 확인
+GET http://localhost:9200/_cat/indices?v
+
+### 상점 데이터 검색 (데이터가 들어간 후 테스트)
+GET http://localhost:9200/stores/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}

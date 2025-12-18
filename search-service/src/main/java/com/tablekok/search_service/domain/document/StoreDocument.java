@@ -188,7 +188,7 @@ public class StoreDocument extends BaseDocument {
 		this.reviewCount = reviewCount;
 	}
 
-	public void softDelete(UUID deleterId) {
-		super.delete(deleterId);
+	public void softDelete(LocalDateTime deletedAt, UUID deleterId) {
+		super.delete(deletedAt, deleterId);
 	}
 }
