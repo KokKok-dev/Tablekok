@@ -10,16 +10,11 @@ import com.tablekok.dto.ApiResponse;
 import com.tablekok.exception.GlobalExceptionHandler;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 @RestControllerAdvice
-@RequiredArgsConstructor
-@Slf4j
 public class CustomExceptionHandler extends GlobalExceptionHandler {
 
 	@ExceptionHandler(AuthorizationDeniedException.class)
-	public ResponseEntity<ApiResponse<Void>> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+	public ResponseEntity<ApiResponse<Void>> handleAuthorizationDeniedException() {
 		return ResponseEntity
 			.status(HttpStatus.FORBIDDEN)
 			.body(ApiResponse.error(
