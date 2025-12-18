@@ -10,6 +10,7 @@ import lombok.Builder;
 @Builder
 public record UpdateStoreReservationPolicyCommand(
 	UUID ownerId,
+	String userRole,
 	UUID storeId,
 	Integer monthlyOpenDay,
 	LocalTime openTime,

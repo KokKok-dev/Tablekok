@@ -11,10 +11,11 @@ public record UpdatePolicyStatusRequest(
 	Boolean isActive
 ) {
 
-	public UpdateStoreReservationPolicyStatusCommand toCommand(UUID ownerId, UUID storeId) {
+	public UpdateStoreReservationPolicyStatusCommand toCommand(UUID ownerId, UUID storeId, String userRole) {
 		return UpdateStoreReservationPolicyStatusCommand.builder()
 			.ownerId(ownerId)
 			.storeId(storeId)
+			.userRole(userRole)
 			.isActive(isActive)
 			.build();
 	}

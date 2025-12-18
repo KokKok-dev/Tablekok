@@ -7,6 +7,7 @@ import lombok.Builder;
 @Builder
 public record UpdateStoreReservationPolicyStatusCommand(
 	UUID ownerId,
+	String userRole,
 	UUID storeId,
 	Boolean isActive
 ) {
