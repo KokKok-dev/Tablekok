@@ -24,6 +24,9 @@ public class StoreWaitingStatus extends BaseEntity {
 	@Column(name = "store_id", nullable = false)
 	private UUID storeId;
 
+	@Column(name = "owner_id", nullable = false)
+	private UUID ownerId;
+
 	@Column(name = "is_open_for_waiting", nullable = false)
 	private boolean isOpenForWaiting;
 
@@ -47,10 +50,12 @@ public class StoreWaitingStatus extends BaseEntity {
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private StoreWaitingStatus(
-		UUID storeId, boolean isOpenForWaiting, int totalTables, int latestAssignedNumber, int currentCallingNumber,
+		UUID storeId, UUID ownerId, boolean isOpenForWaiting, int totalTables, int latestAssignedNumber,
+		int currentCallingNumber,
 		int turnoverRateMinutes, int minHeadcount, int maxHeadcount) {
 
 		this.storeId = storeId;
+		this.ownerId = ownerId;
 		this.isOpenForWaiting = isOpenForWaiting;
 		this.totalTables = totalTables;
 		this.latestAssignedNumber = latestAssignedNumber;
@@ -62,11 +67,13 @@ public class StoreWaitingStatus extends BaseEntity {
 
 	}
 
-	public static StoreWaitingStatus create(UUID storeId, int totalTables, int turnoverRateMinutes, int minHeadcount,
+	public static StoreWaitingStatus create(UUID storeId, UUID ownerId, int totalTables, int turnoverRateMinutes,
+		int minHeadcount,
 		int maxHeadcount) {
 
 		return StoreWaitingStatus.builder()
 			.storeId(storeId)
+			.ownerId(ownerId)
 			.isOpenForWaiting(true)
 			.totalTables(totalTables)
 			.latestAssignedNumber(0)
