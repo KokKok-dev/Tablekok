@@ -44,7 +44,7 @@ redis:
 reservation:
   # 20분 (1200초) - 예약 가능 토큰 최대 유지 시간 (ms)
   token:
-    ttl: 1200000
+    ttl: 600000
 
   # 예약 가능 최대 인원
   available:
@@ -53,7 +53,7 @@ reservation:
 
   # 예약 상태 만료 확인 주기 (ms)
   process:
-    interval: 1200000
+    interval: 4000
 
 eureka:
   client:
@@ -61,7 +61,7 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_SERVER_URL}
-      
+
 management:
   endpoints:
     web:

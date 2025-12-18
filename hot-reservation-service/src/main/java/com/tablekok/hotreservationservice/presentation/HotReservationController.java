@@ -5,6 +5,7 @@ import java.net.URI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +35,7 @@ public class HotReservationController {
 	private final QueueService queueService;
 
 	// SSE 연결 실시간 순서 업데이트를 받기 위해 연결 대기 순서도 리턴
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping(value = "/queue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public SseEmitter connect(
 		@AuthenticationPrincipal AuthUser authUser
@@ -42,6 +44,7 @@ public class HotReservationController {
 	}
 
 	// 토큰 검증
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/validation/{token}")
 	public ResponseEntity<ApiResponse<Void>> completeReservation(
 		@PathVariable("token") String token,
@@ -54,6 +57,7 @@ public class HotReservationController {
 	}
 
 	// 예약 요청 접수(비동기 처리 시작)
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping
 	public ResponseEntity<ApiResponse<CreateReservationResponse>> createReservation(
 		@Valid @RequestBody CreateReservationRequest request,
