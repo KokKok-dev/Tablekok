@@ -30,7 +30,6 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/v1/stores/**", "/v1/categories/**").authenticated()
 				.anyRequest().authenticated()
 			)
 			.addFilterBefore(headerAuthFilter, UsernamePasswordAuthenticationFilter.class);

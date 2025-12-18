@@ -112,19 +112,23 @@ public class ReservationService {
 
 	// 예약 노쇼(오너)
 	@Transactional
-	public void noShow(UUID userId, UUID reservationId) {
+	public void noShow(UUID userId, UUID reservationId, UserRole role) {
 		Reservation findReservation = reservationRepository.findById(reservationId);
-		// 해당 예약의 음식점이 사용자 소유인지
-		validateStoreOwner(userId, findReservation.getStoreId());
+
+		if (role.equals(UserRole.OWNER)) {
+			validateStoreOwner(userId, findReservation.getStoreId());
+		}
 		findReservation.noShow();
 	}
 
 	// 예약 확인(DONE, 오너)
 	@Transactional
-	public void done(UUID userId, UUID reservationId) {
+	public void done(UUID userId, UUID reservationId, UserRole role) {
 		Reservation findReservation = reservationRepository.findById(reservationId);
-		// 해당 예약의 음식점이 사용자 소유인지
-		validateStoreOwner(userId, findReservation.getStoreId());
+
+		if (role.equals(UserRole.OWNER)) {
+			validateStoreOwner(userId, findReservation.getStoreId());
+		}
 		findReservation.done();
 	}
 

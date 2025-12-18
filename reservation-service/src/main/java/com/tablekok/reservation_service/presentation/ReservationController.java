@@ -80,6 +80,7 @@ public class ReservationController {
 	}
 
 	// 예약 취소. 고객, 오너 전략패턴 적용
+	@PreAuthorize("hasAnyRole('COSTOMER', 'OWNER')")
 	@PatchMapping("/{reservationId}/cancel")
 	public ResponseEntity<ApiResponse<Void>> cancelReservation(
 		@PathVariable("reservationId") UUID reservationId,
@@ -98,7 +99,8 @@ public class ReservationController {
 		@PathVariable("reservationId") UUID reservationId,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
-		reservationService.noShow(UUID.fromString(authUser.userId()), reservationId);
+		reservationService.noShow(UUID.fromString(authUser.userId()), reservationId,
+			UserRole.fromName(authUser.role()));
 		return ResponseEntity.ok(
 			ApiResponse.success("예약 노쇼(오너) 성공", HttpStatus.OK));
 	}
@@ -110,13 +112,13 @@ public class ReservationController {
 		@PathVariable("reservationId") UUID reservationId,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
-		reservationService.done(UUID.fromString(authUser.userId()), reservationId);
+		reservationService.done(UUID.fromString(authUser.userId()), reservationId, UserRole.fromName(authUser.role()));
 		return ResponseEntity.ok(
 			ApiResponse.success("예약 확인(오너) 성공", HttpStatus.OK));
 	}
 
 	// 예약 조회(고객)
-	@PreAuthorize("hasAnyRole('MASTER', 'CUSTOMER')")
+	@PreAuthorize("hasRole('CUSTOMER')")
 	@GetMapping
 	public ResponseEntity<ApiResponse<Page<GetReservationsForCustomerResponse>>> getReservationsForCustomer(
 		@AuthenticationPrincipal AuthUser authUser,
@@ -130,7 +132,7 @@ public class ReservationController {
 	}
 
 	// 예약 조회(오너)
-	@PreAuthorize("hasAnyRole('MASTER', 'OWNER')")
+	@PreAuthorize("hasRole('OWNER')")
 	@GetMapping("/owner")
 	public ResponseEntity<ApiResponse<Page<GetReservationsForOwnerResponse>>> getReservationsForOwner(
 		@RequestParam UUID storeId,
