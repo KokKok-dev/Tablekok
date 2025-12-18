@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomExceptionHandler extends GlobalExceptionHandler {
 
 	@ExceptionHandler(AuthorizationDeniedException.class)
-	public ResponseEntity<ApiResponse<Void>> handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+	public ResponseEntity<ApiResponse<Void>> handleAuthorizationDeniedException() {
 		return ResponseEntity
 			.status(HttpStatus.FORBIDDEN)
 			.body(ApiResponse.error(
