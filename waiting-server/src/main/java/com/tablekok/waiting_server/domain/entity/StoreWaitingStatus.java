@@ -138,4 +138,17 @@ public class StoreWaitingStatus extends BaseEntity {
 			throw new AppException(WaitingDomainErrorCode.NO_STORE_OWNER);
 		}
 	}
+
+	public void validateAcceptingWaiting() {
+		// 사장님이 스위치를 켰는지 확인
+		if (!this.isWaitingEnabled) {
+			throw new AppException(WaitingDomainErrorCode.WAITING_DISABLED);
+		}
+
+		// 현재 시간이 영업시간 내에 있는지 확인
+		LocalTime now = LocalTime.now();
+		if (now.isBefore(this.openTime) || now.isAfter(this.closeTime)) {
+			throw new AppException(WaitingDomainErrorCode.NOT_OPERATING_HOURS);
+		}
+	}
 }

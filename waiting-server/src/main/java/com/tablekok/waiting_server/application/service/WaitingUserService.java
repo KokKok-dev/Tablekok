@@ -39,12 +39,11 @@ public class WaitingUserService {
 
 	@Transactional
 	public CreateWaitingResult createWaiting(CreateWaitingCommand command) {
-		// TODO: 매장 접수 가능 상태 확인 (StoreClient - waitingOpenTime 조회)
-
-		// 다음웨이팅 번호 발급 (StoreWaitingStatus에서 latest_assigned_number 증가, 새로운번호 확보)
 		StoreWaitingStatus status = findStoreWaitingStatus(command.storeId());
 
-		waitingUserDomainService.validateStoreStatus(status); // status 활성화 확인
+		// 접수 가능 상태 확인 (스위치 ON 여부 + 영업 시간 확인)
+		status.validateAcceptingWaiting();
+
 		waitingUserDomainService.validateHeadcountPolicy(command.headcount(), status.getMinHeadcount(),
 			status.getMaxHeadcount()); // 인원수 유효성 검사
 		// 고객 웨이팅 중복 확인
