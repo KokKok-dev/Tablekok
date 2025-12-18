@@ -1,8 +1,9 @@
 package com.tablekok.gateway_service.filter;
 
-import com.tablekok.gateway_service.util.JwtValidator;
-import io.jsonwebtoken.Claims;
-import lombok.extern.slf4j.Slf4j;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -13,11 +14,13 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
+import com.tablekok.gateway_service.util.JwtValidator;
+
+import io.jsonwebtoken.Claims;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -51,6 +54,11 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 		super(Config.class);
 	}
 
+	@Data
+	public static class Config {
+		private boolean required = true;
+	}
+
 	@Override
 	public GatewayFilter apply(Config config) {
 		return (exchange, chain) -> {
@@ -71,8 +79,14 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 			);
 
 			if (token == null) {
-				log.warn("JWT 토큰이 없습니다 - 경로: {}", path);
-				return handleUnauthorized(exchange, "토큰이 없습니다");
+				if (config.isRequired()) {
+					// 필수인데 없으면 차단
+					log.warn("JWT 토큰이 없습니다 (인증 필수) - 경로: {}", path);
+					return handleUnauthorized(exchange, "토큰이 없습니다");
+				}
+				// 선택적 인증인데 없으면 그대로 통과 (비회원)
+				log.debug("JWT 토큰이 없습니다 (선택적 인증) - 경로: {}", path);
+				return chain.filter(exchange);
 			}
 
 			// JWT 토큰 검증
@@ -149,7 +163,4 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 		return response.writeWith(Mono.just(buffer));
 	}
 
-	public static class Config {
-		// Configuration properties can be added here
-	}
 }

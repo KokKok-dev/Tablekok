@@ -97,7 +97,7 @@ public class GatewayRoutesConfig {
 			// Waiting Service
 			.route("waiting-service-user", r -> r
 				.path("/v1/waiting/**") // 사용자용 엔드포인트
-				.filters(f -> f.filter(jwtFilter.apply(new JwtAuthenticationFilter.Config())))
+				.filters(f -> f.filter(jwtFilter.apply(config -> config.setRequired(false))))
 				.uri(uris.waiting())
 			)
 
