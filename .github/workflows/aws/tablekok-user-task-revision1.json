@@ -1,0 +1,106 @@
+{
+    "compatibilities": [
+        "EC2",
+        "FARGATE",
+        "MANAGED_INSTANCES"
+    ],
+    "containerDefinitions": [
+        {
+            "cpu": 0,
+            "environment": [
+                {
+                    "name": "DB_USERNAME",
+                    "value": "postgres"
+                },
+                {
+                    "name": "JWT_SECRET",
+                    "value": "tablekok-user-dev-secret-key-minimum-32-characters-long"
+                },
+                {
+                    "name": "DB_URL",
+                    "value": "jdbc:postgresql://tablekok-db.ch0umigqozdz.ap-northeast-2.rds.amazonaws.com:5433/user_db"
+                },
+                {
+                    "name": "DB_PASSWORD",
+                    "value": "zhrzhr123"
+                }
+            ],
+            "environmentFiles": [],
+            "essential": true,
+            "image": "291433606038.dkr.ecr.ap-northeast-2.amazonaws.com/tablekok/user@sha256:4fb08cade846a8258a03a06b0f9806aec941560bb589f4a52b688b4ed38fddf3",
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/tablekok-user-task",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "ap-northeast-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "mountPoints": [],
+            "name": "tablekok-user-container",
+            "portMappings": [
+                {
+                    "appProtocol": "http",
+                    "containerPort": 8081,
+                    "hostPort": 8081,
+                    "name": "tablekok-user-container-8081-tcp",
+                    "protocol": "tcp"
+                }
+            ],
+            "systemControls": [],
+            "ulimits": [],
+            "volumesFrom": []
+        }
+    ],
+    "cpu": "1024",
+    "executionRoleArn": "arn:aws:iam::291433606038:role/ecsTaskExecutionRole",
+    "family": "tablekok-user-task",
+    "memory": "3072",
+    "networkMode": "awsvpc",
+    "placementConstraints": [],
+    "registeredAt": "2025-12-15T04:02:06.217Z",
+    "registeredBy": "arn:aws:iam::291433606038:user/Sungwon",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+        }
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "revision": 1,
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "status": "ACTIVE",
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:291433606038:task-definition/tablekok-user-task:1",
+    "volumes": [],
+    "tags": []
+}
