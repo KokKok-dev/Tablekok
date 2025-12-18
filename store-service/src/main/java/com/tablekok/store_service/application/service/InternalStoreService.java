@@ -5,6 +5,9 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.tablekok.exception.AppException;
+import com.tablekok.store_service.application.exception.StoreErrorCode;
+import com.tablekok.store_service.domain.entity.Store;
 import com.tablekok.store_service.domain.repository.StoreRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,5 +23,11 @@ public class InternalStoreService {
 
 	public boolean isOwner(UUID storeId, UUID ownerId) {
 		return storeRepository.isOwner(storeId, ownerId);
+	}
+
+	public UUID getOwnerIdByStoreId(UUID storeId) {
+		return storeRepository.findById(storeId)
+			.map(Store::getOwnerId)
+			.orElseThrow(() -> new AppException(StoreErrorCode.STORE_NOT_FOUND));
 	}
 }
