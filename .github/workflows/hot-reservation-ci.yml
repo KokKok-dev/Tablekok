@@ -28,7 +28,7 @@ name: Deploy to Amazon ECS
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "ci/#129-hot-reservation" ]
     paths: [ 'hot-reservation-service/**' ]
 
 env:
