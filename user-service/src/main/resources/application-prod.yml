@@ -26,15 +26,15 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-expiration: ${JWT_ACCESS_EXPIRATION:86400000}
-  refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+  access-token-expiration: 86400000
+  refresh-token-expiration: 604800000
 
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL_DEV}
+      defaultZone: ${EUREKA_SERVER_URL}
 
   instance:
     prefer-ip-address: true
