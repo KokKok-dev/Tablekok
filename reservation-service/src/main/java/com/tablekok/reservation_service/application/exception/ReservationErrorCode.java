@@ -26,7 +26,7 @@ public enum ReservationErrorCode implements ErrorCode {
 		HttpStatus.FORBIDDEN),
 
 	INTERNAL_CANNOT_CONNECT(
-		"HOT-RESERVATION102",
+		"RESERVATION103",
 		"내부 서비스 통신에 실패하였습니다. 다시 시도해주세요.",
 		HttpStatus.SERVICE_UNAVAILABLE
 	);

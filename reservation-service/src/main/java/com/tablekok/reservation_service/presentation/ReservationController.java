@@ -41,6 +41,7 @@ public class ReservationController {
 	private final ReservationService reservationService;
 
 	// 예약 생성(예약 접수)
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping
 	public ResponseEntity<ApiResponse<CreateReservationResponse>> createReservation(
 		@Valid @RequestBody CreateReservationRequest request,
@@ -60,6 +61,7 @@ public class ReservationController {
 	}
 
 	// 단건 예약 조회(리뷰에서 호출 용도)
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/{reservationId}")
 	public ResponseEntity<GetReservationResponse> getReservation(
 		@PathVariable("reservationId") UUID reservationId
@@ -68,13 +70,20 @@ public class ReservationController {
 	}
 
 	// 예약 인원수 변경
+	@PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
 	@PatchMapping("/{reservationId}")
 	public ResponseEntity<ApiResponse<Void>> updateHeadcount(
 		@PathVariable("reservationId") UUID reservationId,
 		@Valid @RequestBody UpdateHeadcountRequest request,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
-		reservationService.updateHeadcount(UUID.fromString(authUser.userId()), reservationId, request.headcount());
+		reservationService.updateHeadcount(
+			UUID.fromString(authUser.userId()),
+			reservationId,
+			request.headcount(),
+			UserRole.fromName(authUser.role())
+		);
+
 		return ResponseEntity.ok(
 			ApiResponse.success("예약 인원 변경 성공", HttpStatus.OK));
 	}
@@ -131,8 +140,8 @@ public class ReservationController {
 				HttpStatus.OK));
 	}
 
-	// 예약 조회(오너)
-	@PreAuthorize("hasRole('OWNER')")
+	// 식당 예약 조회
+	@PreAuthorize("hasAnyRole('OWNER', 'MASTER')")
 	@GetMapping("/owner")
 	public ResponseEntity<ApiResponse<Page<GetReservationsForOwnerResponse>>> getReservationsForOwner(
 		@RequestParam UUID storeId,
@@ -140,9 +149,13 @@ public class ReservationController {
 		Pageable pageable
 	) {
 		return ResponseEntity.ok(
-			ApiResponse.success("예약 조회(오너) 성공",
-				GetReservationsForOwnerResponse.fromResult(
-					reservationService.getReservationsForOwner(UUID.fromString(authUser.userId()), storeId, pageable)),
+			ApiResponse.success("식당 예약 조회 성공",
+				GetReservationsForOwnerResponse.fromResult(reservationService.getReservationsForOwner(
+					UUID.fromString(authUser.userId()),
+					storeId,
+					UserRole.fromName(authUser.role()),
+					pageable
+				)),
 				HttpStatus.OK));
 	}
 
