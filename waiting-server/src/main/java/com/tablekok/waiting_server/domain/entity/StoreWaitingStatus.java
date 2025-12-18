@@ -111,4 +111,10 @@ public class StoreWaitingStatus extends BaseEntity {
 	public void setCurrentCallingNumber(int callingNumber) {
 		this.currentCallingNumber = callingNumber;
 	}
+
+	public void validateOwner(UUID requestOwnerId) {
+		if (!this.ownerId.equals(requestOwnerId)) {
+			throw new AppException(WaitingDomainErrorCode.NO_STORE_OWNER);
+		}
+	}
 }

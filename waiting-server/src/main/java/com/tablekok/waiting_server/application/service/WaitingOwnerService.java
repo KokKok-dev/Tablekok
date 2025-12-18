@@ -22,6 +22,7 @@ import com.tablekok.waiting_server.application.dto.result.GetWaitingQueueResult;
 import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
 import com.tablekok.waiting_server.application.port.NoShowSchedulerPort;
 import com.tablekok.waiting_server.application.port.NotificationPort;
+import com.tablekok.waiting_server.common.annotation.CheckOwner;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
 import com.tablekok.waiting_server.domain.entity.WaitingStatus;
@@ -50,7 +51,7 @@ public class WaitingOwnerService {
 			// 사장님이 storeId의 실제 소유자인지 확인 (feign 호출)
 			UUID ownerId = storeClient.getStoreOwner(command.storeId());
 			if (!ownerId.equals(command.ownerId())) {
-				throw new AppException(WaitingErrorCode.NO_STORE_OWNER);
+				throw new AppException(WaitingErrorCode.NOT_STORE_OWNER);
 			}
 
 			StoreWaitingStatus newStatus = command.toEntity(command.ownerId());
@@ -64,17 +65,15 @@ public class WaitingOwnerService {
 	}
 
 	@Transactional
+	@CheckOwner
 	public void stopWaitingService(UUID storeId, UUID ownerId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-
 		StoreWaitingStatus status = getStoreWaitingStatus(storeId);
 		status.stopWaiting();
 	}
 
 	@Transactional(readOnly = true)
+	@CheckOwner
 	public List<GetWaitingQueueResult> getStoreWaitingQueue(UUID storeId, UUID ownerId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-
 		// Redis ZSET에서 현재 대기 중인 모든 waitingId를 가져옴
 		List<String> waitingIdStrings = waitingCache.getWaitingIds(storeId);
 		if (waitingIdStrings.isEmpty()) {
@@ -93,8 +92,8 @@ public class WaitingOwnerService {
 	}
 
 	@Transactional
+	@CheckOwner
 	public void callWaiting(UUID storeId, UUID callingWaitingId, UUID ownerId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
 		Waiting waiting = findWaiting(callingWaitingId);
 		StoreWaitingStatus status = getStoreWaitingStatus(storeId);
 
@@ -109,8 +108,8 @@ public class WaitingOwnerService {
 	}
 
 	@Transactional
+	@CheckOwner
 	public void enterWaiting(UUID storeId, UUID waitingId, UUID ownerId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
 		Waiting waiting = findWaitingForStore(waitingId, storeId);
 		WaitingStatus originalStatus = waiting.getStatus();
 
@@ -132,9 +131,8 @@ public class WaitingOwnerService {
 	}
 
 	@Transactional
+	@CheckOwner
 	public void cancelByOwner(UUID storeId, UUID waitingId, UUID ownerId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-
 		Waiting waiting = findWaitingForStore(waitingId, storeId);
 		WaitingStatus originalStatus = waiting.getStatus();
 
@@ -153,9 +151,8 @@ public class WaitingOwnerService {
 	}
 
 	@Transactional
+	@CheckOwner
 	public void markNoShow(UUID storeId, UUID waitingId, UUID ownerId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-
 		Waiting waiting = findWaitingForStore(waitingId, storeId);
 		WaitingStatus originalStatus = waiting.getStatus();
 
