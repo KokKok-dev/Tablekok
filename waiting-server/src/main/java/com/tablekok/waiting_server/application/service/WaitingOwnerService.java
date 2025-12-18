@@ -47,9 +47,7 @@ public class WaitingOwnerService {
 		StoreInfoVo storeInfo = storeClient.getStoreDetails(command.storeId());
 
 		// 사장님이 storeId의 실제 소유자인지 확인
-		if (!storeInfo.ownerId().equals(command.ownerId())) {
-			throw new AppException(WaitingErrorCode.NOT_STORE_OWNER);
-		}
+		validateOwner(storeInfo.ownerId(), command.ownerId());
 
 		// 기존 상태 레코드가 있는지 조회, 없으면 새로 생성
 		StoreWaitingStatus status = getOrCreateStoreWaitingStatus(command);
@@ -186,6 +184,12 @@ public class WaitingOwnerService {
 	private StoreWaitingStatus getStoreWaitingStatus(UUID storeId) {
 		return storeWaitingStatusRepository.findById(storeId)
 			.orElseThrow(() -> new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND));
+	}
+
+	private void validateOwner(UUID actualOwnerId, UUID requestOwnerId) {
+		if (!actualOwnerId.equals(requestOwnerId)) {
+			throw new AppException(WaitingErrorCode.NOT_STORE_OWNER);
+		}
 	}
 
 	private void registerPostCommitActions(UUID waitingId, int callingNumber) {
