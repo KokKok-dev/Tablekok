@@ -19,7 +19,7 @@ public class RedisConfig {
 	@Value("${spring.data.redis.port}")
 	private int port;
 
-	@Value("${spring.data.redis.password}")
+	@Value("${spring.data.redis.password:pass}")
 	private String password;
 
 	@Bean
@@ -27,7 +27,7 @@ public class RedisConfig {
 		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
 
 		LettuceClientConfiguration.LettuceClientConfigurationBuilder clientConfigBuilder = LettuceClientConfiguration.builder();
-		if (password != null && !password.isBlank()) {
+		if ("localhost".equals(host)) {
 			config.setPassword(password);
 		}
 		if (!"localhost".equals(host)) {

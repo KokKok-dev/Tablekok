@@ -12,13 +12,13 @@ jwt:
 
 gateway:
   uris:
-    review: ${LB_DNS_REVIEW}
-    user: ${LB_DNS_USER}
-    store: ${LB_DNS_STORE}
-    search: ${LB_DNS_SEARCH}
-    hot-reservation: ${LB_DNS_HOT_RESERVATION}
-    reservation: ${LB_DNS_RESERVATION}
-#    waiting: lb://WAITING-SERVICE
+    review: ${REVIEW_URI:lb://REVIEW-SERVICE}
+    user: ${USER_URI}
+    store: ${STORE_URI}
+    search: ${SEARCH_URI:lb://SEARCH-SERVICE}
+    hot-reservation: ${HOT_RESERVATION_URI}
+    reservation: ${RESERVATION_URI}
+
 
 # Eureka 클라이언트 설정
 eureka:
@@ -26,7 +26,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL_DEV}
+      defaultZone: ${EUREKA_SERVER_URL}
   instance:
     prefer-ip-address: true
 
