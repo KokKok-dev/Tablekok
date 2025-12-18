@@ -67,3 +67,7 @@ management:
     web:
       exposure:
         include: health
+
+lb:
+  dns:
+    store: ${LB_DNS_STORE}
