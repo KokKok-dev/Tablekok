@@ -1,6 +1,7 @@
 ### 사장님 웨이팅 시작
-POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/start
+POST http://localhost:19091/v1/stores/442c2486-e7e6-4ade-b42e-bc97698bc535/waiting/start
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA5NDI1My1jNjQ0LTRlMWItYjdkNi1jNThhNmJhNGJlZjUiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjYwMzk0NTUsImV4cCI6MTc2NjEyNTg1NX0.mYbMRRonlYG8qd3S-sbW0X-084UXi2qQeFcu50COlWE
 
 {
   "totalTables": 10,
@@ -10,32 +11,33 @@ Content-Type: application/json
 }
 
 ### 사장님 웨이팅 중단
-POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/stop
+POST http://localhost:19091/v1/stores/442c2486-e7e6-4ade-b42e-bc97698bc535/waiting/stop
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4OTZjMjNlMS1iOTEyLTQ0MDEtOWExNi0wYjNmOTMyYmI1ZGYiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjYwNDM2OTAsImV4cCI6MTc2NjEzMDA5MH0.toYeO9HAS0lO_503FmHW0rUJ9BvU99-xTE6RYhk0Xvg
 
 
 
 ### 웨이팅 큐 조회
-GET http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/queue
+GET http://localhost:19091/v1/stores/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/queue
 Content-Type: application/json
 
 
 ### 고객 호출 CALLED
-POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/74eedb8f-df7b-42dd-9e9a-84b742b77a86/call
+POST http://localhost:19091/v1/stores/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/74eedb8f-df7b-42dd-9e9a-84b742b77a86/call
 Content-Type: application/json
 
 
 ### 고객 입장 처리 ENTERED
-POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/74eedb8f-df7b-42dd-9e9a-84b742b77a86/enter
+POST http://localhost:19091/v1/stores/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/74eedb8f-df7b-42dd-9e9a-84b742b77a86/enter
 Content-Type: application/json
 
 
 ### 사장님 취소 처리 OWNER_CANCELED
-POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/owner-cancel
+POST http://localhost:19091/v1/stores/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/owner-cancel
 Content-Type: application/json
 
 
 ### 사장님 노쇼 수동처리 NO_SHOW
-POST http://localhost:8086/v1/store/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/no-show
+POST http://localhost:19091/v1/stores/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/no-show
 Content-Type: application/json
 

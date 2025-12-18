@@ -39,7 +39,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:23.0.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis' // redis
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign' // feignClient
-
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
