@@ -1,4 +1,4 @@
-package com.tablekok.reservation_service.application.security;
+package com.tablekok.reservation_service.security;
 
 import java.util.Optional;
 import java.util.UUID;
