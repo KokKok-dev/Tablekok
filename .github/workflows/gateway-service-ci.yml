@@ -28,8 +28,8 @@ name: Deploy to Amazon ECS
 
 on:
   push:
-    branches: [ "main", "ci/#140-gateway" ]
-#    paths: [ 'gateway-service/**' ]
+    branches: [ "main" ]
+    paths: [ 'gateway-service/**' ]
 
 env:
   AWS_REGION: ap-northeast-2                                        # set this to your preferred AWS region, e.g. us-west-1
