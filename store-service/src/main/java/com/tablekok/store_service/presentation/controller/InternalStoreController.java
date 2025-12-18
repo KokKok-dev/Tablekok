@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tablekok.store_service.application.dto.result.StoreWaitingInternalResult;
 import com.tablekok.store_service.application.service.InternalStoreService;
 import com.tablekok.store_service.presentation.dto.request.OwnerVerificationRequest;
-import com.tablekok.store_service.presentation.dto.response.StoreOwnerResponse;
+import com.tablekok.store_service.presentation.dto.response.StoreWaitingInternalResponse;
 
 import lombok.AllArgsConstructor;
 
@@ -39,11 +40,12 @@ public class InternalStoreController {
 		return ResponseEntity.ok(isOwner);
 	}
 
-	@GetMapping("/{storeId}/owner")
-	public ResponseEntity<StoreOwnerResponse> getStoreOwner(
+	@GetMapping("/{storeId}/waiting-details")
+	public ResponseEntity<StoreWaitingInternalResponse> getStoreDetailsForWaiting(
 		@PathVariable UUID storeId
 	) {
-		UUID ownerId = internalStoreService.getOwnerIdByStoreId(storeId);
-		return ResponseEntity.ok(new StoreOwnerResponse(storeId, ownerId));
+		StoreWaitingInternalResult result = internalStoreService.getStoreDetailsForWaiting(storeId);
+		StoreWaitingInternalResponse response = StoreWaitingInternalResponse.from(result);
+		return ResponseEntity.ok(response);
 	}
 }
