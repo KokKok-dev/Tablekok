@@ -28,15 +28,15 @@ name: Deploy to Amazon ECS
 
 on:
   push:
-    branches: [ "main" ]
-    paths: [ 'hot-reservation-service/**' ]
+    branches: [ "main", "ci/#129-hot-reservation" ]
+#    paths: [ 'hot-reservation-service/**' ]
 
 env:
   AWS_REGION: ap-northeast-2                                        # set this to your preferred AWS region, e.g. us-west-1
   ECR_REPOSITORY: tablekok/hot-reservation                              # set this to your Amazon ECR repository name
   ECS_SERVICE: tablekok-hot-reservation-task-service-ybguhc6f           # set this to your Amazon ECS service name
   ECS_CLUSTER: tablekok-cluster                                     # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: .github/workflows/aws/tablekok-hot-reservation-task-revision1.json     # set this to the path to your Amazon ECS task definition
+  ECS_TASK_DEFINITION: .github/workflows/aws/tablekok-hot-reservation-task-revision5.json     # set this to the path to your Amazon ECS task definition
   CONTAINER_NAME: tablekok-hot-reservation-container                    # set this to the name of the container in the
   # containerDefinitions section of your task definition
 
@@ -71,6 +71,7 @@ jobs:
           DB_URL_PROD: ${{ secrets.RESERVATION_DB_URL }}
           DB_USERNAME_PROD: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD_PROD: ${{ secrets.DB_PASSWORD }}
+          LB_DNS_STORE: ${{ secrets.LB_DNS_STORE }}
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
