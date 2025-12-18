@@ -6,4 +6,4 @@ COPY ${JAR_FILE} app.jar
 
 EXPOSE 19091
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app.jar", "--spring.profiles.active=prod"]
