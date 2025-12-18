@@ -17,7 +17,8 @@ public enum WaitingErrorCode implements ErrorCode {
 	CONNECT_FORBIDDEN("WAITING103", "본인의 웨이팅만 연결할 수 있습니다.", HttpStatus.BAD_REQUEST),
 	INVALID_CUSTOMER_TYPE("WAITING104", "정의되지 않은 고객 타입입니다.", HttpStatus.BAD_REQUEST),
 	WAITING_NOT_IN_STORE("WAITING105", "매장에 해당 waitingId가 없습니다.", HttpStatus.BAD_REQUEST),
-	FORBIDDEN_ACCESS("WAITING106", "접근권한이 없습니다.", HttpStatus.FORBIDDEN);
+	FORBIDDEN_ACCESS("WAITING106", "접근권한이 없습니다.", HttpStatus.FORBIDDEN),
+	NO_STORE_OWNER("WAITING107", "해당 매장의 소유주가 아닙니다.", HttpStatus.FORBIDDEN);
 	private final String code;
 	private final String message;
 	private final HttpStatus status;
