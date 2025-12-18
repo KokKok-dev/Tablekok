@@ -18,6 +18,7 @@ gateway:
     search: lb://SEARCH-SERVICE
     hot-reservation: lb://HOT-RESERVATION-SERVICE
     reservation: lb://RESERVATION-SERVICE
+    waiting: lb://WAITING-SERVICE
 
 # Eureka 클라이언트 설정
 eureka:

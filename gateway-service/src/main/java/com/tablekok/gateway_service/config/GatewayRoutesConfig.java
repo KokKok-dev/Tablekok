@@ -20,6 +20,13 @@ public class GatewayRoutesConfig {
 	@Bean
 	public RouteLocator customRouteLocator(RouteLocatorBuilder builder, JwtAuthenticationFilter jwtFilter) {
 		return builder.routes()
+			// Waiting Service
+			.route("waiting-service-owner", r -> r
+				.path("/v1/stores/*/waiting/**") // 사장님용 엔드포인트
+				.filters(f -> f.filter(jwtFilter.apply(new JwtAuthenticationFilter.Config())))
+				.uri(uris.waiting())
+			)
+
 			// Review Service
 			.route("review-service-store-nested", r -> r
 				.path("/v1/stores/*/reviews/**") // 가게 리뷰 (와일드카드 사용)
@@ -76,6 +83,13 @@ public class GatewayRoutesConfig {
 				.path("/v1/hot-reservations/**")
 				.filters(f -> f.filter(jwtFilter.apply(new JwtAuthenticationFilter.Config())))
 				.uri(uris.hotReservation())
+			)
+
+			// Waiting Service
+			.route("waiting-service-user", r -> r
+				.path("/v1/waiting/**") // 사용자용 엔드포인트
+				.filters(f -> f.filter(jwtFilter.apply(new JwtAuthenticationFilter.Config())))
+				.uri(uris.waiting())
 			)
 
 			.build();
