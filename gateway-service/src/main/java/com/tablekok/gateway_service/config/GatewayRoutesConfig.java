@@ -5,6 +5,7 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 
 import com.tablekok.gateway_service.filter.JwtAuthenticationFilter;
 
@@ -48,6 +49,14 @@ public class GatewayRoutesConfig {
 				.path("/v1/users/**", "/internal/v1/users/**")
 				.filters(f -> f.filter(jwtFilter.apply(new JwtAuthenticationFilter.Config())))
 				.uri(uris.user())
+			)
+
+			// Store Service - 조회(GET) : 필터 없음 (누구나 접근 가능)
+			.route("store-service-get", r -> r
+				.path("/v1/stores/**", "/v1/categories/**")
+				.and()
+				.method(HttpMethod.GET)
+				.uri(uris.store())
 			)
 
 			// Store Service (리뷰 관련 경로가 아닌 나머지)

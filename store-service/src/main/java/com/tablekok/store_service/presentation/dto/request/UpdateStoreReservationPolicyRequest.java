@@ -51,10 +51,11 @@ public record UpdateStoreReservationPolicyRequest(
 	Boolean isActive
 ) {
 
-	public UpdateStoreReservationPolicyCommand toCommand(UUID ownerId, UUID storeId) {
+	public UpdateStoreReservationPolicyCommand toCommand(UUID ownerId, UUID storeId, String userRole) {
 		return UpdateStoreReservationPolicyCommand.builder()
 			.ownerId(ownerId)
 			.storeId(storeId)
+			.userRole(userRole)
 			.monthlyOpenDay(monthlyOpenDay)
 			.openTime(openTime)
 			.reservationInterval(reservationInterval)

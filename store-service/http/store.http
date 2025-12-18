@@ -1,0 +1,88 @@
+### store 생성 (owner만 가능)
+POST http://localhost:19091/v1/stores
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA5NDI1My1jNjQ0LTRlMWItYjdkNi1jNThhNmJhNGJlZjUiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjU5NzMwMzIsImV4cCI6MTc2NjA1OTQzMn0.PcOElY1j3Bhmkq_wXiRNOfc_0yf63Oa8XzDX-udCHZo
+
+{
+  "name": "음식점1",
+  "phoneNumber": "02-9876-5432",
+  "address": "서울시 강남구 삼성로 400",
+  "latitude": 37.512345,
+  "longitude": 127.056789,
+  "description": "월요일부터 일요일까지 영업 정보 완벽 입력",
+  "totalCapacity": 70,
+  "turnoverRateMinutes": 60,
+  "imageUrl": "https://example.com/weekly_store.jpg",
+  "categoryIds": [
+    "dd171a64-5237-4589-ade6-799ee8ba0476",
+    "c543c399-d282-434c-865f-01c5f25b110d"
+  ],
+  "operatingHours": [
+    {
+      "day": "MONDAY",
+      "openTime": "10:30",
+      "closeTime": "21:30",
+      "isClosed": false
+    },
+    {
+      "day": "TUESDAY",
+      "openTime": "10:30",
+      "closeTime": "21:30",
+      "isClosed": false
+    },
+    {
+      "day": "WEDNESDAY",
+      "openTime": "10:30",
+      "closeTime": "21:30",
+      "isClosed": false
+    },
+    {
+      "day": "THURSDAY",
+      "openTime": "10:30",
+      "closeTime": "21:30",
+      "isClosed": false
+    },
+    {
+      "day": "FRIDAY",
+      "openTime": "10:30",
+      "closeTime": "22:00",
+      "isClosed": false
+    },
+    {
+      "day": "SATURDAY",
+      "openTime": "11:00",
+      "closeTime": "22:00",
+      "isClosed": false
+    },
+    {
+      "day": "SUNDAY",
+      "openTime": null,
+      "closeTime": null,
+      "isClosed": true
+    }
+  ]
+}
+
+### store 정보 수정
+PATCH http://localhost:19091/v1/stores/442c2486-e7e6-4ade-b42e-bc97698bc535
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA5NDI1My1jNjQ0LTRlMWItYjdkNi1jNThhNmJhNGJlZjUiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjU5NzMwMzIsImV4cCI6MTc2NjA1OTQzMn0.PcOElY1j3Bhmkq_wXiRNOfc_0yf63Oa8XzDX-udCHZo
+
+
+{
+  "name": "음식점1",
+  "phoneNumber": "02-9876-5432",
+  "address": "서울시 강남구 삼성로 400",
+  "latitude": 37.512345,
+  "longitude": 127.056789,
+  "description": "음식점 정보 수정했따옹",
+  "totalCapacity": 70,
+  "turnoverRateMinutes": 60,
+  "imageUrl": "https://example.com/weekly_store.jpg"
+}
+
+
+### 음식점 삭제
+DELETE http://localhost:19091/v1/stores/442c2486-e7e6-4ade-b42e-bc97698bc535
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZGVlOTdmOS0yOWJlLTQyNjEtYjE5ZC00NzA0NDc3NWI2MWMiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzY1OTc2NDYyLCJleHAiOjE3NjYwNjI4NjJ9._f_nwUQ5uDm0EjcZg0Pweyasua4sssdxD_u4ScJZXcs
