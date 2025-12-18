@@ -11,13 +11,19 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tablekok.cursor.dto.request.CursorRequest;
 import com.tablekok.cursor.dto.response.Cursor;
 import com.tablekok.cursor.util.CursorUtils;
+import com.tablekok.entity.UserRole;
+import com.tablekok.exception.AppException;
 import com.tablekok.review_service.application.client.ReservationClient;
+import com.tablekok.review_service.application.client.SearchClient;
+import com.tablekok.review_service.application.client.dto.UpdateReviewStats;
+import com.tablekok.review_service.application.dto.ReviewStatsDto;
 import com.tablekok.review_service.application.dto.command.CreateReviewCommand;
 import com.tablekok.review_service.application.dto.command.UpdateReviewCommand;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
 import com.tablekok.review_service.application.dto.result.GetMyReviewsResult;
 import com.tablekok.review_service.application.dto.result.GetReviewResult;
 import com.tablekok.review_service.application.dto.result.GetStoreReviewsResult;
+import com.tablekok.review_service.application.exception.ReviewErrorCode;
 import com.tablekok.review_service.domain.entity.Review;
 import com.tablekok.review_service.domain.entity.ReviewSortCriteria;
 import com.tablekok.review_service.domain.repository.ReviewRepository;
@@ -25,7 +31,9 @@ import com.tablekok.review_service.domain.service.ReviewDomainService;
 import com.tablekok.review_service.domain.vo.Reservation;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -34,6 +42,7 @@ public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final ReservationClient reservationClient;
 	private final ReviewDomainService reviewDomainService;
+	private final SearchClient searchClient;
 
 	@Transactional
 	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId) {
@@ -50,27 +59,38 @@ public class ReviewService {
 
 		reviewRepository.save(newReview);
 
+		syncStoreStats(reservation.storeId());
+
 		return CreateReviewResult.fromEntity(newReview);
 	}
 
 	@Transactional
-	public void updateReview(UUID reviewId, UpdateReviewCommand command) {
+	public void updateReview(UUID reviewId, UUID userId, UpdateReviewCommand command) {
 		Review foundReview = findReview(reviewId);
+
+		validateReviewAuthor(foundReview, userId);
+
 		foundReview.updateReview(command.rating(), command.content());
+
+		syncStoreStats(foundReview.getStoreId());
 	}
 
 	@Transactional
-	public void deleteReview(UUID reviewId, UUID userId) {
+	public void deleteReview(UUID reviewId, UUID userId, String role) {
 		Review foundReview = findReview(reviewId);
-		foundReview.softDelete(userId);
-	}
 
-	private Review findReview(UUID reviewId) {
-		return reviewRepository.findById(reviewId);
+		if (!role.equals(UserRole.MASTER)) {
+			validateReviewAuthor(foundReview, userId);
+		}
+
+		foundReview.softDelete(userId);
+
+		syncStoreStats(foundReview.getStoreId());
 	}
 
 	public GetReviewResult getReview(UUID reviewId) {
-		Review foundReview = findReview(reviewId);
+		Review foundReview = reviewRepository.findById(reviewId).orElseThrow(
+			() -> new AppException(ReviewErrorCode.REVIEW_NOT_FOUND));
 		return GetReviewResult.fromResult(foundReview);
 	}
 
@@ -84,7 +104,10 @@ public class ReviewService {
 		Page<Review> storeReviews = reviewRepository.findReviewsByStoreId(
 			storeId, sortBy, request.cursor(), request.cursorId(), pageable);
 
+		long totalCount = reviewRepository.countByStoreId(storeId);
+
 		Cursor<Review, UUID> response = CursorUtils.makeResponse(
+			totalCount,
 			storeReviews.getContent(),
 			request.size(),
 			review -> {
@@ -105,7 +128,10 @@ public class ReviewService {
 		Page<Review> myReviews = reviewRepository.findReviewsByUserId(
 			userId, request.cursor(), request.cursorId(), pageable);
 
+		long totalCount = reviewRepository.countByUserId(userId);
+
 		Cursor<Review, UUID> response = CursorUtils.makeResponse(
+			totalCount,
 			myReviews.getContent(),
 			request.size(),
 			review -> review.getCreatedAt().toString(),
@@ -113,5 +139,29 @@ public class ReviewService {
 		);
 
 		return response.map(GetMyReviewsResult::from);
+	}
+
+	private Review findReview(UUID reviewId) {
+		return reviewRepository.findById(reviewId).orElseThrow(
+			() -> new AppException(ReviewErrorCode.REVIEW_NOT_FOUND));
+	}
+
+	// 리뷰 수정, 삭제 시 사용자 검증
+	private void validateReviewAuthor(Review review, UUID userId) {
+		if (!review.getUserId().equals(userId)) {
+			throw new AppException(ReviewErrorCode.REVIEW_INVALID_USER);
+		}
+	}
+
+	// 가게 리뷰수, 평균 평점 -> search-service로 전달
+	// Todo: feignClient로 동기통신 -> 이벤트 기반 비동기 통신으로 리팩토링
+	private void syncStoreStats(UUID storeId) {
+		ReviewStatsDto stats = reviewRepository.getReviewStats(storeId);
+		searchClient.updateStoreStats(storeId,
+			UpdateReviewStats.builder()
+				.averageRating(stats.averageRating())
+				.reviewCount(stats.reviewCount())
+				.build()
+		);
 	}
 }

@@ -1,20 +1,32 @@
-package com.tablekok.user_service.config;
+package com.tablekok.user_service.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.tablekok.user_service.security.filter.HeaderAuthFilter;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
+
+	private final HeaderAuthFilter headerAuthFilter;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -24,9 +36,14 @@ public class SecurityConfig {
 			.sessionManagement(session ->
 				session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				// Gateway 경유 시 이미 인증 완료 → 전체 permitAll 으로 리팩토링 진행
-				.anyRequest().permitAll()
+				// Auth 관련은 인증 없이 허용
+				.requestMatchers("/v1/auth/**").permitAll()
+				// Actuator 허용
+				.requestMatchers("/actuator/**").permitAll()
+				// 나머지는 인증 필요
+				.anyRequest().authenticated()
 			)
+			.addFilterBefore(headerAuthFilter, UsernamePasswordAuthenticationFilter.class)  // ← 추가!
 			.httpBasic(httpBasic -> httpBasic.disable())
 			.formLogin(formLogin -> formLogin.disable())
 			.logout(logout -> logout.disable());
@@ -40,6 +57,7 @@ public class SecurityConfig {
 		configuration.setAllowedOriginPatterns(Arrays.asList(
 			"http://localhost:3000",
 			"http://localhost:8080",
+			"http://localhost:8081",
 			"http://localhost:19091",
 			"https://*.tablekok.com",
 			"https://tablekok.vercel.app"

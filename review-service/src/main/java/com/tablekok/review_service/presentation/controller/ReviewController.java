@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -12,13 +14,13 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.cursor.dto.response.Cursor;
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.dto.auth.AuthUser;
 import com.tablekok.review_service.application.dto.result.CreateReviewResult;
 import com.tablekok.review_service.application.dto.result.GetReviewResult;
 import com.tablekok.review_service.application.service.ReviewService;
@@ -42,12 +44,13 @@ public class ReviewController {
 	private final ReviewService reviewService;
 
 	@PostMapping("/reviews")
+	@PreAuthorize("hasRole('CUSTOMER')")
 	public ResponseEntity<ApiResponse<CreateReviewResponse>> createReview(
 		@RequestBody @Valid CreateReviewRequest request,
-		@RequestHeader("X-User-Id") String strUserId
+		@AuthenticationPrincipal AuthUser authUser
 	) {
 		// 임시로 id 지정
-		UUID userId = UUID.fromString(strUserId);
+		UUID userId = UUID.fromString(authUser.userId());
 
 		CreateReviewResult result = reviewService.createReview(request.toCommand(), userId);
 
@@ -65,23 +68,26 @@ public class ReviewController {
 	}
 
 	@PatchMapping("/reviews/{reviewId}")
+	@PreAuthorize("hasRole('CUSTOMER')")
 	public ResponseEntity<ApiResponse<Void>> updateReview(
 		@PathVariable("reviewId") UUID reviewId,
+		@AuthenticationPrincipal AuthUser authUser,
 		@RequestBody @Valid UpdateReviewRequest request
 	) {
-		reviewService.updateReview(reviewId, request.toCommand());
+		UUID userId = UUID.fromString(authUser.userId());
+		reviewService.updateReview(reviewId, userId, request.toCommand());
 		return ResponseEntity.ok(
 			ApiResponse.success("리뷰 수정이 완료되었습니다.", HttpStatus.OK));
 	}
 
 	@DeleteMapping("/reviews/{reviewId}")
+	@PreAuthorize("hasAnyRole('CUSTOMER', 'MASTER')")
 	public ResponseEntity<ApiResponse<Void>> deleteReview(
 		@PathVariable("reviewId") UUID reviewId,
-		@RequestHeader("X-User-Id") String strUserId
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		// 임시로 id 지정
-		UUID userId = UUID.fromString(strUserId);
-		reviewService.deleteReview(reviewId, userId);
+		UUID userId = UUID.fromString(authUser.userId());
+		reviewService.deleteReview(reviewId, userId, authUser.role());
 		return ResponseEntity.ok(
 			ApiResponse.success("리뷰 삭제가 완료되었습니다.", HttpStatus.OK));
 	}
@@ -114,11 +120,12 @@ public class ReviewController {
 	}
 
 	@GetMapping("/users/me/reviews")
+	@PreAuthorize("hasRole('CUSTOMER')")
 	public ResponseEntity<ApiResponse<Cursor<GetMyReviewsResponse, UUID>>> findMyReviews(
-		@RequestHeader("X-User-Id") String strUserId,
+		@AuthenticationPrincipal AuthUser authUser,
 		@ModelAttribute GetMyReviewCursorRequest request
 	) {
-		UUID userId = UUID.fromString(strUserId);
+		UUID userId = UUID.fromString(authUser.userId());
 
 		Cursor<GetMyReviewsResponse, UUID> response = reviewService.findMyReviews(userId, request.toCursorRequest())
 			.map(GetMyReviewsResponse::from);

@@ -31,8 +31,10 @@ jwt:
 
 eureka:
   client:
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL}
+      defaultZone: ${EUREKA_SERVER_URL_DEV}
 
   instance:
     prefer-ip-address: true

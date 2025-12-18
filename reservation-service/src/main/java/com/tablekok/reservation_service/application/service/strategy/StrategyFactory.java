@@ -20,6 +20,6 @@ public class StrategyFactory {
 		return strategies.stream()
 			.filter(strategy -> strategy.supports(role)) // 해당 role을 지원하는지 확인
 			.findFirst()
-			.orElseThrow(() -> new AppException(ReservationErrorCode.USER_ROLE_NOT_FOUND));
+			.orElseThrow(() -> new AppException(ReservationErrorCode.FORBIDDEN_ACCESS));
 	}
 }

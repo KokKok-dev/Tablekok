@@ -69,40 +69,4 @@ public class JwtValidator {
 		}
 		return null;
 	}
-
-	public boolean hasPermissionForPath(String path, String role) {
-		log.debug("권한 확인 - 경로: {}, 역할: {}", path, role);
-
-		// 공개 경로
-		if (path.startsWith("/v1/auth/") ||
-			path.startsWith("/actuator/")) {
-			return true;
-		}
-
-		// 역할별 접근 제어
-		switch (role) {
-			case "CUSTOMER":
-				return path.startsWith("/v1/users/profile") ||
-					path.startsWith("/v1/users/findid") ||
-					path.startsWith("/v1/users/findpassword") ||
-					path.startsWith("/v1/reservations") ||
-					path.startsWith("/v1/reservations/*") ||
-					path.startsWith("/v1/hot-reservations/queue") ||
-					path.startsWith("/v1/hot-reservations/validation/{token}") ||
-					path.startsWith("/v1/hot-reservations");
-
-			case "OWNER":
-				return path.startsWith("/v1/users/profile") ||
-					path.startsWith("/v1/users/findid") ||
-					path.startsWith("/v1/users/findpassword") ||
-					path.startsWith("/v1/stores/");
-
-			case "MASTER":
-				return true;  // 관리자는 모든 경로 접근 가능
-
-			default:
-				log.warn("알 수 없는 역할: {}", role);
-				return false;
-		}
-	}
 }
