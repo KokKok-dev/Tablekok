@@ -1,6 +1,6 @@
 
-### 웨이팅 생성
-POST http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1
+### 웨이팅 생성(비회원)
+POST http://localhost:19091/v1/waiting/442c2486-e7e6-4ade-b42e-bc97698bc535
 Content-Type: application/json
 
 {
@@ -9,22 +9,39 @@ Content-Type: application/json
   "nonMemberPhone": "01012345678"
 }
 
+### 웨이팅 생성(회원)
+POST http://localhost:19091/v1/waiting/442c2486-e7e6-4ade-b42e-bc97698bc535
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzZDdkYjc4My0wYjZmLTRkOWEtODgwNS03MzE2NTUyYzMyYjciLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjYwNTQzOTgsImV4cCI6MTc2NjE0MDc5OH0.PzndYKBBO4TY9gy-irO47Tpba4R7ghFHi8nIUpt59Qc
+
+{
+  "headcount": 2,
+  "nonMemberName": "",
+  "nonMemberPhone": ""
+}
+
 ### SSE connect
-GET http://localhost:8086/v1/waiting/c6bac2f7-2c24-42bb-af1a-5af1b6a1ef06/connect?nonMemberName=홍길동&
+GET http://localhost:19091/v1/waiting/c6bac2f7-2c24-42bb-af1a-5af1b6a1ef06/connect?nonMemberName=홍길동&
     nonMemberPhone=01012345678
 
 
 
-### 웨이팅 조회
-GET http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1
+### 웨이팅 조회(회원)
+GET http://localhost:19091/v1/waiting/76dc7596-ad6d-4077-8967-7941be5c3ceb
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzZDdkYjc4My0wYjZmLTRkOWEtODgwNS03MzE2NTUyYzMyYjciLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjYwNTQzOTgsImV4cCI6MTc2NjE0MDc5OH0.PzndYKBBO4TY9gy-irO47Tpba4R7ghFHi8nIUpt59Qc
+
+### 웨이팅 조회(비회원)
+GET http://localhost:19091/v1/waiting/99b066ae-640a-4e4e-9ad6-2c41f01e7621?nonMemberName=김철수&
+    nonMemberPhone=01012345678
 Content-Type: application/json
 
 
 ### 웨이팅 상태 변경 (CONFIRM)
-POST http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/confirm
+POST http://localhost:19091/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/confirm
 Content-Type: application/json
 
 
 ### 웨이팅 상태 변경 (USER_CANCELED)
-POST http://localhost:8086/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/cancel
+POST http://localhost:19091/v1/waiting/ba1581b9-a7fe-4cd0-bfff-f7095d5837b1/cancel
 Content-Type: application/json
