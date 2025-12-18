@@ -92,15 +92,20 @@ public class ReservationService {
 
 	// 예약 인원수 변경
 	@Transactional
-	public void updateHeadcount(UUID userId, UUID reservationId, Integer headcount) {
-		Reservation findReservation = reservationRepository.findByIdAndUserId(reservationId, userId);
-
-		// 인원수 정책 검증
-		StoreReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
-			storeClient.getStoreReservationPolicy(findReservation.getStoreId()));
-		reservationDomainService.validateHeadcount(headcount, policy);
-
-		findReservation.updateHeadcount(headcount);
+	public void updateHeadcount(UUID userId, UUID reservationId, Integer headcount, UserRole role) {
+		if (role.equals(UserRole.CUSTOMER)) {
+			Reservation findReservation = reservationRepository.findByIdAndUserId(reservationId, userId);
+			// 인원수 정책 검증
+			StoreReservationPolicy policy = GetStoreReservationPolicyResponse.toVo(
+				storeClient.getStoreReservationPolicy(findReservation.getStoreId()));
+			reservationDomainService.validateHeadcount(headcount, policy);
+			findReservation.updateHeadcount(headcount);
+			return;
+		}
+		if (role.equals(UserRole.OWNER)) {
+			Reservation findReservation = reservationRepository.findById(reservationId);
+			findReservation.updateHeadcount(headcount);
+		}
 	}
 
 	// 예약 취소
@@ -112,19 +117,23 @@ public class ReservationService {
 
 	// 예약 노쇼(오너)
 	@Transactional
-	public void noShow(UUID userId, UUID reservationId) {
+	public void noShow(UUID userId, UUID reservationId, UserRole role) {
 		Reservation findReservation = reservationRepository.findById(reservationId);
-		// 해당 예약의 음식점이 사용자 소유인지
-		validateStoreOwner(userId, findReservation.getStoreId());
+
+		if (role.equals(UserRole.OWNER)) {
+			validateStoreOwner(userId, findReservation.getStoreId());
+		}
 		findReservation.noShow();
 	}
 
 	// 예약 확인(DONE, 오너)
 	@Transactional
-	public void done(UUID userId, UUID reservationId) {
+	public void done(UUID userId, UUID reservationId, UserRole role) {
 		Reservation findReservation = reservationRepository.findById(reservationId);
-		// 해당 예약의 음식점이 사용자 소유인지
-		validateStoreOwner(userId, findReservation.getStoreId());
+
+		if (role.equals(UserRole.OWNER)) {
+			validateStoreOwner(userId, findReservation.getStoreId());
+		}
 		findReservation.done();
 	}
 
@@ -137,10 +146,17 @@ public class ReservationService {
 		return GetReservationsForCustomerResult.toPage(reservations);
 	}
 
-	// 예약 조회(오너)
+	// 식당 예약 조회
 	@Transactional(readOnly = true)
-	public Page<GetReservationsForOwnerResult> getReservationsForOwner(UUID userId, UUID storeId, Pageable pageable) {
-		validateStoreOwner(userId, storeId);
+	public Page<GetReservationsForOwnerResult> getReservationsForOwner(
+		UUID userId,
+		UUID storeId,
+		UserRole role,
+		Pageable pageable
+	) {
+		if (role.equals(UserRole.OWNER)) {
+			validateStoreOwner(userId, storeId);
+		}
 		Pageable normalizedPageable = PageableUtils.normalize(pageable);
 
 		Page<Reservation> reservations = reservationRepository.findByStoreId(storeId, normalizedPageable);

@@ -15,15 +15,21 @@ public enum ReservationErrorCode implements ErrorCode {
 		"예약을 찾을 수 없습니다.",
 		HttpStatus.NOT_FOUND),
 
-	USER_ROLE_NOT_FOUND(
+	FORBIDDEN_ACCESS(
 		"RESERVATION101",
-		"지원하지 않는 권한입니다.",
+		"접근 권한이 없습니다.",
 		HttpStatus.NOT_FOUND),
 
 	FORBIDDEN_STORE_ACCESS(
 		"RESERVATION102",
 		"해당 음식점에 대한 권한이 없습니다.",
-		HttpStatus.FORBIDDEN);
+		HttpStatus.FORBIDDEN),
+
+	INTERNAL_CANNOT_CONNECT(
+		"RESERVATION103",
+		"내부 서비스 통신에 실패하였습니다. 다시 시도해주세요.",
+		HttpStatus.SERVICE_UNAVAILABLE
+	);
 
 	private final String code;
 	private final String message;
