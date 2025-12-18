@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.tablekok.waiting_server.infrastructure.client.dto.StoreWaitingInternalResponse;
 
-@FeignClient(name = "store-service")
+@FeignClient(name = "store-service", url = "${lb.dns.store}")
 public interface StoreFeignClient {
 	@GetMapping("/v1/internal/stores/{storeId}/waiting-details")
 	ResponseEntity<StoreWaitingInternalResponse> getStoreDetails(@PathVariable UUID storeId);
