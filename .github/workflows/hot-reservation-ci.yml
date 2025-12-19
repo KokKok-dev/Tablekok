@@ -72,6 +72,7 @@ jobs:
           DB_USERNAME_PROD: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD_PROD: ${{ secrets.DB_PASSWORD }}
           LB_DNS_STORE: ${{ secrets.LB_DNS_STORE }}
+          ZIPKIN_ENDPOINT: ${{ secrets.ZIPKIN_ENDPOINT }}
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
