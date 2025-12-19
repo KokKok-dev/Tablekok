@@ -1,0 +1,117 @@
+{
+  "compatibilities": [
+    "EC2",
+    "FARGATE",
+    "MANAGED_INSTANCES"
+  ],
+  "containerDefinitions": [
+    {
+      "cpu": 0,
+      "environment": [
+        {
+          "name": "DB_PASSWORD_PROD",
+          "value": "zhrzhr123"
+        },
+        {
+          "name": "EUREKA_SERVER_URL",
+          "value": "http://tablekok-eureka-server-lb-1162347586.ap-northeast-2.elb.amazonaws.com/eureka"
+        },
+        {
+          "name": "LB_DNS_STORE",
+          "value": "tablekok-store-service-lb-752510743.ap-northeast-2.elb.amazonaws.com"
+        },
+        {
+          "name": "CACHE_HOST",
+          "value": "tablekok-cache-saweub.serverless.apn2.cache.amazonaws.com"
+        },
+        {
+          "name": "CACHE_PORT",
+          "value": "6379"
+        },
+        {
+          "name": "DB_USERNAME_PROD",
+          "value": "postgres"
+        },
+        {
+          "name": "DB_URL_PROD",
+          "value": "jdbc:postgresql://tablekok-db.ch0umigqozdz.ap-northeast-2.rds.amazonaws.com:5433/tablekok_reservation_db"
+        },
+        {
+          "name": "ZIPKIN_ENDPOINT",
+          "value": "http://tablekok-zipkin-lb-1242910951.ap-northeast-2.elb.amazonaws.com/api/v2/spans"
+        }
+      ],
+      "essential": true,
+      "image": "291433606038.dkr.ecr.ap-northeast-2.amazonaws.com/tablekok/hot-reservation:5a07b12505b97ea974bd5df2187b059c84e3374d",
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/tablekok-hot-reservation-task",
+          "awslogs-create-group": "true",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        },
+        "secretOptions": []
+      },
+      "mountPoints": [],
+      "name": "tablekok-hot-reservation-container",
+      "portMappings": [
+        {
+          "appProtocol": "http",
+          "containerPort": 8085,
+          "hostPort": 8085,
+          "name": "tablekok-hot-reservation-container-8085-tcp",
+          "protocol": "tcp"
+        }
+      ],
+      "systemControls": [],
+      "volumesFrom": []
+    }
+  ],
+  "cpu": "1024",
+  "executionRoleArn": "arn:aws:iam::291433606038:role/ecsTaskExecutionRole",
+  "family": "tablekok-hot-reservation-task",
+  "memory": "3072",
+  "networkMode": "awsvpc",
+  "placementConstraints": [],
+  "registeredAt": "2025-12-18T12:33:12.870Z",
+  "registeredBy": "arn:aws:iam::291433606038:user/Gyoseok",
+  "requiresAttributes": [
+    {
+      "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+    },
+    {
+      "name": "ecs.capability.execution-role-awslogs"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.ecr-auth"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+    },
+    {
+      "name": "ecs.capability.execution-role-ecr-pull"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+    },
+    {
+      "name": "ecs.capability.task-eni"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "revision": 5,
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "status": "ACTIVE",
+  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:291433606038:task-definition/tablekok-hot-reservation-task:5",
+  "volumes": [],
+  "tags": []
+}

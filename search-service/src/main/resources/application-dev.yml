@@ -1,0 +1,47 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: search-service
+
+    # 1. Elasticsearch 설정
+  elasticsearch:
+    uris: http://localhost:9200 # ES 실행 주소
+    connection-timeout: 5s
+    socket-timeout: 30s
+    # username: elastic # 보안 설정(X-Pack)이 되어있다면 주석 해제
+    # password: changeme
+
+  # 2. Kafka 설정
+  kafka:
+    bootstrap-servers: localhost:9092 # Kafka 브로커 주소
+    consumer:
+      group-id: search-service-group # 컨슈머 그룹 ID, Java 코드의 @KafkaListener groupId와 일치해야 함
+      auto-offset-reset: earliest    # 서버 처음 뜰 때, 못 읽은 데이터 처음부터 읽기
+      enable-auto-commit: false      # 데이터 정합성을 위해 수동 커밋 권장 (혹은 AckMode 사용)
+      # 직렬화 설정 (Java Config에서 덮어씌워질 수 있으나 기본값으로 명시)
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*" # 모든 패키지의 DTO 신뢰 (보안 경고 방지)
+
+  # 3. 한글 깨짐 방지 및 JSON 포맷팅
+  jackson:
+    serialization:
+      indent_output: true # JSON 응답 예쁘게 출력
+    deserialization:
+      fail_on_unknown_properties: false # 모르는 필드가 와도 에러 안 내고 무시
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL_DEV}
+
+logging:
+  level:
+    root: INFO
+    com.tablekok.search-service: DEBUG # 내 프로젝트 로그는 자세히 보기
+    org.springframework.data.elasticsearch.client.WIRE: TRACE # ES 쿼리 로그 확인용 (개발 시 유용)

@@ -1,0 +1,59 @@
+package com.tablekok.store_service.application.service.strategy;
+
+import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
+import com.tablekok.entity.UserRole;
+import com.tablekok.exception.AppException;
+import com.tablekok.store_service.application.exception.StoreErrorCode;
+import com.tablekok.store_service.domain.entity.Store;
+import com.tablekok.store_service.domain.entity.StoreStatus;
+
+import lombok.RequiredArgsConstructor;
+
+@Component
+@RequiredArgsConstructor
+public class OwnerStatusStrategy implements StoreStatusTransitionStrategy {
+
+	// Owner가 상태 변경을 시작할 수 없는 현재 상태 목록
+	private final Set<StoreStatus> FORBIDDEN_CURRENT_STATUSES = Set.of(
+		StoreStatus.PENDING_APPROVAL,
+		StoreStatus.APPROVAL_REJECTED,
+		StoreStatus.DECOMMISSIONED // 이 상태에서는 영구적으로 변경 불가
+	);
+
+	// Owner가 목표 상태로 설정할 수 없는 Master 전용 상태 목록
+	private final Set<StoreStatus> FORBIDDEN_NEW_STATUSES = Set.of(
+		StoreStatus.PENDING_APPROVAL,
+		StoreStatus.APPROVAL_REJECTED,
+		StoreStatus.DECOMMISSIONED
+	);
+
+	@Override
+	public Boolean supports(UserRole userRole) {
+		return userRole == UserRole.OWNER;
+	}
+
+	@Override
+	public void changeStatus(Store store, StoreStatus newStatus) {
+		// 현재 상태가 PENDING/REJECTED/DECOMMISSIONED인 경우, Owner는 상태 변경 불가
+		if (FORBIDDEN_CURRENT_STATUSES.contains(store.getStatus())) {
+			throw new AppException(StoreErrorCode.OWNER_FORBIDDEN_CURRENT_STATUS_TRANSITION);
+		}
+
+		// Owner가 Master 전용 상태로 NEW STATUS를 시도 시 예외
+		if (FORBIDDEN_NEW_STATUSES.contains(newStatus)) {
+			throw new AppException(StoreErrorCode.OWNER_FORBIDDEN_STATUS_TRANSITION);
+		}
+
+		// 임시 상태에서 OPERATING으로의 복구는 허용
+		if ((store.getStatus() == StoreStatus.CLOSED_TODAY || store.getStatus() == StoreStatus.BREAK_TIME)
+			&& newStatus == StoreStatus.OPERATING) {
+			store.changeStatus(newStatus);
+			return;
+		}
+
+		store.changeStatus(newStatus);
+	}
+}

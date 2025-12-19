@@ -1,0 +1,80 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: hot-reservation-service
+
+  data:
+    redis:
+      host: ${CACHE_HOST}
+      port: ${CACHE_PORT}
+
+  datasource:
+    url: ${DB_URL_PROD}
+    username: ${DB_USERNAME_PROD}
+    password: ${DB_PASSWORD_PROD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# 20분 (1200초) - 대기열 sse 타임아웃 (ms)
+queue:
+  sse:
+    timeout: 1200000
+
+redis:
+  queue:
+    key: "reservation:queue"
+
+  token:
+    prefix: "reservation:token:"
+
+  available:
+    users:
+      key: "reservation:available_users"
+
+reservation:
+  # 20분 (1200초) - 예약 가능 토큰 최대 유지 시간 (ms)
+  token:
+    ttl: 600000
+
+  # 예약 가능 최대 인원
+  available:
+    user:
+      limit: 2
+
+  # 예약 상태 만료 확인 주기 (ms)
+  process:
+    interval: 4000
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
+
+lb:
+  dns:
+    store: ${LB_DNS_STORE}

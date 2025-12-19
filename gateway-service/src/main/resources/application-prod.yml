@@ -1,0 +1,54 @@
+server:
+  port: 19091
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: gateway-service
+
+jwt:
+  secret: ${JWT_SECRET}
+
+gateway:
+  uris:
+    review: ${REVIEW_URI:lb://REVIEW-SERVICE}
+    user: ${USER_URI}
+    store: ${STORE_URI}
+    search: ${SEARCH_URI:lb://SEARCH-SERVICE}
+    hot-reservation: ${HOT_RESERVATION_URI}
+    reservation: ${RESERVATION_URI}
+
+
+# Eureka 클라이언트 설정
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL}
+  instance:
+    prefer-ip-address: true
+
+# Actuator 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,routes
+  endpoint:
+    health:
+      show-details: always
+
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
+
+# 로깅 설정
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.tablekok.gateway_service: DEBUG

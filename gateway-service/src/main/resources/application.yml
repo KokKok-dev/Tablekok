@@ -1,46 +1,6 @@
-server:
-  port: 19091
-
 spring:
-  main:
-    web-application-type: reactive
   application:
     name: gateway-service
 
-  cloud:
-    gateway:
-      server:
-        webflux:
-          routes:
-            - id: user-service
-              uri: lb://USER-SERVICE
-              predicates:
-                - Path=/v1/users/**, /internal/v1/users/**
-
-            - id: store-service
-              uri: lb://STORE-SERVICE
-              predicates:
-                - Path=/v1/stores/**, /v1/categories/**
-
-            - id: search-service
-              uri: lb://SEARCH-SERVICE
-              predicates:
-                - Path=/v1/stores/**
-
-            - id: reservation-service
-              uri: lb://RESERVATION-SERVICE
-              predicates:
-                - Path=/v1/reservations/**
-
-
-            - id: review-service
-              uri: lb://REVIEW-SERVICE
-              predicates:
-                - Path=/v1/reviews/**
-
-eureka:
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:19090/eureka
+  profiles:
+    active: dev

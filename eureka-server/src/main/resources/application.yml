@@ -1,11 +1,6 @@
-server:
-  port: 19090
-
 spring:
   application:
     name: eureka-server
 
-eureka:
-  client:
-    register-with-eureka: false
-    fetch-registry: false
+  profiles:
+    active: dev

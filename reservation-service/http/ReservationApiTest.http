@@ -1,0 +1,75 @@
+### 예약 생성 (예약 접수)
+POST http://localhost:19091/v1/reservations
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4NzYxOTgsImV4cCI6MTc2NTk2MjU5OH0.TiN-AQps4TaqvKt0soaba0qIhxWZ14mcPvWQ-atpObs
+
+{
+  "storeId": "f5bf4f7c-ccfc-4741-a7d4-3b1625fcf70e",
+  "reservationDateTime": "2025-12-29T16:00:00",
+  "headcount": 3
+}
+
+
+### 단건 예약 조회 (리뷰용)
+GET http://localhost:8084/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8
+
+
+### 예약 인원 변경
+PATCH http://localhost:8084/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8
+Content-Type: application/json
+
+{
+  "headcount": 4
+}
+
+
+### 예약 취소 (고객/오너 전략 적용)
+PATCH http://localhost:8084/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8/cancel
+
+
+### 예약 노쇼 처리 (오너)
+PATCH http://localhost:8084/v1/reservations/owner/796b9651-5305-4616-9319-ec8cb440b547/noshow
+
+
+### 예약 확인(DONE, 오너)
+PATCH http://localhost:8084/v1/reservations/owner/1b35833d-657c-4104-aecf-a13023f779a8/done
+
+
+### 예약 조회 (고객)
+GET http://localhost:19091/v1/reservations
+#GET http://tablekok-gateway-service-lb-1957092183.ap-northeast-2.elb.amazonaws.com/v1/reservations
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4NzYxOTgsImV4cCI6MTc2NTk2MjU5OH0.TiN-AQps4TaqvKt0soaba0qIhxWZ14mcPvWQ-atpObs
+
+
+### 예약 조회 (오너)
+GET http://tablekok-gateway-service-lb-1957092183.ap-northeast-2.elb.amazonaws.com/v1/reservations/owner?
+    storeId=a0c33cc2-bafc-4031-8173-c95ad7fb7621
+
+
+### 회원가입
+POST http://localhost:19091/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "customer6@test.com",
+  "password": "Test1234!",
+  "username": "홍길동",
+  "phoneNumber": "01034567890"
+}
+
+
+### 로그인
+POST http://localhost:19091/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer5@test.com",
+  "password": "Test1234!"
+}
+
+
+### 회원 조회
+GET http://tablekok-gateway-service-lb-1957092183.ap-northeast-2.elb.amazonaws.com/v1/users/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU3ODQyNjQsImV4cCI6MTc2NTg3MDY2NH0.JJpPJtURfIaNlMfaOJhO5VgvEwsrkrpRH5L3qsChiJg
