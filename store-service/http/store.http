@@ -1,10 +1,10 @@
 ### store 생성 (owner만 가능)
 POST http://localhost:19091/v1/stores
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA5NDI1My1jNjQ0LTRlMWItYjdkNi1jNThhNmJhNGJlZjUiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjU5NzMwMzIsImV4cCI6MTc2NjA1OTQzMn0.PcOElY1j3Bhmkq_wXiRNOfc_0yf63Oa8XzDX-udCHZo
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA5NDI1My1jNjQ0LTRlMWItYjdkNi1jNThhNmJhNGJlZjUiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjYxMTQ5MzIsImV4cCI6MTc2NjIwMTMzMn0.jrsa8V5k4MpFlTfETibGltH_MOR9TUx9OQ-IQP02-6U
 
 {
-  "name": "음식점1",
+  "name": "음식점4",
   "phoneNumber": "02-9876-5432",
   "address": "서울시 강남구 삼성로 400",
   "latitude": 37.512345,
@@ -64,13 +64,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA5NDI1My1jNjQ0LTRlMWItY
 }
 
 ### store 정보 수정
-PATCH http://localhost:19091/v1/stores/442c2486-e7e6-4ade-b42e-bc97698bc535
+PATCH http://localhost:19091/v1/stores/ac4e947e-ac69-4c66-88ab-037016ba8e7b
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA5NDI1My1jNjQ0LTRlMWItYjdkNi1jNThhNmJhNGJlZjUiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjU5NzMwMzIsImV4cCI6MTc2NjA1OTQzMn0.PcOElY1j3Bhmkq_wXiRNOfc_0yf63Oa8XzDX-udCHZo
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA5NDI1My1jNjQ0LTRlMWItYjdkNi1jNThhNmJhNGJlZjUiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjYxMTQ5MzIsImV4cCI6MTc2NjIwMTMzMn0.jrsa8V5k4MpFlTfETibGltH_MOR9TUx9OQ-IQP02-6U
 
 
 {
-  "name": "음식점1",
+  "name": "음식점 이름 바꿔요!!",
   "phoneNumber": "02-9876-5432",
   "address": "서울시 강남구 삼성로 400",
   "latitude": 37.512345,
@@ -82,7 +82,26 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA5NDI1My1jNjQ0LTRlMWItY
 }
 
 
-### 음식점 삭제
+### 음식점 삭제 (마스터)
 DELETE http://localhost:19091/v1/stores/442c2486-e7e6-4ade-b42e-bc97698bc535
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZGVlOTdmOS0yOWJlLTQyNjEtYjE5ZC00NzA0NDc3NWI2MWMiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzY1OTc2NDYyLCJleHAiOjE3NjYwNjI4NjJ9._f_nwUQ5uDm0EjcZg0Pweyasua4sssdxD_u4ScJZXcs
+
+
+### 음식점 상태 변경 (사장님)
+PATCH http://localhost:19091/v1/stores/442c2486-e7e6-4ade-b42e-bc97698bc535/status
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDA5NDI1My1jNjQ0LTRlMWItYjdkNi1jNThhNmJhNGJlZjUiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjYxMTQ5MzIsImV4cCI6MTc2NjIwMTMzMn0.jrsa8V5k4MpFlTfETibGltH_MOR9TUx9OQ-IQP02-6U
+
+{
+  "storeStatus": "CLOSED_TODAY"
+}
+
+### 음식점 상태 변경(마스터)
+PATCH http://localhost:19091/v1/stores/5dc40765-f81a-4d77-b509-5a1a7947b168/status
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZGVlOTdmOS0yOWJlLTQyNjEtYjE5ZC00NzA0NDc3NWI2MWMiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzY2MTI2NDU2LCJleHAiOjE3NjYyMTI4NTZ9.L_b7XKpwQ-8vi6zJ-jDHND1TH-WdxNJqVOoUK-5aI-I
+
+{
+  "storeStatus": "OPERATING"
+}

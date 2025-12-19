@@ -48,12 +48,6 @@ public class MasterStatusStrategy implements StoreStatusTransitionStrategy {
 			throw new AppException(StoreErrorCode.MASTER_INVALID_STATUS_TRANSITION);
 		}
 
-		// Current Status 검사 (Owner 전용 상태에 Master가 개입하는 것을 방지)
-		// Master는 CLOSED_TODAY나 BREAK_TIME 상태 자체를 다루지 않습니다.
-		if (OWNER_TEMP_STATUSES.contains(store.getStatus())) {
-			throw new AppException(StoreErrorCode.MASTER_INVALID_STATUS_TRANSITION);
-		}
-
 		// 3. 역전환 로직 검사 (PENDING_APPROVAL로 되돌리는 행위 중 금지된 경우)
 		if (FORBIDDEN_REVERSION_STATUSES.contains(store.getStatus()) && newStatus == StoreStatus.PENDING_APPROVAL) {
 			throw new AppException(StoreErrorCode.MASTER_FORBIDDEN_REVERSION_TRANSITION);
