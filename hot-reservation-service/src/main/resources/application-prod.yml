@@ -68,6 +68,13 @@ management:
       exposure:
         include: health
 
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
+
 lb:
   dns:
     store: ${LB_DNS_STORE}

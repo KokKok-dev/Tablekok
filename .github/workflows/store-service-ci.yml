@@ -29,7 +29,7 @@ name: Deploy to Amazon ECS
 on:
   push:
     branches: [ "main" ]
-    paths: [ 'store-service/**' ] # 🌳 모노레포: store-service 폴더 변경 시에만 실행
+    paths: [ 'store-service/**' ]
 
 env:
   AWS_REGION: ap-northeast-2                   # set this to your preferred AWS region, e.g. us-west-1
@@ -37,9 +37,9 @@ env:
   ECS_SERVICE: tablekok-store-task-service-bpaoz4hs                 # set this to your Amazon ECS service name
   ECS_CLUSTER: tablekok-cluster                 # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: .github/workflows/aws/tablekok-store-task-revision3.json # set this to the path to your
-                                               # file, e.g. .aws/task-definition.json
+  # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: tablekok-store-container           # set this to the name of the container in the
-                                               # containerDefinitions section of your task definition
+  # containerDefinitions section of your task definition
 
 permissions:
   contents: read
@@ -50,91 +50,92 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew 
-      working-directory: ./store-service # ✅ 수정
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+        working-directory: ./store-service
 
-    - name: Build with Gradle
-      run: ./gradlew clean build -x test
-      working-directory: ./store-service # ✅ 수정
-      env:
-        RDS_ENDPOINT_STORE: ${{ secrets.RESERVATION_DB_URL }} 
-        DB_USER_STORE: ${{ secrets.DB_USERNAME }}
-        DB_PASSWORD_STORE: ${{ secrets.DB_PASSWORD }}
-        EUREKA_SERVER_URL: ${{ secrets.EUREKA_SERVER_URL }}
-      
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-libs
-        path: store-service/build/libs/*.jar # ✅ 아티팩트 경로를 store-service 기준으로 지정
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+        working-directory: ./store-service
+        env:
+          RDS_ENDPOINT_STORE: ${{ secrets.RESERVATION_DB_URL }}
+          DB_USER_STORE: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD_STORE: ${{ secrets.DB_PASSWORD }}
+          EUREKA_SERVER_URL: ${{ secrets.EUREKA_SERVER_URL }}
+          ZIPKIN_ENDPOINT: ${{ secrets.ZIPKIN_ENDPOINT }}
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-libs
+          path: store-service/build/libs/*.jar # 아티팩트 경로를 store-service 기준으로 지정
 
 
 
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: production 
-    needs: build # 🧱 추가: build Job이 성공해야만 deploy Job이 실행되도록 의존성 설정
+    environment: production
+    needs: build # 추가: build Job이 성공해야만 deploy Job이 실행되도록 의존성 설정
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Download Build Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-libs
-        path: store-service/build/libs # ✅ 수정: 다운로드 경로를 store-service 기준으로 지정
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-libs
+          path: store-service/build/libs # 수정: 다운로드 경로를 store-service 기준으로 지정
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
 
-    # --- Docker Build/Push 시작 (Task Definition 업데이트보다 먼저 실행되어야 함) ---
+      # --- Docker Build/Push 시작 (Task Definition 업데이트보다 먼저 실행되어야 함) ---
 
-    - name: Build, tag, and push image to Amazon ECR
-      id: build-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./store-service
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./store-service
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      
 
-    
-    # --- Docker Build/Push 끝 ---
-    - name: Fill in the new image ID in the Amazon ECS task definition
-      id: task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION }}
-        container-name: ${{ env.CONTAINER_NAME }}
-        image: ${{ steps.build-image.outputs.image }} # 이제 image output을 정상적으로 참조 가능
+      # --- Docker Build/Push 끝 ---
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }} # 이제 image output을 정상적으로 참조 가능
 
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: true
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
   

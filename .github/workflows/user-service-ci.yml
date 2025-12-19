@@ -70,6 +70,7 @@ jobs:
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ZIPKIN_ENDPOINT: ${{ secrets.ZIPKIN_ENDPOINT }}
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4

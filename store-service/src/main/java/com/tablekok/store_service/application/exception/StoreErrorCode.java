@@ -27,7 +27,9 @@ public enum StoreErrorCode implements ErrorCode {
 		HttpStatus.BAD_REQUEST),
 
 	FORBIDDEN_ACCESS("STORE107", "접근권한이 없습니다.", HttpStatus.BAD_REQUEST),
-
+	OPERATING_HOUR_NOT_FOUND("STORE108", "해당 운영시간이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+	STORE_CLOSED_TODAY("STORE109", "오늘은 정기 휴무일입니다", HttpStatus.BAD_REQUEST),
+	
 	// ----------------------------------------------------
 	// SRP1xx: 예약 정책 (ReservationPolicy) 검증 오류
 	// ----------------------------------------------------

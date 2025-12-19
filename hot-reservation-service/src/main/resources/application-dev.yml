@@ -63,3 +63,20 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:19090/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
+
+lb:
+  dns:
+    store: ""

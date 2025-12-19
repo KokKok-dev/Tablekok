@@ -23,6 +23,10 @@
         {
           "name": "DB_PASSWORD",
           "value": "zhrzhr123"
+        },
+        {
+          "name": "ZIPKIN_ENDPOINT",
+          "value": "http://tablekok-zipkin-lb-1242910951.ap-northeast-2.elb.amazonaws.com/api/v2/spans"
         }
       ],
       "environmentFiles": [],

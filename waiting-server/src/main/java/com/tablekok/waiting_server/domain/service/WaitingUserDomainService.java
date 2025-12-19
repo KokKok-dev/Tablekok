@@ -28,12 +28,6 @@ public class WaitingUserDomainService {
 		WaitingStatus.CONFIRMED
 	);
 
-	public void validateStoreStatus(StoreWaitingStatus status) {
-		if (!status.isOpenForWaiting()) {
-			throw new AppException(WaitingDomainErrorCode.WAITING_CLOSED);
-		}
-	}
-
 	public void validateHeadcountPolicy(int headcount, int min, int max) {
 		if (headcount < min) {
 			throw new AppException(WaitingDomainErrorCode.HEADCOUNT_BELOW_MIN);
