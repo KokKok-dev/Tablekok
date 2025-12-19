@@ -9,6 +9,7 @@ public record GatewayUriProperties(
 	String store,
 	String reservation,
 	String search,
-	String hotReservation
+	String hotReservation,
+	String waiting
 ) {
 }

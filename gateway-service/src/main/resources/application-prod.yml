@@ -19,6 +19,7 @@ gateway:
     hot-reservation: ${HOT_RESERVATION_URI}
     reservation: ${RESERVATION_URI}
 
+
 # Eureka 클라이언트 설정
 eureka:
   client:

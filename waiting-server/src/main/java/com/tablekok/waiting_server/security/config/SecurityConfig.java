@@ -1,8 +1,7 @@
-package com.tablekok.store_service.security.config;
+package com.tablekok.waiting_server.security.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,7 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.tablekok.store_service.security.filter.HeaderAuthFilter;
+import com.tablekok.waiting_server.security.filter.HeaderAuthFilter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +30,7 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers(HttpMethod.GET, "/v1/categories/**", "/v1/stores/**").permitAll()
-				.requestMatchers("/v1/internal/stores/**").permitAll()
+				.requestMatchers("/v1/waiting/**").permitAll()
 				.requestMatchers("/actuator/**").permitAll()
 				.anyRequest().authenticated()
 			)

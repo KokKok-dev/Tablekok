@@ -128,7 +128,6 @@ public class StoreController {
 	}
 
 	@GetMapping("/{storeId}/reservation-policy")
-	@PreAuthorize("hasAnyRole('MASTER', 'OWNER')")
 	public ResponseEntity<ApiResponse<GetStoreReservationPolicyResponse>> getStoreReservationPolicy(
 		@PathVariable UUID storeId
 	) {
