@@ -24,7 +24,10 @@ public record StoreEvent(
 	Integer turnoverRateMinutes,
 	LocalTime waitingOpenTime,
 	LocalTime reservationOpenTime,
+
+	List<UUID> categoryIds,
 	List<String> categories,
+
 	LocalDateTime createdAt,
 	UUID createdBy,
 	LocalDateTime updatedAt,
@@ -47,6 +50,7 @@ public record StoreEvent(
 			.turnoverRateMinutes(turnoverRateMinutes)
 			.waitingOpenTime(waitingOpenTime)
 			.reservationOpenTime(reservationOpenTime)
+			.categoryIds(categoryIds)
 			.categories(categories)
 			.createdAt(createdAt)
 			.createdBy(createdBy)

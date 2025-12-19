@@ -1,6 +1,5 @@
 package com.tablekok.search_service.domain.document;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -75,6 +74,10 @@ public class StoreDocument extends BaseDocument {
 	private LocalTime reservationOpenTime;
 
 	// --- Category (역정규화: 검색 성능을 위해 이름 리스트로 저장) ---
+
+	@Field(type = FieldType.Keyword)
+	private List<UUID> categoryIds;
+
 	@Field(type = FieldType.Keyword)
 	private List<String> categories; // 예: ["한식", "삼겹살"]
 
@@ -133,7 +136,7 @@ public class StoreDocument extends BaseDocument {
 	// 초기 생성을 위한 팩토리 메서드
 	public static StoreDocument create(String storeId, StoreUpdateCommand command) {
 		GeoPoint geoPoint = (command.latitude() != null && command.longitude() != null)
-			? new GeoPoint(command.latitude().doubleValue(), command.latitude().doubleValue()) : null;
+			? new GeoPoint(command.latitude().doubleValue(), command.longitude().doubleValue()) : null;
 
 		return StoreDocument.builder()
 			.storeId(storeId)
@@ -148,6 +151,7 @@ public class StoreDocument extends BaseDocument {
 			.turnoverRateMinutes(command.turnoverRateMinutes())
 			.waitingOpenTime(command.waitingOpenTime())
 			.reservationOpenTime(command.reservationOpenTime())
+			.categoryIds(command.categoryIds())
 			.categories(command.categories())
 			// 초기 생성 시 통계는 0
 			.averageRating(0.0)
@@ -170,9 +174,12 @@ public class StoreDocument extends BaseDocument {
 		this.isHot = command.isHot() != null ? command.isHot() : this.isHot;
 		this.imageUrl = command.imageUrl() != null ? command.imageUrl() : this.imageUrl;
 		this.description = command.description() != null ? command.description() : this.description;
-		this.turnoverRateMinutes = command.turnoverRateMinutes() != null ? command.turnoverRateMinutes() : this.turnoverRateMinutes;
+		this.turnoverRateMinutes =
+			command.turnoverRateMinutes() != null ? command.turnoverRateMinutes() : this.turnoverRateMinutes;
 		this.waitingOpenTime = command.waitingOpenTime() != null ? command.waitingOpenTime() : this.waitingOpenTime;
-		this.reservationOpenTime = command.reservationOpenTime() != null ? command.reservationOpenTime() : this.reservationOpenTime;
+		this.reservationOpenTime =
+			command.reservationOpenTime() != null ? command.reservationOpenTime() : this.reservationOpenTime;
+		this.categoryIds = command.categoryIds() != null ? command.categoryIds() : this.categoryIds;
 		this.categories = command.categories() != null ? command.categories() : this.categories;
 		super.update(command.updatedAt(), command.updatedBy());
 
