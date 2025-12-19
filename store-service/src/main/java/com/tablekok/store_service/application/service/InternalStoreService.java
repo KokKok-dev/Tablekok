@@ -17,20 +17,18 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class InternalStoreService {
 	private final StoreRepository storeRepository;
 
-	@Transactional(readOnly = true)
 	public List<UUID> findPopularStores() {
 		return storeRepository.findHotStoreIds();
 	}
 
-	@Transactional(readOnly = true)
 	public boolean isOwner(UUID storeId, UUID ownerId) {
 		return storeRepository.isOwner(storeId, ownerId);
 	}
 
-	@Transactional(readOnly = true)
 	public StoreWaitingInternalResult getStoreDetailsForWaiting(UUID storeId) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new AppException(StoreErrorCode.STORE_NOT_FOUND));
