@@ -31,6 +31,10 @@
         {
           "name": "HOT_RESERVATION_URI",
           "value": "http://tablekok-hot-reservation-lb-1034623374.ap-northeast-2.elb.amazonaws.com"
+        },
+        {
+          "name": "ZIPKIN_ENDPOINT",
+          "value": "http://tablekok-zipkin-lb-1242910951.ap-northeast-2.elb.amazonaws.com/api/v2/spans"
         }
       ],
       "environmentFiles": [],
