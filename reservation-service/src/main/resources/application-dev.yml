@@ -30,3 +30,16 @@ eureka:
 lb:
   dns:
     store: ""
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
