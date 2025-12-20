@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tablekok.dto.ApiResponse;
+import com.tablekok.dto.auth.AuthUser;
 import com.tablekok.waiting_server.application.dto.command.GetWaitingCommand;
 import com.tablekok.waiting_server.application.dto.result.CreateWaitingResult;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingResult;
@@ -26,10 +28,12 @@ import com.tablekok.waiting_server.presentation.dto.response.GetWaitingResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/v1/waiting")
 @RequiredArgsConstructor
+@Slf4j
 public class WaitingUserController {
 
 	private final WaitingUserService waitingUserService;
@@ -37,12 +41,13 @@ public class WaitingUserController {
 	@PostMapping("/{storeId}")
 	public ResponseEntity<ApiResponse<CreateWaitingResponse>> createWaiting(
 		@PathVariable UUID storeId,
-		@Valid @RequestBody CreateWaitingRequest request
+		@Valid @RequestBody CreateWaitingRequest request,
+		@AuthenticationPrincipal AuthUser authUser
 	) {
-		UUID memberId = UUID.randomUUID();
+		// 로그인 사용자면 memberId 넘겨주고 아니면 null return
+		UUID memberId = (authUser != null) ? UUID.fromString(authUser.userId()) : null;
 
-		// TODO: 로그인 사용자면 memberId 넘겨주고 아니면 null return
-		CreateWaitingResult result = waitingUserService.createWaiting(request.toCommand(storeId, null));
+		CreateWaitingResult result = waitingUserService.createWaiting(request.toCommand(storeId, memberId));
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{waitingId}")
 			.buildAndExpand(result.waitingId())
@@ -55,11 +60,13 @@ public class WaitingUserController {
 	@GetMapping("/{waitingId}")
 	public ResponseEntity<ApiResponse<GetWaitingResponse>> getWaiting(
 		@PathVariable UUID waitingId,
-		// TODO: userId 받아야함
+		@AuthenticationPrincipal AuthUser authUser,
 		@RequestParam(required = false) String nonMemberName,
 		@RequestParam(required = false) String nonMemberPhone
 	) {
-		UUID memberId = UUID.randomUUID();
+		// 로그인 사용자면 memberId 넘겨주고 아니면 null return
+		UUID memberId = (authUser != null) ? UUID.fromString(authUser.userId()) : null;
+
 		GetWaitingCommand command = GetWaitingCommand.of(waitingId, memberId, nonMemberName, nonMemberPhone);
 		GetWaitingResult result = waitingUserService.getWaiting(command);
 		return ResponseEntity.ok(
@@ -70,26 +77,28 @@ public class WaitingUserController {
 	@GetMapping("/{waitingId}/connect")
 	public SseEmitter connectNotification(
 		@PathVariable UUID waitingId,
-		// TODO: userId 받아야함 @AuthenticationPrincipal UUID memberId
+		@AuthenticationPrincipal AuthUser authUser,
 		@RequestParam(required = false) String nonMemberName,
 		@RequestParam(required = false) String nonMemberPhone
 	) {
-		UUID memberId = UUID.fromString("986b5a2a-dc96-4920-afec-0d4ef7903ef6");
-		GetWaitingCommand command = GetWaitingCommand.of(waitingId, memberId, nonMemberName, nonMemberPhone);
+		// 로그인 사용자면 memberId 넘겨주고 아니면 null return
+		UUID memberId = (authUser != null) ? UUID.fromString(authUser.userId()) : null;
 
+		GetWaitingCommand command = GetWaitingCommand.of(waitingId, memberId, nonMemberName, nonMemberPhone);
 		return waitingUserService.connectUserWaitingNotification(command);
 	}
 
 	@PostMapping("/{waitingId}/confirm")
 	public ResponseEntity<ApiResponse<Void>> confirmWaiting(
 		@PathVariable UUID waitingId,
-		// TODO: userId 받아야함 @AuthenticationPrincipal UUID memberId
+		@AuthenticationPrincipal AuthUser authUser,
 		@RequestParam(required = false) String nonMemberName,
 		@RequestParam(required = false) String nonMemberPhone
 	) {
-		UUID memberId = UUID.fromString("986b5a2a-dc96-4920-afec-0d4ef7903ef6");
-		GetWaitingCommand command = GetWaitingCommand.of(waitingId, memberId, nonMemberName, nonMemberPhone);
+		// 로그인 사용자면 memberId 넘겨주고 아니면 null return
+		UUID memberId = (authUser != null) ? UUID.fromString(authUser.userId()) : null;
 
+		GetWaitingCommand command = GetWaitingCommand.of(waitingId, memberId, nonMemberName, nonMemberPhone);
 		waitingUserService.confirmWaiting(command);
 		return ResponseEntity.ok(
 			ApiResponse.success("웨이팅 confirm 상태 변경 성공", HttpStatus.OK)
@@ -99,13 +108,14 @@ public class WaitingUserController {
 	@PostMapping("/{waitingId}/cancel")
 	public ResponseEntity<ApiResponse<Void>> cancelWaiting(
 		@PathVariable UUID waitingId,
-		// TODO: userId 받아야함 @AuthenticationPrincipal UUID memberId
+		@AuthenticationPrincipal AuthUser authUser,
 		@RequestParam(required = false) String nonMemberName,
 		@RequestParam(required = false) String nonMemberPhone
 	) {
-		UUID memberId = UUID.fromString("986b5a2a-dc96-4920-afec-0d4ef7903ef6");
-		GetWaitingCommand command = GetWaitingCommand.of(waitingId, memberId, nonMemberName, nonMemberPhone);
+		// 로그인 사용자면 memberId 넘겨주고 아니면 null return
+		UUID memberId = (authUser != null) ? UUID.fromString(authUser.userId()) : null;
 
+		GetWaitingCommand command = GetWaitingCommand.of(waitingId, memberId, nonMemberName, nonMemberPhone);
 		waitingUserService.cancelWaiting(command);
 		return ResponseEntity.ok(
 			ApiResponse.success("웨이팅 cancel 상태 변경 성공", HttpStatus.OK)

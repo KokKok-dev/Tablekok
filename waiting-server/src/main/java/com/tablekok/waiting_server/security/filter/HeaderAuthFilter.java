@@ -1,4 +1,4 @@
-package com.tablekok.hotreservationservice.application.security.filter;
+package com.tablekok.waiting_server.security.filter;
 
 import java.io.IOException;
 import java.util.List;

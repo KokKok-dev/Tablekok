@@ -29,7 +29,7 @@ import lombok.NoArgsConstructor;
 public class Waiting extends BaseEntity {
 
 	@Id
-	@Column(name = "waiting_queue_id", updatable = false, nullable = false)
+	@Column(name = "waiting_id", updatable = false, nullable = false)
 	private UUID id;
 
 	@Column(name = "store_id", nullable = false)

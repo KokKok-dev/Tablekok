@@ -19,6 +19,7 @@ gateway:
     hot-reservation: ${HOT_RESERVATION_URI}
     reservation: ${RESERVATION_URI}
 
+
 # Eureka 클라이언트 설정
 eureka:
   client:
@@ -38,6 +39,13 @@ management:
   endpoint:
     health:
       show-details: always
+
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
 
 # 로깅 설정
 logging:

@@ -39,12 +39,11 @@ public class WaitingUserService {
 
 	@Transactional
 	public CreateWaitingResult createWaiting(CreateWaitingCommand command) {
-		// TODO: 매장 접수 가능 상태 확인 (StoreClient - waitingOpenTime 조회)
-
-		// 다음웨이팅 번호 발급 (StoreWaitingStatus에서 latest_assigned_number 증가, 새로운번호 확보)
 		StoreWaitingStatus status = findStoreWaitingStatus(command.storeId());
 
-		waitingUserDomainService.validateStoreStatus(status); // status 활성화 확인
+		// 접수 가능 상태 확인 (스위치 ON 여부 + 영업 시간 확인)
+		status.validateAcceptingWaiting();
+
 		waitingUserDomainService.validateHeadcountPolicy(command.headcount(), status.getMinHeadcount(),
 			status.getMaxHeadcount()); // 인원수 유효성 검사
 		// 고객 웨이팅 중복 확인
@@ -94,8 +93,7 @@ public class WaitingUserService {
 		Waiting waiting = findWaiting(command.waitingId());
 
 		// Member ID가 일치하지 않으면 권한 없음
-		// TODO: memberId 바꿔야함
-		waitingUserDomainService.validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(),
+		waitingUserDomainService.validateAccessPermission(waiting, command.memberId(), command.nonMemberName(),
 			command.nonMemberPhone());
 
 		// 매장 ID 및 상태 확인 (회전식사시간 확인)
@@ -130,8 +128,7 @@ public class WaitingUserService {
 	public void confirmWaiting(GetWaitingCommand command) {
 		Waiting waiting = findWaiting(command.waitingId());
 
-		// TODO: memberId 바꿔야함
-		waitingUserDomainService.validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(),
+		waitingUserDomainService.validateAccessPermission(waiting, command.memberId(), command.nonMemberName(),
 			command.nonMemberPhone());
 
 		// entity 상태 변경 (CALLED -> CONFIRMED)
@@ -148,8 +145,7 @@ public class WaitingUserService {
 	public void cancelWaiting(GetWaitingCommand command) {
 		Waiting waiting = findWaiting(command.waitingId());
 
-		// TODO: memberId 바꿔야함
-		waitingUserDomainService.validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(),
+		waitingUserDomainService.validateAccessPermission(waiting, command.memberId(), command.nonMemberName(),
 			command.nonMemberPhone());
 
 		// USER_CANCELED 상태변경
@@ -169,8 +165,7 @@ public class WaitingUserService {
 		Waiting waiting = findWaiting(command.waitingId());
 
 		// Member ID가 일치하지 않으면 권한 없음
-		// TODO: memberId 바꿔야함
-		waitingUserDomainService.validateAccessPermission(waiting, waiting.getMemberId(), command.nonMemberName(),
+		waitingUserDomainService.validateAccessPermission(waiting, command.memberId(), command.nonMemberName(),
 			command.nonMemberPhone());
 
 		return notificationPort.connectCustomer(command.waitingId());

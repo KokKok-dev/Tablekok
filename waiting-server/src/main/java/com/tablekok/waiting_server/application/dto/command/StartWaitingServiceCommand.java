@@ -21,7 +21,8 @@ public record StartWaitingServiceCommand(
 	int turnoverRateMinutes
 ) {
 
-	public StoreWaitingStatus toEntity() {
-		return StoreWaitingStatus.create(storeId, totalTables, turnoverRateMinutes, minHeadCount, maxHeadcount);
+	public StoreWaitingStatus toEntity(UUID ownerId) {
+		return StoreWaitingStatus.create(storeId, ownerId, totalTables, turnoverRateMinutes, minHeadCount,
+			maxHeadcount);
 	}
 }

@@ -49,3 +49,7 @@ eureka:
 waiting:
   noshow:
     timeout: ${TIME_OUT}
+
+lb:
+  dns:
+    store: localhost:8082

@@ -27,6 +27,19 @@ eureka:
     service-url:
       defaultZone: ${EUREKA_SERVER_URL_DEV}
 
-#lb:
-#  dns:
-#    store: ${LB_DNS_STORE}
+lb:
+  dns:
+    store: ""
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}

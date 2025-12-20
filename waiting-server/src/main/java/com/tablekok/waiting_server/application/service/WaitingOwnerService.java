@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,17 +15,20 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.tablekok.exception.AppException;
+import com.tablekok.waiting_server.application.client.StoreClient;
 import com.tablekok.waiting_server.application.dto.command.StartWaitingServiceCommand;
 import com.tablekok.waiting_server.application.dto.result.GetWaitingQueueResult;
 import com.tablekok.waiting_server.application.exception.WaitingErrorCode;
 import com.tablekok.waiting_server.application.port.NoShowSchedulerPort;
 import com.tablekok.waiting_server.application.port.NotificationPort;
+import com.tablekok.waiting_server.common.annotation.CheckOwner;
 import com.tablekok.waiting_server.domain.entity.StoreWaitingStatus;
 import com.tablekok.waiting_server.domain.entity.Waiting;
 import com.tablekok.waiting_server.domain.entity.WaitingStatus;
 import com.tablekok.waiting_server.domain.repository.StoreWaitingStatusRepository;
 import com.tablekok.waiting_server.domain.repository.WaitingCachePort;
 import com.tablekok.waiting_server.domain.repository.WaitingRepository;
+import com.tablekok.waiting_server.domain.vo.StoreInfoVo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,36 +40,36 @@ public class WaitingOwnerService {
 	private final NotificationPort notificationPort;
 	private final NoShowSchedulerPort noShowSchedulerPort;
 	private final WaitingCachePort waitingCache;
+	private final StoreClient storeClient;
 
 	@Transactional
 	public void startWaitingService(StartWaitingServiceCommand command) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-		Optional<StoreWaitingStatus> existingStatus = findStoreWaitingStatus(command.storeId());
+		StoreInfoVo storeInfo = storeClient.getStoreDetails(command.storeId());
 
-		// 레코드가 없는 경우 (최초 생성 및 초기화)
-		if (existingStatus.isEmpty()) {
-			StoreWaitingStatus newStatus = command.toEntity();
-			storeWaitingStatusRepository.save(newStatus);
-			return;
-		}
+		// 사장님이 storeId의 실제 소유자인지 확인
+		validateOwner(storeInfo.ownerId(), command.ownerId());
 
-		// 레코드가 이미 존재하는 경우 (운영 스위치만 ON)
-		StoreWaitingStatus status = existingStatus.get();
+		// 기존 상태 레코드가 있는지 조회, 없으면 새로 생성
+		StoreWaitingStatus status = getOrCreateStoreWaitingStatus(command);
+
+		// 매장 정보 동기화
+		status.syncStoreInfo(storeInfo);
+
+		// 웨이팅 서비스 활성화
 		status.startWaiting(command.minHeadCount(), command.maxHeadcount());
+		storeWaitingStatusRepository.save(status);
 	}
 
 	@Transactional
+	@CheckOwner
 	public void stopWaitingService(UUID storeId, UUID ownerId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-
 		StoreWaitingStatus status = getStoreWaitingStatus(storeId);
 		status.stopWaiting();
 	}
 
 	@Transactional(readOnly = true)
-	public List<GetWaitingQueueResult> getStoreWaitingQueue(UUID storeId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-
+	@CheckOwner
+	public List<GetWaitingQueueResult> getStoreWaitingQueue(UUID storeId, UUID ownerId) {
 		// Redis ZSET에서 현재 대기 중인 모든 waitingId를 가져옴
 		List<String> waitingIdStrings = waitingCache.getWaitingIds(storeId);
 		if (waitingIdStrings.isEmpty()) {
@@ -86,8 +88,8 @@ public class WaitingOwnerService {
 	}
 
 	@Transactional
-	public void callWaiting(UUID storeId, UUID callingWaitingId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
+	@CheckOwner
+	public void callWaiting(UUID storeId, UUID callingWaitingId, UUID ownerId) {
 		Waiting waiting = findWaiting(callingWaitingId);
 		StoreWaitingStatus status = getStoreWaitingStatus(storeId);
 
@@ -102,8 +104,8 @@ public class WaitingOwnerService {
 	}
 
 	@Transactional
-	public void enterWaiting(UUID storeId, UUID waitingId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
+	@CheckOwner
+	public void enterWaiting(UUID storeId, UUID waitingId, UUID ownerId) {
 		Waiting waiting = findWaitingForStore(waitingId, storeId);
 		WaitingStatus originalStatus = waiting.getStatus();
 
@@ -125,9 +127,8 @@ public class WaitingOwnerService {
 	}
 
 	@Transactional
-	public void cancelByOwner(UUID storeId, UUID waitingId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-
+	@CheckOwner
+	public void cancelByOwner(UUID storeId, UUID waitingId, UUID ownerId) {
 		Waiting waiting = findWaitingForStore(waitingId, storeId);
 		WaitingStatus originalStatus = waiting.getStatus();
 
@@ -146,9 +147,8 @@ public class WaitingOwnerService {
 	}
 
 	@Transactional
-	public void markNoShow(UUID storeId, UUID waitingId) {
-		// TODO: 사장님이 storeId의 실제 소유자인지 확인
-
+	@CheckOwner
+	public void markNoShow(UUID storeId, UUID waitingId, UUID ownerId) {
 		Waiting waiting = findWaitingForStore(waitingId, storeId);
 		WaitingStatus originalStatus = waiting.getStatus();
 
@@ -166,8 +166,9 @@ public class WaitingOwnerService {
 		registerPostMarkNoShowActions(waitingId);
 	}
 
-	private Optional<StoreWaitingStatus> findStoreWaitingStatus(UUID storeId) {
-		return storeWaitingStatusRepository.findById(storeId);
+	private StoreWaitingStatus getOrCreateStoreWaitingStatus(StartWaitingServiceCommand command) {
+		return storeWaitingStatusRepository.findById(command.storeId())
+			.orElseGet(() -> command.toEntity(command.ownerId()));
 	}
 
 	private Waiting findWaiting(UUID waitingId) {
@@ -183,6 +184,12 @@ public class WaitingOwnerService {
 	private StoreWaitingStatus getStoreWaitingStatus(UUID storeId) {
 		return storeWaitingStatusRepository.findById(storeId)
 			.orElseThrow(() -> new AppException(WaitingErrorCode.STORE_WAITING_STATUS_NOT_FOUND));
+	}
+
+	private void validateOwner(UUID actualOwnerId, UUID requestOwnerId) {
+		if (!actualOwnerId.equals(requestOwnerId)) {
+			throw new AppException(WaitingErrorCode.NOT_STORE_OWNER);
+		}
 	}
 
 	private void registerPostCommitActions(UUID waitingId, int callingNumber) {
@@ -272,4 +279,5 @@ public class WaitingOwnerService {
 
 		return results;
 	}
+
 }

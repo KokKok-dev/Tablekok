@@ -18,6 +18,7 @@ gateway:
     search: lb://SEARCH-SERVICE
     hot-reservation: lb://HOT-RESERVATION-SERVICE
     reservation: lb://RESERVATION-SERVICE
+    waiting: lb://WAITING-SERVICE
 
 # Eureka 클라이언트 설정
 eureka:
@@ -38,6 +39,13 @@ management:
   endpoint:
     health:
       show-details: always
+
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
 
 # 로깅 설정
 logging:
