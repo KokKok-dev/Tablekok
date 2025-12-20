@@ -27,7 +27,7 @@ public record StoreEvent(
 	Integer turnoverRateMinutes,
 	LocalTime waitingOpenTime,
 	LocalTime reservationOpenTime,
-	List<UUID> categoryIds,
+	List<String> categoryIds,
 	List<String> categories,
 	LocalDateTime createdAt,
 	UUID createdBy,
@@ -54,7 +54,12 @@ public record StoreEvent(
 			.turnoverRateMinutes(store.getTurnoverRateMinutes())
 			.waitingOpenTime(store.getWaitingOpenTime())
 			.reservationOpenTime(store.getReservationOpenTime())
-			.categoryIds(store.getCategoryIds())
+			// List<UUID> -> List<String> 변환
+			.categoryIds(
+				store.getCategoryIds().stream()
+					.map(UUID::toString)
+					.toList()
+			)
 			.categories(categoryNames)
 			.createdAt(store.getCreatedAt())
 			.createdBy(store.getCreatedBy())

@@ -76,7 +76,7 @@ public class StoreDocument extends BaseDocument {
 	// --- Category (역정규화: 검색 성능을 위해 이름 리스트로 저장) ---
 
 	@Field(type = FieldType.Keyword)
-	private List<UUID> categoryIds;
+	private List<String> categoryIds;
 
 	@Field(type = FieldType.Keyword)
 	private List<String> categories; // 예: ["한식", "삼겹살"]

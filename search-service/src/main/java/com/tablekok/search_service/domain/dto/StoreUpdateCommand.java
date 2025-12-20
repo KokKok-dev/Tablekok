@@ -23,7 +23,7 @@ public record StoreUpdateCommand(
 	Integer turnoverRateMinutes,
 	LocalTime waitingOpenTime,
 	LocalTime reservationOpenTime,
-	List<UUID> categoryIds,
+	List<String> categoryIds,
 	List<String> categories,
 	LocalDateTime createdAt,
 	UUID createdBy,
