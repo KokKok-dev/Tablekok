@@ -28,6 +28,20 @@ spring:
       FAIL_ON_UNKNOWN_PROPERTIES: true
 
 
+  # kafka 설정
+  kafka:
+    bootstrap-servers: localhost:9092 # Kafka 브로커 주소
+    consumer:
+      group-id: search-service-group # 컨슈머 그룹 ID, Java 코드의 @KafkaListener groupId와 일치해야 함
+      auto-offset-reset: earliest    # 서버 처음 뜰 때, 못 읽은 데이터 처음부터 읽기
+      enable-auto-commit: false      # 데이터 정합성을 위해 수동 커밋 권장 (혹은 AckMode 사용)
+      # 직렬화 설정 (Java Config에서 덮어씌워질 수 있으나 기본값으로 명시)
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*" # 모든 패키지의 DTO 신뢰 (보안 경고 방지)
+
+
   logging:
     level:
       org.hibernate.SQL: DEBUG
