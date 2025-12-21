@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import com.tablekok.store_service.domain.entity.OperatingHour;
 import com.tablekok.store_service.domain.entity.Store;
 
 import lombok.Builder;
@@ -21,12 +20,12 @@ public record CreateStoreResult(
 	Integer totalCapacity,
 	Integer turnoverRateMinutes,
 	String imageUrl,
-	List<UUID> categoryIds,
+	List<String> categoryNames,
 	List<OperatingHourResult> operatingHours
 ) {
 
-	public static CreateStoreResult of(Store store, List<OperatingHour> savedOperatingHours) {
-		List<OperatingHourResult> operatingHourResults = savedOperatingHours.stream()
+	public static CreateStoreResult of(Store store, List<String> categoryNames) {
+		List<OperatingHourResult> operatingHourResults = store.getOperatingHours().stream()
 			.map(OperatingHourResult::from)
 			.toList();
 
@@ -41,7 +40,7 @@ public record CreateStoreResult(
 			.totalCapacity(store.getTotalCapacity())
 			.turnoverRateMinutes(store.getTurnoverRateMinutes())
 			.imageUrl(store.getImageUrl())
-			.categoryIds(store.getCategoryIds())
+			.categoryNames(categoryNames)
 			.operatingHours(operatingHourResults)
 			.build();
 	}

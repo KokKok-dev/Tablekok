@@ -21,7 +21,7 @@ public record CreateStoreResponse(
 	Integer totalCapacity,
 	Integer turnoverRateMinutes,
 	String imageUrl,
-	List<UUID> categoryIds,
+	List<String> categoryNames,
 
 	List<OperatingHourResult> operatingHours
 ) {
@@ -37,7 +37,7 @@ public record CreateStoreResponse(
 			.totalCapacity(result.totalCapacity())
 			.turnoverRateMinutes(result.turnoverRateMinutes())
 			.imageUrl(result.imageUrl())
-			.categoryIds(result.categoryIds())
+			.categoryNames(result.categoryNames())
 			.operatingHours(result.operatingHours())
 			.build();
 	}
