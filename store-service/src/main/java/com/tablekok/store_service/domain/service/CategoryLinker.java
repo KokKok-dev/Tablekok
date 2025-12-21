@@ -1,11 +1,13 @@
 package com.tablekok.store_service.domain.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.tablekok.exception.AppException;
+import com.tablekok.store_service.domain.entity.Category;
 import com.tablekok.store_service.domain.entity.Store;
 import com.tablekok.store_service.domain.exception.StoreDomainErrorCode;
 import com.tablekok.store_service.domain.repository.CategoryRepository;
@@ -30,6 +32,15 @@ public class CategoryLinker {
 
 		// Store Entity의 컬렉션에 CategoryIds 추가
 		store.updateCategoryIds(categoryIds);
+	}
 
+	public List<String> resolveCategoryNames(List<UUID> categoryIds) {
+		if (categoryIds == null || categoryIds.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		return categoryRepository.findAllByIdIn(categoryIds).stream()
+			.map(Category::getName)
+			.toList();
 	}
 }
