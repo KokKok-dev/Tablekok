@@ -28,7 +28,7 @@ name: waiting-service Deploy to Amazon ECS
 
 on:
   push:
-    branches: [ "develop", "feat/#162-waiting-deploy" ]
+    branches: [ "main" ]
     paths: [ 'waiting-server/**' ]
 
 env:
