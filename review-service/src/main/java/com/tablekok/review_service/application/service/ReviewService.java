@@ -47,7 +47,7 @@ public class ReviewService {
 	private final ReviewMessagePort reviewMessagePort;
 
 	@Transactional
-	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId, UUID storeId) {
+	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId) {
 		// 이미 작성된 리뷰인지 검증
 		reviewDomainService.validReview(command.reservationId());
 
@@ -58,8 +58,6 @@ public class ReviewService {
 		reviewDomainService.validReservation(reservation, userId);
 
 		Review newReview = command.toEntity(userId, reservation.storeId());
-
-		Review newReview = command.toEntity(userId, storeId);
 
 		reviewRepository.save(newReview);
 
