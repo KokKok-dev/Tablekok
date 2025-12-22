@@ -14,6 +14,7 @@ import com.tablekok.user_service.auth.domain.repository.UserRepository;
 import com.tablekok.user_service.auth.domain.service.BusinessNumberValidator;
 import com.tablekok.user_service.auth.domain.service.PasswordValidator;
 import com.tablekok.user_service.auth.domain.service.UserValidator;
+import com.tablekok.user_service.auth.infrastructure.redis.RedisAuthService;
 import com.tablekok.user_service.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,6 +33,7 @@ public class AuthApplicationService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 	private final PasswordValidator passwordValidator;
+	private final RedisAuthService redisAuthService;
 
 	@Transactional
 	public SignupResult signup(SignupCommand command) {
@@ -95,13 +97,18 @@ public class AuthApplicationService {
 			user.getRole().name()
 		);
 
-		// 4. 결과 반환
+		// 4. Refresh Token 생성 + Redis 저장
+		String refreshToken = jwtUtil.generateRefreshToken(user.getUserId());
+		redisAuthService.saveRefreshToken(user.getUserId(), refreshToken);
+
+		// 5. 결과 반환
 		return new LoginResult(
 			user.getUserId(),
 			user.getEmail(),
 			user.getUsername(),
 			user.getRole().name(),
-			accessToken
+			accessToken,
+			refreshToken
 		);
 	}
 }

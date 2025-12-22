@@ -66,3 +66,8 @@ management:
   zipkin:
     tracing:
       endpoint: ${ZIPKIN_ENDPOINT}
+
+redis:
+  auth:
+    refresh-prefix: "auth:refresh:"
+    invalid-before-prefix: "auth:invalid-before:"

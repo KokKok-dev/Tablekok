@@ -44,7 +44,7 @@ public class AuthController {
 
 		return ResponseEntity.ok()
 			.header("Authorization", "Bearer " + result.accessToken())
+			.header("X-Refresh-Token", result.refreshToken())
 			.body(ApiResponse.success("로그인이 완료되었습니다.", response, HttpStatus.OK));
-
 	}
 }

@@ -46,4 +46,15 @@ public class JwtUtil {
 			.compact();
 	}
 
+	public String generateRefreshToken(UUID userId) {
+		Date now = new Date();
+		Date expiryDate = new Date(now.getTime() + refreshTokenExpiration);
+
+		return Jwts.builder()
+			.setSubject(userId.toString())
+			.setIssuedAt(now)
+			.setExpiration(expiryDate)
+			.signWith(getSigningKey(), SignatureAlgorithm.HS256)
+			.compact();
+	}
 }
