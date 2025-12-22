@@ -1,0 +1,122 @@
+{
+    "compatibilities": [
+        "EC2",
+        "FARGATE",
+        "MANAGED_INSTANCES"
+    ],
+    "containerDefinitions": [
+        {
+            "cpu": 0,
+            "environment": [
+                {
+                    "name": "EUREKA_SERVER_PROD_URL",
+                    "value": "http://tablekok-eureka-server-lb-1162347586.ap-northeast-2.elb.amazonaws.com/eureka"
+                },
+                {
+                    "name": "LB_DNS_STORE",
+                    "value": "tablekok-store-service-lb-752510743.ap-northeast-2.elb.amazonaws.com"
+                },
+                {
+                    "name": "CACHE_HOST",
+                    "value": "tablekok-cache-saweub.serverless.apn2.cache.amazonaws.com"
+                },
+                {
+                    "name": "RDS_ENDPOINT_WAITING",
+                    "value": "jdbc:postgresql://tablekok-db.ch0umigqozdz.ap-northeast-2.rds.amazonaws.com:5433/waiting_db"
+                },
+                {
+                    "name": "CACHE_PORT",
+                    "value": "6379"
+                },
+                {
+                    "name": "DB_USER_WAITING",
+                    "value": "postgres"
+                },
+                {
+                    "name": "DB_PASSWORD_WAITING",
+                    "value": "zhrzhr123"
+                },
+                {
+                    "name": "TIME_OUT",
+                    "value": "10"
+                }
+            ],
+            "environmentFiles": [],
+            "essential": true,
+            "image": "291433606038.dkr.ecr.ap-northeast-2.amazonaws.com/tablekok/waiting@sha256:439c7d0d4b2e5520baac5b2005549bc9c0d153386d8f3b993cc3538fd5a8d11c",
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/tablekok-waiting-task",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "ap-northeast-2",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "mountPoints": [],
+            "name": "tablekok-waiting-container",
+            "portMappings": [
+                {
+                    "appProtocol": "http",
+                    "containerPort": 8086,
+                    "hostPort": 8086,
+                    "name": "tablekok-waiting-container-8086-tcp",
+                    "protocol": "tcp"
+                }
+            ],
+            "systemControls": [],
+            "ulimits": [],
+            "volumesFrom": []
+        }
+    ],
+    "cpu": "1024",
+    "executionRoleArn": "arn:aws:iam::291433606038:role/ecsTaskExecutionRole",
+    "family": "tablekok-waiting-task",
+    "memory": "3072",
+    "networkMode": "awsvpc",
+    "placementConstraints": [],
+    "registeredAt": "2025-12-21T05:29:09.496Z",
+    "registeredBy": "arn:aws:iam::291433606038:user/Gahyeon",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.21"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+        }
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "revision": 5,
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "status": "ACTIVE",
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:291433606038:task-definition/tablekok-waiting-task:5",
+    "volumes": [],
+    "tags": []
+}

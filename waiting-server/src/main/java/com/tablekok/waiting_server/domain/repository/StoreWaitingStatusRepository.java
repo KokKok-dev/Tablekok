@@ -11,4 +11,6 @@ public interface StoreWaitingStatusRepository {
 	Optional<StoreWaitingStatus> findById(UUID storeId);
 
 	StoreWaitingStatus save(StoreWaitingStatus status);
+
+	void resetAllStoresDaily();
 }
