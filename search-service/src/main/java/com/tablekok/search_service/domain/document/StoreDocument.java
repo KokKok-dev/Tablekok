@@ -93,51 +93,6 @@ public class StoreDocument extends BaseDocument {
 	@Field(type = FieldType.Integer)
 	private Long reviewCount;   // 리뷰 수
 
-	// // // --- OperatingHour (Nested Object) ---
-	// // @Field(type = FieldType.Nested)
-	// // private List<OperatingHourInfo> operatingHours;
-	// //
-	// // // --- StoreReservationPolicy (1:1 관계이므로 Flattening하여 필드로 포함) ---
-	// // // 정책 정보는 필터링("예약금 없는 곳", "6명 가능")에 중요하므로 최상위 레벨 혹은 Object로 둡니다.
-	// // @Field(type = FieldType.Object)
-	// // private ReservationPolicyInfo reservationPolicy;
-	//
-	// // --- 내부 클래스 정의 ---
-	// @Getter
-	// @Builder
-	// public static class OperatingHourInfo {
-	// 	@Field(type = FieldType.Keyword)
-	// 	private String dayOfWeek;
-	// 	@Field(type = FieldType.Keyword)
-	// 	private LocalTime openTime;
-	// 	@Field(type = FieldType.Keyword)
-	// 	private LocalTime closeTime;
-	// 	@Field(type = FieldType.Boolean)
-	// 	private boolean isClosed;
-	// }
-	//
-	// @Getter
-	// @Builder
-	// public static class ReservationPolicyInfo {
-	// 	@Field(type = FieldType.Integer)
-	// 	private int monthlyOpenDay;
-	//
-	// 	@Field(type = FieldType.Integer)
-	// 	private int reservationInterval;
-	//
-	// 	@Field(type = FieldType.Integer)
-	// 	private int minHeadcount;
-	//
-	// 	@Field(type = FieldType.Integer)
-	// 	private int maxHeadcount;
-	//
-	// 	@Field(type = FieldType.Boolean)
-	// 	private boolean isDepositRequired;
-	//
-	// 	@Field(type = FieldType.Integer)
-	// 	private int depositAmount;
-	// }
-
 	// 초기 생성을 위한 팩토리 메서드
 	public static StoreDocument create(String storeId, StoreUpdateCommand command) {
 		GeoPoint geoPoint = (command.latitude() != null && command.longitude() != null)
