@@ -5,6 +5,13 @@ spring:
   application:
     name: user-service
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      username: default
+      password: systempass
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}

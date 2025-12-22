@@ -43,6 +43,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis' // 레디스 추가
 
     // JWT 라이브러리 (최적화된 의존성 스코프)
     compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'      // 컴파일 시에만 인터페이스 필요
