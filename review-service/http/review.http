@@ -18,11 +18,11 @@
 #GET http://localhost:8084/v1/reservations/ba797ddf-59cf-405c-8ad6-13f8c98e1ec3
 
 ### 리뷰 생성
-POST http://localhost:8087/v1/reviews
+POST http://localhost:19091/v1/reviews
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjMTI3MGYyZC1mMWVkLTQ5YzUtYmMxNS00NTJlN2M1ZjQwNzgiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjY0MDk5MjUsImV4cCI6MTc2NjQ5NjMyNX0.HRNo3R9ZYruUVPK_R1ZuZ1EQYB5j3Hu6phnMGdbp6Ws
 Content-Type: application/json
 
 {
-  "reservationId": "ba797ddf-59cf-405c-8ad6-13f8c98e1ec3",
   "rating" : 5.0,
   "content" : "정말 맛있습니다~! 강추"
 }
