@@ -1,3 +1,4 @@
 ### 카테고리별 음식점 목록 조회
-GET http://localhost:8083/v1/search/category/dd171a64-5237-4589-ade6-799ee8ba0476/stores
+GET http://localhost:19091/v1/search/category/32e96591-2af1-45ae-a4be-6c91311fccd0/stores
 Content-Type: application/json
+

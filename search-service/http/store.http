@@ -1,0 +1,111 @@
+### store 생성 (owner만 가능)
+POST http://localhost:19091/v1/stores
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjNiOGI4Ny0zZDRkLTQyZjUtYjRiYy0wOTg5ZTdmYWJjZWEiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjY0MDkwMTYsImV4cCI6MTc2NjQ5NTQxNn0.I6PYegQxi0ONUyPFKBatxC1hhsDDoU27DAsm-bPP-Ck
+
+{
+  "name": "음식점8",
+  "phoneNumber": "02-9876-5432",
+  "address": "서울시 강남구 삼성로 400",
+  "latitude": 37.512345,
+  "longitude": 127.056789,
+  "description": "월요일부터 일요일까지 영업 정보 완벽 입력",
+  "totalCapacity": 70,
+  "turnoverRateMinutes": 60,
+  "imageUrl": "https://example.com/weekly_store.jpg",
+  "categoryIds": [
+    "32e96591-2af1-45ae-a4be-6c91311fccd0"
+  ],
+  "operatingHours": [
+    {
+      "day": "MONDAY",
+      "openTime": "10:30",
+      "closeTime": "21:30",
+      "isClosed": false
+    },
+    {
+      "day": "TUESDAY",
+      "openTime": "10:30",
+      "closeTime": "21:30",
+      "isClosed": false
+    },
+    {
+      "day": "WEDNESDAY",
+      "openTime": "10:30",
+      "closeTime": "21:30",
+      "isClosed": false
+    },
+    {
+      "day": "THURSDAY",
+      "openTime": "10:30",
+      "closeTime": "21:30",
+      "isClosed": false
+    },
+    {
+      "day": "FRIDAY",
+      "openTime": "10:30",
+      "closeTime": "22:00",
+      "isClosed": false
+    },
+    {
+      "day": "SATURDAY",
+      "openTime": "11:00",
+      "closeTime": "22:00",
+      "isClosed": false
+    },
+    {
+      "day": "SUNDAY",
+      "openTime": null,
+      "closeTime": null,
+      "isClosed": true
+    }
+  ]
+}
+
+### store 정보 수정
+PATCH http://localhost:19091/v1/stores/ac4e947e-ac69-4c66-88ab-037016ba8e7b
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjNiOGI4Ny0zZDRkLTQyZjUtYjRiYy0wOTg5ZTdmYWJjZWEiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjY0MDkwMTYsImV4cCI6MTc2NjQ5NTQxNn0.I6PYegQxi0ONUyPFKBatxC1hhsDDoU27DAsm-bPP-Ck
+
+
+{
+  "name": "음식점 이름 바꿔요!!",
+  "phoneNumber": "02-9876-5432",
+  "address": "서울시 강남구 삼성로 400",
+  "latitude": 37.512345,
+  "longitude": 127.056789,
+  "description": "음식점 정보 수정했따옹",
+  "totalCapacity": 70,
+  "turnoverRateMinutes": 60,
+  "imageUrl": "https://example.com/weekly_store.jpg"
+}
+
+
+### 음식점 삭제 (마스터)
+DELETE http://localhost:19091/v1/stores/442c2486-e7e6-4ade-b42e-bc97698bc535
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkNzc3ODBhNC04MTA4LTQ1Y2ItOTEyNy03MzdhNTRlMDA4ZDYiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjY0MDkwNzcsImV4cCI6MTc2NjQ5NTQ3N30.UPC3FI9iIEb5e5ZeAVQuiaKA2vVTytJNGIl579056xM
+
+
+### 음식점 상태 변경 (사장님)
+PATCH http://localhost:19091/v1/stores/442c2486-e7e6-4ade-b42e-bc97698bc535/status
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiNjNiOGI4Ny0zZDRkLTQyZjUtYjRiYy0wOTg5ZTdmYWJjZWEiLCJyb2xlIjoiT1dORVIiLCJpYXQiOjE3NjY0MDkwMTYsImV4cCI6MTc2NjQ5NTQxNn0.I6PYegQxi0ONUyPFKBatxC1hhsDDoU27DAsm-bPP-Ck
+
+{
+  "storeStatus": "CLOSED_TODAY"
+}
+
+### 음식점 상태 변경(마스터)
+PATCH http://localhost:19091/v1/stores/aa6037df-ad7e-42c4-b66a-cef9bc55faff/status
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkNzc3ODBhNC04MTA4LTQ1Y2ItOTEyNy03MzdhNTRlMDA4ZDYiLCJyb2xlIjoiTUFTVEVSIiwiaWF0IjoxNzY2NDEzNTQ5LCJleHAiOjE3NjY0OTk5NDl9.ChMQYCtVLAc5_MyOzHZEzk-hZbXAL2cJQtxvB-sYbDs
+
+{
+  "storeStatus": "OPERATING"
+}
+
+
+### 음식점 상세 조회
+GET http://localhost:19091/v1/stores/5dc40765-f81a-4d77-b509-5a1a7947b168
+Content-Type: application/json

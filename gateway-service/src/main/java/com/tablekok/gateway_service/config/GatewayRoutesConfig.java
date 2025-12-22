@@ -83,7 +83,6 @@ public class GatewayRoutesConfig {
 			// Search Service
 			.route("search-service", r -> r
 				.path("/v1/search/**")
-				.filters(f -> f.filter(jwtFilter.apply(new JwtAuthenticationFilter.Config())))
 				.uri(uris.search())
 			)
 

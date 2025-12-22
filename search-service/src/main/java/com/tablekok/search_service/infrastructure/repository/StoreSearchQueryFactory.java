@@ -54,8 +54,8 @@ public class StoreSearchQueryFactory {
 		// 쿼리 생성
 		return co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q
 			.bool(b -> b
-				.must(m -> m.term(t -> t.field("categoryIds").value(categoryId)))
-				.must(m -> m.terms(t -> t.field("status")
+				.filter(f -> f.term(t -> t.field("categoryIds").value(categoryId)))
+				.filter(f -> f.terms(t -> t.field("status")
 					.terms(ts -> ts.value(searchableStatuses)) // 변환된 FieldValue 리스트 주입
 				))
 			)

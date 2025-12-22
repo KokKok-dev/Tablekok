@@ -14,6 +14,7 @@ import com.tablekok.cursor.util.CursorUtils;
 import com.tablekok.entity.UserRole;
 import com.tablekok.exception.AppException;
 import com.tablekok.review_service.application.client.ReservationClient;
+import com.tablekok.review_service.application.client.ReviewMessagePort;
 import com.tablekok.review_service.application.client.SearchClient;
 import com.tablekok.review_service.application.client.dto.UpdateReviewStats;
 import com.tablekok.review_service.application.dto.ReviewStatsDto;
@@ -43,9 +44,10 @@ public class ReviewService {
 	private final ReservationClient reservationClient;
 	private final ReviewDomainService reviewDomainService;
 	private final SearchClient searchClient;
+	private final ReviewMessagePort reviewMessagePort;
 
 	@Transactional
-	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId) {
+	public CreateReviewResult createReview(CreateReviewCommand command, UUID userId, UUID storeId) {
 		// 이미 작성된 리뷰인지 검증
 		reviewDomainService.validReview(command.reservationId());
 
@@ -56,6 +58,8 @@ public class ReviewService {
 		reviewDomainService.validReservation(reservation, userId);
 
 		Review newReview = command.toEntity(userId, reservation.storeId());
+
+		Review newReview = command.toEntity(userId, storeId);
 
 		reviewRepository.save(newReview);
 
@@ -154,14 +158,9 @@ public class ReviewService {
 	}
 
 	// 가게 리뷰수, 평균 평점 -> search-service로 전달
-	// Todo: feignClient로 동기통신 -> 이벤트 기반 비동기 통신으로 리팩토링
 	private void syncStoreStats(UUID storeId) {
 		ReviewStatsDto stats = reviewRepository.getReviewStats(storeId);
-		searchClient.updateStoreStats(storeId,
-			UpdateReviewStats.builder()
-				.averageRating(stats.averageRating())
-				.reviewCount(stats.reviewCount())
-				.build()
-		);
+		reviewMessagePort.sendReviewStats(
+			storeId, stats.averageRating(), stats.reviewCount());
 	}
 }
