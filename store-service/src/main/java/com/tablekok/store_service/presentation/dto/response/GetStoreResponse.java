@@ -4,13 +4,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import com.tablekok.store_service.application.dto.result.CreateStoreResult;
+import com.tablekok.store_service.application.dto.result.GetStoreResult;
 import com.tablekok.store_service.application.dto.result.OperatingHourResult;
 
 import lombok.Builder;
 
 @Builder
-public record CreateStoreResponse(
+public record GetStoreResponse(
 	UUID storeId,
 	String name,
 	String phoneNumber,
@@ -25,8 +25,9 @@ public record CreateStoreResponse(
 
 	List<OperatingHourResult> operatingHours
 ) {
-	public static CreateStoreResponse from(CreateStoreResult result) {
-		return CreateStoreResponse.builder()
+
+	public static GetStoreResponse from(GetStoreResult result) {
+		return GetStoreResponse.builder()
 			.storeId(result.storeId())
 			.name(result.name())
 			.phoneNumber(result.phoneNumber())

@@ -17,4 +17,6 @@ public interface CategoryRepository {
 
 	Long countByIdIn(List<UUID> categoryIds);
 
+	List<Category> findAllByIdIn(List<UUID> ids);
+
 }

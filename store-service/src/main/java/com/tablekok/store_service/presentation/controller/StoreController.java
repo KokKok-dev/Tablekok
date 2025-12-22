@@ -22,6 +22,7 @@ import com.tablekok.dto.ApiResponse;
 import com.tablekok.dto.auth.AuthUser;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.dto.result.GetStoreReservationPolicyResult;
+import com.tablekok.store_service.application.dto.result.GetStoreResult;
 import com.tablekok.store_service.application.service.StoreService;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.CreateStoreReservationPolicyRequest;
@@ -31,6 +32,7 @@ import com.tablekok.store_service.presentation.dto.request.UpdateStoreRequest;
 import com.tablekok.store_service.presentation.dto.request.UpdateStoreReservationPolicyRequest;
 import com.tablekok.store_service.presentation.dto.response.CreateStoreResponse;
 import com.tablekok.store_service.presentation.dto.response.GetStoreReservationPolicyResponse;
+import com.tablekok.store_service.presentation.dto.response.GetStoreResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +61,15 @@ public class StoreController {
 
 		return ResponseEntity.created(location)
 			.body(ApiResponse.success("음식점 생성 성공", CreateStoreResponse.from(result), HttpStatus.CREATED));
+	}
+
+	// store 상세 조회
+	@GetMapping("/{storeId}")
+	public ResponseEntity<ApiResponse<GetStoreResponse>> getStore(
+		@PathVariable UUID storeId
+	) {
+		GetStoreResult result = storeService.getStore(storeId);
+		return ResponseEntity.ok(ApiResponse.success("음식 상세 조회 성공", GetStoreResponse.from(result), HttpStatus.OK));
 	}
 
 	// store 정보 수정

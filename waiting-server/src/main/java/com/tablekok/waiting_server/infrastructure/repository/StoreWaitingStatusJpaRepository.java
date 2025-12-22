@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -16,4 +17,11 @@ public interface StoreWaitingStatusJpaRepository extends JpaRepository<StoreWait
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT s FROM StoreWaitingStatus s WHERE s.storeId = :storeId")
 	Optional<StoreWaitingStatus> findByIdWithLock(@Param("storeId") UUID storeId);
+
+	@Modifying
+	@Query("UPDATE StoreWaitingStatus s " +
+		"SET s.latestAssignedNumber = 0, " +
+		"    s.currentCallingNumber = 0, " +
+		"    s.isWaitingEnabled = false")
+	void resetAllStoresDaily();
 }

@@ -30,4 +30,10 @@ public class StoreWaitingStatusRepositoryAdapter implements StoreWaitingStatusRe
 	public StoreWaitingStatus save(StoreWaitingStatus status) {
 		return storeWaitingStatusJpaRepository.save(status);
 	}
+
+	@Override
+	public void resetAllStoresDaily() {
+		storeWaitingStatusJpaRepository.resetAllStoresDaily();
+	}
+
 }

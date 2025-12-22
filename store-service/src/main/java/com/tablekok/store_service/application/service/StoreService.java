@@ -19,18 +19,23 @@ import com.tablekok.store_service.application.dto.command.UpdateStoreCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreReservationPolicyCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreReservationPolicyStatusCommand;
 import com.tablekok.store_service.application.dto.command.UpdateStoreStatusCommand;
+import com.tablekok.store_service.application.dto.event.StoreEvent;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.dto.result.GetStoreReservationPolicyResult;
+import com.tablekok.store_service.application.dto.result.GetStoreResult;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
+import com.tablekok.store_service.application.port.StoreEventPublisher;
 import com.tablekok.store_service.application.service.strategy.StoreStatusTransitionStrategy;
 import com.tablekok.store_service.application.service.strategy.StrategyFactory;
 import com.tablekok.store_service.domain.entity.OperatingHour;
+import com.tablekok.store_service.domain.entity.OperationType;
 import com.tablekok.store_service.domain.entity.Store;
 import com.tablekok.store_service.domain.entity.StoreReservationPolicy;
 import com.tablekok.store_service.domain.entity.StoreStatus;
 import com.tablekok.store_service.domain.repository.StoreRepository;
 import com.tablekok.store_service.domain.service.CategoryLinker;
 import com.tablekok.store_service.domain.service.OperatingHourValidator;
+import com.tablekok.store_service.domain.service.StoreEventMapper;
 import com.tablekok.store_service.domain.service.StoreReservationPolicyValidator;
 import com.tablekok.store_service.domain.vo.OperatingHourInput;
 import com.tablekok.store_service.domain.vo.StoreReservationPolicyInput;
@@ -41,13 +46,16 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class StoreService {
 
 	private final StoreRepository storeRepository;
-	private final CategoryLinker categoryDomainService;
+	private final CategoryLinker categoryLinker;
 	private final OperatingHourValidator operatingHourValidator;
 	private final StoreReservationPolicyValidator storeReservationPolicyValidator;
 	private final StrategyFactory strategyFactory;
+	private final StoreEventPublisher storeEventPublisher;
+	private final StoreEventMapper storeEventMapper;
 
 	@Transactional
 	public CreateStoreResult createStore(CreateStoreCommand command) {
@@ -70,14 +78,25 @@ public class StoreService {
 			.toList();
 
 		// Category ID를 사용하여 Entity 조회 및 연결
-		categoryDomainService.linkCategoriesToStore(store, command.categoryIds());
+		categoryLinker.linkCategoriesToStore(store, command.categoryIds());
 
 		// OperatingHour Entity를 Store 컬렉션에 추가
 		store.getOperatingHours().addAll(hoursToSave);
 
 		storeRepository.save(store);
 
-		return CreateStoreResult.of(store, hoursToSave);
+		// kafka 이벤트 알림
+		StoreEvent event = storeEventMapper.createEvent(store, OperationType.CREATE.toString());
+		storeEventPublisher.publish(event);
+
+		List<String> categoryNames = categoryLinker.resolveCategoryNames(store.getCategoryIds());
+		return CreateStoreResult.of(store, categoryNames);
+	}
+
+	public GetStoreResult getStore(UUID storeId) {
+		Store store = findStore(storeId);
+		List<String> categoryNames = categoryLinker.resolveCategoryNames(store.getCategoryIds());
+		return GetStoreResult.of(store, categoryNames);
 	}
 
 	@Transactional
@@ -114,6 +133,10 @@ public class StoreService {
 			// operatingHour 수정
 			updateAllOperatingHours(store, newHoursMap);
 		}
+
+		// kafka 이벤트 알림
+		StoreEvent event = storeEventMapper.createEvent(store, OperationType.UPDATE.toString());
+		storeEventPublisher.publish(event);
 	}
 
 	@Transactional
@@ -125,6 +148,10 @@ public class StoreService {
 
 		StoreStatusTransitionStrategy strategy = strategyFactory.getStrategy(userRole);
 		strategy.changeStatus(store, newStatus);
+
+		// kafka 이벤트 알림
+		StoreEvent event = storeEventMapper.createEvent(store, OperationType.STATUS_CHANGE.toString());
+		storeEventPublisher.publish(event);
 	}
 
 	@Transactional
@@ -133,6 +160,10 @@ public class StoreService {
 
 		store.changeStatus(StoreStatus.DECOMMISSIONED);
 		store.softDelete(deleterId);
+
+		// kafka 이벤트 알림
+		StoreEvent event = storeEventMapper.createEvent(store, OperationType.DELETE.toString());
+		storeEventPublisher.publish(event);
 	}
 
 
