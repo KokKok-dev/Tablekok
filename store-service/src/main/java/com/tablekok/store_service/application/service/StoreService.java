@@ -22,6 +22,7 @@ import com.tablekok.store_service.application.dto.command.UpdateStoreStatusComma
 import com.tablekok.store_service.application.dto.event.StoreEvent;
 import com.tablekok.store_service.application.dto.result.CreateStoreResult;
 import com.tablekok.store_service.application.dto.result.GetStoreReservationPolicyResult;
+import com.tablekok.store_service.application.dto.result.GetStoreResult;
 import com.tablekok.store_service.application.exception.StoreErrorCode;
 import com.tablekok.store_service.application.port.StoreEventPublisher;
 import com.tablekok.store_service.application.service.strategy.StoreStatusTransitionStrategy;
@@ -45,10 +46,11 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class StoreService {
 
 	private final StoreRepository storeRepository;
-	private final CategoryLinker categoryDomainService;
+	private final CategoryLinker categoryLinker;
 	private final OperatingHourValidator operatingHourValidator;
 	private final StoreReservationPolicyValidator storeReservationPolicyValidator;
 	private final StrategyFactory strategyFactory;
@@ -76,7 +78,7 @@ public class StoreService {
 			.toList();
 
 		// Category ID를 사용하여 Entity 조회 및 연결
-		categoryDomainService.linkCategoriesToStore(store, command.categoryIds());
+		categoryLinker.linkCategoriesToStore(store, command.categoryIds());
 
 		// OperatingHour Entity를 Store 컬렉션에 추가
 		store.getOperatingHours().addAll(hoursToSave);
@@ -87,7 +89,14 @@ public class StoreService {
 		StoreEvent event = storeEventMapper.createEvent(store, OperationType.CREATE.toString());
 		storeEventPublisher.publish(event);
 
-		return CreateStoreResult.of(store, hoursToSave);
+		List<String> categoryNames = categoryLinker.resolveCategoryNames(store.getCategoryIds());
+		return CreateStoreResult.of(store, categoryNames);
+	}
+
+	public GetStoreResult getStore(UUID storeId) {
+		Store store = findStore(storeId);
+		List<String> categoryNames = categoryLinker.resolveCategoryNames(store.getCategoryIds());
+		return GetStoreResult.of(store, categoryNames);
 	}
 
 	@Transactional

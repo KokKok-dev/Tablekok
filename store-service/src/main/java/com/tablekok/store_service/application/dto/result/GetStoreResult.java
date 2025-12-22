@@ -9,7 +9,7 @@ import com.tablekok.store_service.domain.entity.Store;
 import lombok.Builder;
 
 @Builder
-public record CreateStoreResult(
+public record GetStoreResult(
 	UUID storeId,
 	String name,
 	String phoneNumber,
@@ -24,12 +24,12 @@ public record CreateStoreResult(
 	List<OperatingHourResult> operatingHours
 ) {
 
-	public static CreateStoreResult of(Store store, List<String> categoryNames) {
+	public static GetStoreResult of(Store store, List<String> categoryNames) {
 		List<OperatingHourResult> operatingHourResults = store.getOperatingHours().stream()
 			.map(OperatingHourResult::from)
 			.toList();
 
-		return CreateStoreResult.builder()
+		return GetStoreResult.builder()
 			.storeId(store.getId())
 			.name(store.getName())
 			.phoneNumber(store.getPhoneNumber())
@@ -44,5 +44,4 @@ public record CreateStoreResult(
 			.operatingHours(operatingHourResults)
 			.build();
 	}
-
 }
