@@ -14,7 +14,7 @@
         },
         {
           "name": "JWT_SECRET",
-          "value": "tablekok-user-dev-secret-key-minimum-32-characters-long"
+          "value": "VGFibGVrb2stU2VjcmV0S2V5LUZvcitKV1QtQXV0aGVudGljYXRpb24tMjAyNTAzMTI="
         },
         {
           "name": "DB_URL",

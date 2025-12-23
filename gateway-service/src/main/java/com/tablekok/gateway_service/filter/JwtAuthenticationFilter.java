@@ -1,13 +1,17 @@
 package com.tablekok.gateway_service.filter;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -28,6 +32,12 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
 	@Autowired
 	private JwtValidator jwtValidator;
+
+	@Autowired
+	private ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
+
+	@Value("${redis.auth.invalid-before-prefix}")
+	private String invalidBeforePrefix;
 
 	private static final List<String> PUBLIC_PATHS = Arrays.asList(
 		// User Service 인증 경로
@@ -80,11 +90,9 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
 			if (token == null) {
 				if (config.isRequired()) {
-					// 필수인데 없으면 차단
 					log.warn("JWT 토큰이 없습니다 (인증 필수) - 경로: {}", path);
 					return handleUnauthorized(exchange, "토큰이 없습니다");
 				}
-				// 선택적 인증인데 없으면 그대로 통과 (비회원)
 				log.debug("JWT 토큰이 없습니다 (선택적 인증) - 경로: {}", path);
 				return chain.filter(exchange);
 			}
@@ -101,26 +109,53 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 				String userId = claims.getSubject();
 				String email = claims.get("email", String.class);
 				String role = claims.get("role", String.class);
+				Date issuedAt = claims.getIssuedAt();
 
 				log.debug("JWT 검증 성공 - 사용자: {}, 역할: {}, 경로: {}", userId, role, path);
 
-				// 인증된 사용자 정보를 헤더에 추가하여 후속 서비스로 전달
-				ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-					.header("X-User-Id", userId)
-					.header("X-User-Email", email)
-					.header("X-User-Role", role)
-					.header("X-Gateway-Verified", "true")
-					.build();
+				// Redis 블랙리스트 체크 (비밀번호 변경 여부)
+				return checkTokenInvalidation(userId, issuedAt)
+					.flatMap(isInvalid -> {
+						if (isInvalid) {
+							log.warn("토큰이 무효화되었습니다 (비밀번호 변경) - 사용자: {}", userId);
+							return handleUnauthorized(exchange, "비밀번호가 변경되어 재로그인이 필요합니다");
+						}
 
-				log.debug("사용자 정보 헤더 추가 완료 - 경로: {}", path);
+						// 인증된 사용자 정보를 헤더에 추가
+						ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
+							.header("X-User-Id", userId)
+							.header("X-User-Email", email)
+							.header("X-User-Role", role)
+							.header("X-Gateway-Verified", "true")
+							.build();
 
-				return chain.filter(exchange.mutate().request(modifiedRequest).build());
+						log.debug("사용자 정보 헤더 추가 완료 - 경로: {}", path);
+
+						return chain.filter(exchange.mutate().request(modifiedRequest).build());
+					});
 
 			} catch (Exception e) {
 				log.error("JWT 토큰 처리 중 오류 발생 - 경로: {}, 오류: {}", path, e.getMessage());
 				return handleUnauthorized(exchange, "토큰 처리 중 오류 발생");
 			}
 		};
+	}
+
+	/**
+	 * Redis에서 토큰 무효화 여부 체크
+	 * - invalid-before 시점 이전에 발급된 토큰이면 무효
+	 */
+	private Mono<Boolean> checkTokenInvalidation(String userId, Date issuedAt) {
+		String key = invalidBeforePrefix + userId;
+
+		return reactiveRedisTemplate.opsForValue().get(key)
+			.map(invalidBeforeStr -> {
+				Instant invalidBefore = Instant.parse(invalidBeforeStr);
+				Instant tokenIssuedAt = issuedAt.toInstant();
+				// 토큰 발급시간이 무효화 시점 이전이면 true (무효)
+				return tokenIssuedAt.isBefore(invalidBefore);
+			})
+			.defaultIfEmpty(false);  // Redis에 값이 없으면 유효한 토큰
 	}
 
 	private boolean isPublicPath(String path) {
@@ -141,7 +176,6 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
 		log.debug("401 응답 전송 - 메시지: {}", message);
 
-		// 올바른 WebFlux 방식으로 응답 작성
 		DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
 		return response.writeWith(Mono.just(buffer));
 	}
@@ -158,9 +192,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
 		log.debug("403 응답 전송 - 메시지: {}", message);
 
-		// 올바른 WebFlux 방식으로 응답 작성
 		DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
 		return response.writeWith(Mono.just(buffer));
 	}
-
 }

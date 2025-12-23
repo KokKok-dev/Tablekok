@@ -33,6 +33,9 @@ dependencies {
     // 유지할 의존성들
     implementation 'org.springframework.boot:spring-boot-starter-actuator'  // 모니터링용
 
+    // Redis (WebFlux 기반이라 reactive 버전 사용)
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+
     // JWT 라이브러리 (토큰 검증용)
     compileOnly group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'

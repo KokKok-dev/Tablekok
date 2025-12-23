@@ -6,6 +6,7 @@ import com.tablekok.user_service.auth.domain.entity.User;
 import com.tablekok.user_service.auth.domain.entity.UserRole;
 import com.tablekok.user_service.auth.domain.repository.OwnerRepository;
 import com.tablekok.user_service.auth.domain.repository.UserRepository;
+import com.tablekok.user_service.auth.infrastructure.redis.RedisAuthService;
 import com.tablekok.user_service.user.application.dto.command.ChangePasswordCommand;
 import com.tablekok.user_service.user.application.dto.command.UpdateProfileCommand;
 import com.tablekok.user_service.user.application.dto.result.ProfileResult;
@@ -34,6 +35,7 @@ public class UserApplicationService {
 	private final UserRepository userRepository;
 	private final OwnerRepository ownerRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final RedisAuthService redisAuthService;
 
 	public ProfileResult getProfile(UUID userId, String role) {
 		// 1. 사용자 조회
@@ -90,6 +92,10 @@ public class UserApplicationService {
 
 		// 4. 새 비밀번호 암호화 후 저장
 		user.updatePassword(passwordEncoder.encode(command.newPassword()));
+
+		// 5. 기존 토큰 무효과 (Redis)
+		redisAuthService.saveTokenInvalidBefore(userId);
+		redisAuthService.deleteRefreshToken(userId);
 	}
 
 	public UserListResult getAllUsers(String role, Pageable pageable) {

@@ -5,6 +5,11 @@ spring:
   application:
     name: user-service
 
+  data:
+    redis:
+      host: ${CACHE_HOST}
+      port: ${CACHE_PORT}
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -61,3 +66,8 @@ management:
   zipkin:
     tracing:
       endpoint: ${ZIPKIN_ENDPOINT}
+
+redis:
+  auth:
+    refresh-prefix: "auth:refresh:"
+    invalid-before-prefix: "auth:invalid-before:"

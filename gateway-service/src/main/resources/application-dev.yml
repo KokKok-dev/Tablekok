@@ -7,6 +7,13 @@ spring:
   application:
     name: gateway-service
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      username: default
+      password: systempass
+
 jwt:
   secret: ${JWT_SECRET}
 
@@ -52,3 +59,8 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     com.tablekok.gateway_service: DEBUG
+
+# redis 추가
+redis:
+  auth:
+    invalid-before-prefix: "auth:invalid-before:"
