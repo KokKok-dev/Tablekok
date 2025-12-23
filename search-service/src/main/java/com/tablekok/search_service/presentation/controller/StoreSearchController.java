@@ -49,11 +49,13 @@ public class StoreSearchController {
 	public ResponseEntity<ApiResponse<Cursor<SearchStoreResponse, String>>> search(
 		@ModelAttribute StoreSearchRequest request
 	) {
-		storeSearchService.search(request.toCommand());
+		Cursor<SearchStoreResponse, String> response = storeSearchService.search(request.toCommand())
+			.map(SearchStoreResponse::from);
 
 		return ResponseEntity.ok(
 			ApiResponse.success(
 				"음식점 검색 성공",
+				response,
 				HttpStatus.OK
 			)
 		);

@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tablekok.cursor.dto.request.CursorRequest;
 import com.tablekok.cursor.dto.response.Cursor;
 import com.tablekok.cursor.util.CursorUtils;
+import com.tablekok.search_service.application.dto.command.StoreSearchCommand;
 import com.tablekok.search_service.application.dto.result.SearchCategoryStoreResult;
+import com.tablekok.search_service.application.dto.result.SearchStoreResult;
 import com.tablekok.search_service.domain.document.SortType;
 import com.tablekok.search_service.domain.document.StoreDocument;
 import com.tablekok.search_service.domain.repository.StoreSearchRepository;
@@ -68,6 +70,28 @@ public class StoreSearchService {
 			case RATING -> String.valueOf(result.averageRating());
 			case REVIEW -> String.valueOf(result.reviewCount());
 			case NAME -> result.name();
+		};
+	}
+
+	public Cursor<SearchStoreResult, String> search(StoreSearchCommand command) {
+		List<StoreDocument> documents = storeSearchRepository.search(command.toDomainCriteria());
+
+		Cursor<StoreDocument, String> cursorResult = CursorUtils.makeResponse(
+			null,
+			documents,
+			command.cursorRequest().size(),
+			doc -> extractCursorValue(doc, command.sortType()),
+			StoreDocument::getStoreId
+		);
+
+		return cursorResult.map(SearchStoreResult::fromResult);
+	}
+
+	private String extractCursorValue(StoreDocument store, SortType sortType) {
+		return switch (sortType) {
+			case RATING -> String.valueOf(store.getAverageRating()); // double -> string
+			case REVIEW -> String.valueOf(store.getReviewCount()); // long -> string
+			default -> String.valueOf(store.getAverageRating());
 		};
 	}
 }
