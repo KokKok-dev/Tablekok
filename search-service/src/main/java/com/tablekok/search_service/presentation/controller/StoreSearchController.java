@@ -14,7 +14,9 @@ import com.tablekok.cursor.dto.response.Cursor;
 import com.tablekok.dto.ApiResponse;
 import com.tablekok.search_service.application.service.StoreSearchService;
 import com.tablekok.search_service.presentation.dto.request.SearchCategoryStoreRequest;
+import com.tablekok.search_service.presentation.dto.request.StoreSearchRequest;
 import com.tablekok.search_service.presentation.dto.response.SearchCategoryStoreResponse;
+import com.tablekok.search_service.presentation.dto.response.SearchStoreResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +40,20 @@ public class StoreSearchController {
 			ApiResponse.success(
 				"음식점 조회 성공.",
 				response,
+				HttpStatus.OK
+			)
+		);
+	}
+
+	@GetMapping
+	public ResponseEntity<ApiResponse<Cursor<SearchStoreResponse, String>>> search(
+		@ModelAttribute StoreSearchRequest request
+	) {
+		storeSearchService.search(request.toCommand());
+
+		return ResponseEntity.ok(
+			ApiResponse.success(
+				"음식점 검색 성공",
 				HttpStatus.OK
 			)
 		);
