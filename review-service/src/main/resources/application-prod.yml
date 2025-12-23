@@ -1,8 +1,9 @@
+server:
+  port: 8087
+
 spring:
   application:
     name: review-service
-  profiles:
-    active: prod
   datasource:
     url: ${DB_PROD_URL}
     driver-class-name: org.postgresql.Driver
@@ -10,7 +11,7 @@ spring:
     password: ${DB_PROD_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto:
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -19,9 +20,20 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     open-in-view: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL}
+      defaultZone: ${EUREKA_SERVER_URL_PROD}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

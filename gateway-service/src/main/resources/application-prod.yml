@@ -12,7 +12,7 @@ jwt:
 
 gateway:
   uris:
-    review: ${REVIEW_URI:lb://REVIEW-SERVICE}
+    review: ${REVIEW_URI}
     user: ${USER_URI}
     store: ${STORE_URI}
     search: ${SEARCH_URI:lb://SEARCH-SERVICE}

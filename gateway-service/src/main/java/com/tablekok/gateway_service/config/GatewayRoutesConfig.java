@@ -31,7 +31,6 @@ public class GatewayRoutesConfig {
 			// Review Service
 			.route("review-service-store-nested", r -> r
 				.path("/v1/stores/*/reviews/**") // 가게 리뷰 (와일드카드 사용)
-				.filters(f -> f.filter(jwtFilter.apply(new JwtAuthenticationFilter.Config())))
 				.uri(uris.review())
 			)
 			.route("review-service-user-nested", r -> r
