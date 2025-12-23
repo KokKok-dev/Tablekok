@@ -1,5 +1,6 @@
 package com.tablekok.search_service.application.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -93,5 +94,12 @@ public class StoreSearchService {
 			case REVIEW -> String.valueOf(store.getReviewCount()); // long -> string
 			default -> String.valueOf(store.getAverageRating());
 		};
+	}
+
+	public List<String> autocomplete(String keyword) {
+		if (keyword == null || keyword.trim().isEmpty()) {
+			return Collections.emptyList();
+		}
+		return storeSearchRepository.autocomplete(keyword);
 	}
 }
