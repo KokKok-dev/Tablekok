@@ -1,5 +1,6 @@
 package com.tablekok.search_service.presentation.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tablekok.cursor.dto.response.Cursor;
@@ -56,6 +58,21 @@ public class StoreSearchController {
 			ApiResponse.success(
 				"음식점 검색 성공",
 				response,
+				HttpStatus.OK
+			)
+		);
+	}
+
+	// 검색어 자동완성
+	@GetMapping("/autocomplete")
+	public ResponseEntity<ApiResponse<List<String>>> autocomplete(@RequestParam String keyword) {
+
+		List<String> result = storeSearchService.autocomplete(keyword);
+
+		return ResponseEntity.ok(
+			ApiResponse.success(
+				"검색어 자동완성 리스트",
+				result,
 				HttpStatus.OK
 			)
 		);
