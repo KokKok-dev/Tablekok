@@ -72,7 +72,7 @@ Content-Type: application/json
   "password": "Test1234!"
 }
 
-### 가게별 리뷰 목록 조회
+### 가게별 리뷰 목록 조회.
 GET http://localhost:19091/v1/stores/a9ab17e5-ec03-4536-a0ac-60618902e5bb/reviews?sortBy=NEWEST
 Content-Type: application/json
 
