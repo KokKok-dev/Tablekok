@@ -55,7 +55,6 @@
         }
     ],
     "cpu": "1024",
-    "enableFaultInjection": false,
     "executionRoleArn": "arn:aws:iam::291433606038:role/ecsTaskExecutionRole",
     "family": "tablekok-review-task",
     "memory": "3072",
