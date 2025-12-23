@@ -143,4 +143,8 @@ public class AuthApplicationService {
 
 		return new RefreshTokenResult(newAccessToken);
 	}
+
+	public void logout(UUID userId) {
+		redisAuthService.deleteRefreshToken(userId);
+	}
 }

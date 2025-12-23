@@ -1,5 +1,7 @@
 package com.tablekok.user_service.auth.presentation.controller;
 
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -59,5 +61,14 @@ public class AuthController {
 		return ResponseEntity.ok()
 			.header("Authorization", "Bearer " + result.accessToken())
 			.body(ApiResponse.success("토큰이 재발급되었습니다.", response, HttpStatus.OK));
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<ApiResponse<Void>> logout(
+		@RequestHeader("X-User-Id") UUID userId
+	) {
+		authApplicationService.logout(userId);
+		return ResponseEntity.ok()
+			.body(ApiResponse.success("로그아웃이 완료되었습니다.", null, HttpStatus.OK));
 	}
 }
