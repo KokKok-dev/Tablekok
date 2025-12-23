@@ -34,7 +34,7 @@ on:
 env:
   AWS_REGION: ap-northeast-2                   # set this to your preferred AWS region, e.g. us-west-1
   ECR_REPOSITORY: tablekok/review           # set this to your Amazon ECR repository name
-  ECS_SERVICE: tablekok-review-task-service-bpaoz4hs                 # set this to your Amazon ECS service name
+  ECS_SERVICE: tablekok-review-task-service-gqlsfplo                 # set this to your Amazon ECS service name
   ECS_CLUSTER: tablekok-cluster                 # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: .github/workflows/aws/tablekok-review-task-revision3.json # set this to the path to your
   # file, e.g. .aws/task-definition.json
