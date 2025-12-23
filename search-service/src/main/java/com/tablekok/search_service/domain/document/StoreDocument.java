@@ -38,7 +38,8 @@ public class StoreDocument extends BaseDocument {
 	@MultiField(
 		mainField = @Field(type = FieldType.Text, analyzer = "nori"),
 		otherFields = {
-			@InnerField(suffix = "keyword", type = FieldType.Keyword)
+			@InnerField(suffix = "keyword", type = FieldType.Keyword),
+			@InnerField(suffix = "autocomplete", type = FieldType.Search_As_You_Type)
 		}
 	)
 	private String name;
