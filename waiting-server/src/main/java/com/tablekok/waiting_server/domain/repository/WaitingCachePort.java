@@ -14,4 +14,6 @@ public interface WaitingCachePort {
 	void removeWaiting(UUID storeId, String toString);
 
 	List<String> getWaitingIds(UUID storeId);
+
+	int incrementAndGetLatestNumber(UUID storeId, int dbLastNumber);
 }

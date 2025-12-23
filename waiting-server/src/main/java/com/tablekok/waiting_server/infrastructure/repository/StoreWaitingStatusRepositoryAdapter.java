@@ -17,11 +17,6 @@ public class StoreWaitingStatusRepositoryAdapter implements StoreWaitingStatusRe
 	private final StoreWaitingStatusJpaRepository storeWaitingStatusJpaRepository;
 
 	@Override
-	public Optional<StoreWaitingStatus> findByIdWithLock(UUID storeId) {
-		return storeWaitingStatusJpaRepository.findByIdWithLock(storeId);
-	}
-
-	@Override
 	public Optional<StoreWaitingStatus> findById(UUID storeId) {
 		return storeWaitingStatusJpaRepository.findById(storeId);
 	}
@@ -34,6 +29,11 @@ public class StoreWaitingStatusRepositoryAdapter implements StoreWaitingStatusRe
 	@Override
 	public void resetAllStoresDaily() {
 		storeWaitingStatusJpaRepository.resetAllStoresDaily();
+	}
+
+	@Override
+	public int updateLatestNumberIfGreater(UUID storeId, int assignedNumber) {
+		return storeWaitingStatusJpaRepository.updateLatestNumberIfGreater(storeId, assignedNumber);
 	}
 
 }
