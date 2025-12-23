@@ -71,4 +71,17 @@ public class StoreSearchRepositoryAdapter implements StoreSearchRepository {
 			.map(SearchHit::getContent)
 			.collect(Collectors.toList());
 	}
+
+	// 검색어 자동완성
+	@Override
+	public List<String> autocomplete(String keyword) {
+		Query query = queryFactory.createAutocompleteQuery(keyword);
+
+		SearchHits<StoreDocument> searchHits = elasticsearchOperations.search(query, StoreDocument.class);
+
+		return searchHits.stream()
+			.map(hit -> hit.getContent().getName())
+			.distinct()
+			.collect(Collectors.toList());
+	}
 }

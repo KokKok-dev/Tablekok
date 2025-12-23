@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import com.tablekok.search_service.domain.document.StoreStatus;
 import com.tablekok.search_service.domain.vo.StoreSearchCriteria;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 
 @Component
 public class StoreSearchQueryFactory {
@@ -86,6 +88,8 @@ public class StoreSearchQueryFactory {
 	public Query createKeywordSearchQuery(StoreSearchCriteria criteria, int limit) {
 		NativeQueryBuilder queryBuilder = NativeQuery.builder();
 
+		queryBuilder.withQuery(buildSearchQuery(criteria.keyword()));
+
 		if (criteria.sortType() != null) {
 			queryBuilder.withSort(buildSort(criteria.sortType()));
 		}
@@ -138,5 +142,25 @@ public class StoreSearchQueryFactory {
 			.filter(StoreStatus::isSearchable)
 			.map(status -> FieldValue.of(status.name()))
 			.toList();
+	}
+
+	public Query createAutocompleteQuery(String keyword) {
+		return NativeQuery.builder()
+			.withQuery(q -> q
+				.multiMatch(m -> m
+					.query(keyword)
+					.fields(
+						"name.autocomplete",
+						"name.autocomplete._2gram",
+						"name.autocomplete._3gram"
+					)
+					.type(TextQueryType.BoolPrefix)
+				)
+			)
+			.withSourceFilter(
+				new FetchSourceFilter(true, new String[]{"name"}, new String[]{})
+			)
+			.withMaxResults(10)
+			.build();
 	}
 }

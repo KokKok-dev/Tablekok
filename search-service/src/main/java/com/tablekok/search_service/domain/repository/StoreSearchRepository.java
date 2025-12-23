@@ -23,4 +23,7 @@ public interface StoreSearchRepository {
 
 	// 검색
 	List<StoreDocument> search(StoreSearchCriteria criteria);
+
+	// 검색어 자동완성
+	List<String> autocomplete(String keyword);
 }
