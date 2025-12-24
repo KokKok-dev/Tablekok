@@ -5,6 +5,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+
 import com.tablekok.hotreservationservice.application.service.QueueService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,11 @@ public class ReservationScheduler {
 
 	// 예약 입장 스케쥴러
 	@Scheduled(fixedRateString = "${reservation.process.interval}")
+	@SchedulerLock(
+		name = "hot-reservation-scheduler-lock",
+		lockAtMostFor = "10s",
+		lockAtLeastFor = "500ms"
+	)
 	public void processReservations() {
 
 		// 예약 허용 시간 초과 유저 삭제 및 입장 인원 반환

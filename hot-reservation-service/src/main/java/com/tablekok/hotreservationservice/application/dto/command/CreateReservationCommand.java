@@ -14,8 +14,4 @@ public record CreateReservationCommand(
 	Integer headcount,
 	Integer deposit
 ) {
-	// Reservation 엔티티로
-	// public Reservation toEntity() {
-	// 	return Reservation.create(userId, storeId, reservationDateTime, headcount, deposit);
-	// }
 }
