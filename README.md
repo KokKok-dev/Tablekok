@@ -17,7 +17,7 @@
 |:---:|:---:|:---|:---:|
 | **태성원** | 팀장 | 🔐 Auth, 🚪 Gateway(Auth), 🏗 Infra | [Link](https://github.com/trevivom76) |
 | **이가현** | 부팀장 | 🏪 Store, ⏳ Waiting | [Link](https://github.com/gashine20) |
-| **송준일** | 팀원 | 🔍 Search, ⭐ Review, 🚪 Gateway(Routing) | Link |
+| **송준일** | 팀원 | 🔍 Search, ⭐ Review, 🚪 Gateway(Routing) | [Link](https://github.com/thdwnsdlf61) |
 | **황교석** | 팀원 | 📅 Reservation(Normal/Queue) | [Link](https://github.com/gyoseok17) |
 
 
