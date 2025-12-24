@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,28 +42,27 @@ public class HotReservationController {
 		return queueService.enterQueue(authUser.userId());
 	}
 
-	// 토큰 검증
+	// 입장 유저 검증
 	@PreAuthorize("isAuthenticated()")
-	@PostMapping("/validation/{token}")
-	public ResponseEntity<ApiResponse<Void>> completeReservation(
-		@PathVariable("token") String token,
+	@PostMapping("/validation")
+	public ResponseEntity<ApiResponse<Void>> validateAvailableUser(
 		@AuthenticationPrincipal AuthUser authUser
 	) {
-		queueService.validateToken(authUser.userId(), token);
+		queueService.validateAvailableUser(authUser.userId());
 
 		return ResponseEntity.ok(
-			ApiResponse.success("토큰이 검증되었습니다.", HttpStatus.ACCEPTED));
+			ApiResponse.success("유저가 검증되었습니다.", HttpStatus.ACCEPTED));
 	}
 
-	// 예약 요청 접수(비동기 처리 시작)
+	// 예약 요청
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping
 	public ResponseEntity<ApiResponse<CreateReservationResponse>> createReservation(
 		@Valid @RequestBody CreateReservationRequest request,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
-		//토큰 검사
-		queueService.validateToken(authUser.userId(), request.token());
+		// 유저 검사
+		queueService.validateAvailableUser(authUser.userId());
 
 		// 예약 진행
 		CreateReservationResult result = hotReservationService.createReservation(request.toCommand(authUser.userId()));

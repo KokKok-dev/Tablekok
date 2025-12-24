@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.hotreservationservice.application.client.StoreClient;
 import com.tablekok.hotreservationservice.application.client.dto.GetStoreReservationPolicyResponse;
@@ -14,6 +13,7 @@ import com.tablekok.hotreservationservice.domain.entity.Reservation;
 import com.tablekok.hotreservationservice.domain.repository.ReservationRepository;
 import com.tablekok.hotreservationservice.domain.service.ReservationDomainService;
 import com.tablekok.hotreservationservice.domain.vo.StoreReservationPolicy;
+import com.tablekok.hotreservationservice.infrastructure.Cache.RedissonLockMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,27 +23,25 @@ public class HotReservationService {
 	private final ReservationDomainService reservationDomainService;
 	private final StoreClient storeClient;
 	private final ReservationRepository reservationRepository;
+	private final RedissonLockMapper redissonLockMapper;
 
 	// 예약 생성(접수)
-	@Transactional
 	public CreateReservationResult createReservation(CreateReservationCommand command) {
+		String lockKey = "reservation:" + command.storeId() + ":" + command.reservationDateTime().getReservationDate();
+		return redissonLockMapper.executeWithLock(lockKey, 10L, 2L, () -> {
+			createValidate(command);
 
-		// 생성 전 검증
-		createValidate(command);
+			Reservation newReservation = Reservation.create(
+				command.userId(),
+				command.storeId(),
+				command.reservationDateTime(),
+				command.headcount(),
+				command.deposit()
+			);
 
-		// 생성
-		Reservation newReservation = Reservation.create(
-			command.userId(),
-			command.storeId(),
-			command.reservationDateTime(),
-			command.headcount(),
-			command.deposit()
-		);
-
-		// 저장
-		reservationRepository.save(newReservation);
-
-		return CreateReservationResult.of(newReservation);
+			reservationRepository.save(newReservation);
+			return CreateReservationResult.of(newReservation);
+		});
 	}
 
 	// 생성 전 검증
