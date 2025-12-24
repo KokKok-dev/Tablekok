@@ -10,9 +10,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum HotReservationErrorCode implements ErrorCode {
-	RESERVATION_TOKEN_VALIDATION_FAILED(
+	AVAILABLE_USER_VALIDATION_FAILED(
 		"HOT-RESERVATION100",
-		"유효하지 않은 입장 토큰입니다.",
+		"예약이 허용되지 않은 유저입니다.",
 		HttpStatus.BAD_REQUEST
 	),
 

@@ -1,8 +1,6 @@
 package com.tablekok.hotreservationservice.infrastructure.Cache;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,16 +18,15 @@ public class RedisStoreImpl implements CacheStore {
 
 	@Value("${redis.queue.key}")
 	private String QUEUE_KEY;
-	@Value("${redis.token.prefix}")
-	private String TOKEN_PREFIX;
 	@Value("${redis.available.users.key}")
 	private String AVAILABLE_USERS_KEY;
-	@Value("${reservation.token.ttl}")
-	private long tokenTtl;
+	@Value("${redis.pubsub.channel}")
+	private String PUB_SUB_CHANNEL;
 
 	@Override
-	public void addUserToQueue(String userId, long score) {
-		redisTemplate.opsForZSet().add(QUEUE_KEY, userId, score);
+	public void addUserToQueue(String userId, long sseTtl) {
+		long expireAt = System.currentTimeMillis() + sseTtl;
+		redisTemplate.opsForZSet().add(QUEUE_KEY, userId, (double)expireAt);
 	}
 
 	@Override
@@ -44,13 +41,9 @@ public class RedisStoreImpl implements CacheStore {
 	}
 
 	@Override
-	public void saveToken(String userId, String token) {
-		redisTemplate.opsForValue().set(TOKEN_PREFIX + userId, token, tokenTtl, TimeUnit.MILLISECONDS);
-	}
-
-	@Override
-	public void addAvailableUser(String userId, long expirationTime) {
-		redisTemplate.opsForHash().put(AVAILABLE_USERS_KEY, userId, String.valueOf(expirationTime + tokenTtl));
+	public void addAvailableUser(String userId, long entryTtl) {
+		long expireAt = System.currentTimeMillis() + entryTtl;
+		redisTemplate.opsForZSet().add(AVAILABLE_USERS_KEY, userId, (double)expireAt);
 	}
 
 	@Override
@@ -59,22 +52,27 @@ public class RedisStoreImpl implements CacheStore {
 	}
 
 	@Override
-	public String getToken(String userId) {
-		return redisTemplate.opsForValue().get(TOKEN_PREFIX + userId);
-	}
-
-	@Override
-	public void removeToken(String userId) {
-		redisTemplate.delete(TOKEN_PREFIX + userId);
+	public Double findAvailableUser(String userId) {
+		return redisTemplate.opsForZSet().score(AVAILABLE_USERS_KEY, userId);
 	}
 
 	@Override
 	public void removeAvailableUser(String userId) {
-		redisTemplate.opsForHash().delete(AVAILABLE_USERS_KEY, userId);
+		redisTemplate.opsForZSet().remove(AVAILABLE_USERS_KEY, userId);
 	}
 
 	@Override
-	public Map<Object, Object> getAvailableUsers() {
-		return redisTemplate.opsForHash().entries(AVAILABLE_USERS_KEY);
+	public void removeExpiredAvailableUsers(long now) {
+		redisTemplate.opsForZSet().removeRangeByScore(AVAILABLE_USERS_KEY, 0, (double)now);
+	}
+
+	@Override
+	public int getAvailableUserCount() {
+		return redisTemplate.opsForZSet().zCard(AVAILABLE_USERS_KEY).intValue();
+	}
+
+	@Override
+	public void convertAndSend(String message) {
+		redisTemplate.convertAndSend(PUB_SUB_CHANNEL, message);
 	}
 }

@@ -10,8 +10,6 @@ spring:
     uris: http://localhost:9200 # ES 실행 주소
     connection-timeout: 5s
     socket-timeout: 30s
-    # username: elastic # 보안 설정(X-Pack)이 되어있다면 주석 해제
-    # password: changeme
 
   # 2. Kafka 설정
   kafka:

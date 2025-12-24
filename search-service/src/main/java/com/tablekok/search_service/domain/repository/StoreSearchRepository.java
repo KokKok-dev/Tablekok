@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.tablekok.search_service.domain.document.SortType;
 import com.tablekok.search_service.domain.document.StoreDocument;
+import com.tablekok.search_service.domain.vo.StoreSearchCriteria;
 
 public interface StoreSearchRepository {
 
@@ -19,4 +20,10 @@ public interface StoreSearchRepository {
 		String cursorId,
 		int limit
 	);
+
+	// 검색
+	List<StoreDocument> search(StoreSearchCriteria criteria);
+
+	// 검색어 자동완성
+	List<String> autocomplete(String keyword);
 }

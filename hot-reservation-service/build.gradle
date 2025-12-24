@@ -27,10 +27,15 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'   //jpa
     implementation 'org.springframework.boot:spring-boot-starter-validation' // valid
 
-    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.24.3'   // 분산락
 
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'      // 집킨
+    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'          // 집킨
+
+    implementation "net.javacrumbs.shedlock:shedlock-spring:5.13.0"     // 스케줄러락
+    implementation "net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.13.0"// 스케줄러 락
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client' // 유레카 클라이언트
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'  // 페인 클라이언트
