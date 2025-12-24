@@ -4,8 +4,6 @@ server:
 spring:
   application:
     name: review-service
-#  profiles:
-#    active: dev
   datasource:
     url: ${DB_DEV_URL}
     driver-class-name: org.postgresql.Driver

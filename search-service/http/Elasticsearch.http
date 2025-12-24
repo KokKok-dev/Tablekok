@@ -17,3 +17,10 @@ Content-Type: application/json
     "match_all": {}
   }
 }
+
+###
+GET http://localhost:9200/stores/_mapping
+Content-Type: application/json
+
+###
+DELETE http://localhost:9200/stores

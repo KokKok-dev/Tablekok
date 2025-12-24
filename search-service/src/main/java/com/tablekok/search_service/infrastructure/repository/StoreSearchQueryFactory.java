@@ -16,6 +16,7 @@ import com.tablekok.search_service.domain.document.StoreStatus;
 import com.tablekok.search_service.domain.vo.StoreSearchCriteria;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 
 @Component
@@ -122,15 +123,39 @@ public class StoreSearchQueryFactory {
 					if (keyword == null || keyword.isBlank()) {
 						return m.matchAll(ma -> ma);
 					}
-					return m.multiMatch(mm -> mm
-							.query(keyword)
-							// 검색할 필드 목록과 가중치 설정
-							.fields(List.of(
-								"name^2.0",
-								"categories^1.5",
-								"description",
-								"address"
-							))
+					return m.bool(subBool -> subBool
+						// 정확히 일치하는 경우 (가중치 대폭 증가 -> 상단 노출)
+						.should(s -> s
+							.multiMatch(mm -> mm
+								.query(keyword)
+								.fields(List.of(
+									"name^5.0",       // 이름 정확 일치는 5배 점수
+									"categories^3.0", // 카테고리 정확 일치는 3배
+									"description",
+									"address"
+								))
+								.type(TextQueryType.BestFields)
+								.operator(Operator.And) // 모든 단어가 다 맞아야 함 (정확도)
+								.boost(10.0f) // 이 쿼리에 걸리면 점수를 훨씬 높게 줌
+							)
+						)
+						// 오타가 있는 경우 (Fuzzy Search -> 하단 노출)
+						.should(s -> s
+							.multiMatch(mm -> mm
+								.query(keyword)
+								.fields(List.of(
+									"name",
+									"categories",
+									"description",
+									"address"
+								))
+								.type(TextQueryType.BestFields)
+								.fuzziness("AUTO") // 오타 허용 (길이에 따라 자동 조절)
+								.prefixLength(1)   // 첫 글자는 맞아야 함 (성능 + 정확도 향상)
+							)
+						)
+						// A와 B 둘 중 하나라도 맞으면 결과에 포함
+						.minimumShouldMatch("1")
 					);
 				})
 			)
