@@ -1,5 +1,6 @@
 package com.tablekok.reservation_service.application.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ import com.tablekok.reservation_service.application.dto.result.CreateReservation
 import com.tablekok.reservation_service.application.dto.result.GetReservationResult;
 import com.tablekok.reservation_service.application.dto.result.GetReservationsForCustomerResult;
 import com.tablekok.reservation_service.application.dto.result.GetReservationsForOwnerResult;
+import com.tablekok.reservation_service.application.dto.result.GetReservedTimeResult;
 import com.tablekok.reservation_service.application.exception.ReservationErrorCode;
 import com.tablekok.reservation_service.application.service.strategy.RoleStrategy;
 import com.tablekok.reservation_service.application.service.strategy.StrategyFactory;
@@ -25,6 +27,7 @@ import com.tablekok.reservation_service.domain.entity.Reservation;
 import com.tablekok.reservation_service.domain.repository.ReservationRepository;
 import com.tablekok.reservation_service.domain.service.ReservationDomainService;
 import com.tablekok.reservation_service.domain.vo.StoreReservationPolicy;
+import com.tablekok.reservation_service.infrastructure.redis.RedissonLockMapper;
 import com.tablekok.util.PageableUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -36,26 +39,26 @@ public class ReservationService {
 	private final ReservationDomainService reservationDomainService;
 	private final StoreClient storeClient;
 	private final StrategyFactory strategyFactory;
+	private final RedissonLockMapper redissonLockMapper;
 
 	// 예약 생성(접수)
-	@Transactional
 	public CreateReservationResult createReservation(CreateReservationCommand command) {
-		// 생성 전 검증
-		validateReservationConstraints(command);
+		String lockKey = "reservation:" + command.storeId() + ":" + command.reservationDateTime().getReservationDate();
 
-		// 생성
-		Reservation newReservation = Reservation.create(
-			command.userId(),
-			command.storeId(),
-			command.reservationDateTime(),
-			command.headcount(),
-			command.deposit()
-		);
+		return redissonLockMapper.executeWithLock(lockKey, 10L, 2L, () -> {
+			validateReservationConstraints(command);
 
-		// 저장
-		reservationRepository.save(newReservation);
+			Reservation newReservation = Reservation.create(
+				command.userId(),
+				command.storeId(),
+				command.reservationDateTime(),
+				command.headcount(),
+				command.deposit()
+			);
 
-		return CreateReservationResult.of(newReservation);
+			reservationRepository.save(newReservation);
+			return CreateReservationResult.of(newReservation);
+		});
 	}
 
 	// 생성 전 검증
@@ -83,8 +86,16 @@ public class ReservationService {
 		);
 	}
 
+	// 특정 식당의 선택 일자의 예약 목록 조회(프론트에서 예약 가능 시간 선택 표시를 위해)
+	@Transactional(readOnly = true)
+	public GetReservedTimeResult getReservedTime(UUID storeId, LocalDate date) {
+		List<Reservation> findReservations = reservationRepository.findByStoreIdAndReservationDateTime_ReservationDate(
+			storeId, date);
+		return GetReservedTimeResult.of(findReservations);
+	}
+
 	// 단건 예약 조회(리뷰에서 호출 용도)
-	@Transactional
+	@Transactional(readOnly = true)
 	public GetReservationResult getReservation(UUID reservationId) {
 		Reservation findReservation = reservationRepository.findById(reservationId);
 		return GetReservationResult.of(findReservation);

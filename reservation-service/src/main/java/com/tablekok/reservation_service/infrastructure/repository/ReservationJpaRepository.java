@@ -2,6 +2,7 @@ package com.tablekok.reservation_service.infrastructure.repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ import com.tablekok.reservation_service.domain.entity.Reservation;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, UUID> {
 
-	boolean existsByStoreIdAndReservationDateTimeReservationDateAndReservationDateTimeReservationTime(
+	boolean existsByStoreIdAndReservationDateTime_ReservationDateAndReservationDateTime_ReservationTime(
 		UUID storeId,
 		LocalDate reservationDate,
 		LocalTime reservationTime
@@ -24,4 +25,6 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, UUI
 	Page<Reservation> findByUserId(UUID userId, Pageable pageable);
 
 	Page<Reservation> findByStoreId(UUID storeId, Pageable pageable);
+
+	List<Reservation> findByStoreIdAndReservationDateTime_ReservationDate(UUID storeId, LocalDate date);
 }

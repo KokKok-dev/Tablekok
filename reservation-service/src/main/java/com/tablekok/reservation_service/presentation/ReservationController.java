@@ -1,6 +1,7 @@
 package com.tablekok.reservation_service.presentation;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -30,6 +31,7 @@ import com.tablekok.reservation_service.presentation.dto.response.CreateReservat
 import com.tablekok.reservation_service.presentation.dto.response.GetReservationResponse;
 import com.tablekok.reservation_service.presentation.dto.response.GetReservationsForCustomerResponse;
 import com.tablekok.reservation_service.presentation.dto.response.GetReservationsForOwnerResponse;
+import com.tablekok.reservation_service.presentation.dto.response.GetReservedTimeResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +51,7 @@ public class ReservationController {
 	) {
 		CreateReservationResult result = reservationService.createReservation(
 			request.toCommand(authUser.userId()));
+
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 			.path("/{reservationId}")
 			.buildAndExpand(result.reservationId())
@@ -60,13 +63,24 @@ public class ReservationController {
 				HttpStatus.CREATED));
 	}
 
+	// 특정 식당의 선택 일자의 예약 목록 조회(프론트에서 예약 가능 시간 선택 표시를 위해)
+	@GetMapping("/internal/store/{storeId}")
+	public ResponseEntity<GetReservedTimeResponse> getReservedTime(
+		@PathVariable("storeId") UUID storeId,
+		@RequestParam LocalDate date
+	) {
+		String as = "asd";
+		return ResponseEntity.ok(
+			GetReservedTimeResponse.fromResult(reservationService.getReservedTime(storeId, date)));
+	}
+
 	// 단건 예약 조회(리뷰에서 호출 용도)
-	@PreAuthorize("isAuthenticated()")
-	@GetMapping("/{reservationId}")
+	@GetMapping("/internal/review/{reservationId}")
 	public ResponseEntity<GetReservationResponse> getReservation(
 		@PathVariable("reservationId") UUID reservationId
 	) {
-		return ResponseEntity.ok(GetReservationResponse.fromResult(reservationService.getReservation(reservationId)));
+		return ResponseEntity.ok(
+			GetReservationResponse.fromResult(reservationService.getReservation(reservationId)));
 	}
 
 	// 예약 인원수 변경

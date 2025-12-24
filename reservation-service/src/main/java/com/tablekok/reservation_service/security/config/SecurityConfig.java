@@ -30,7 +30,9 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/v1/reservations/internal/**").permitAll()
 				.requestMatchers("/actuator/**").permitAll()
+				.requestMatchers("/error").permitAll()
 				.anyRequest().authenticated()
 			)
 			.addFilterBefore(headerAuthFilter, UsernamePasswordAuthenticationFilter.class);
