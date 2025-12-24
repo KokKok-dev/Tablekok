@@ -105,10 +105,6 @@ public class StoreWaitingStatus extends BaseEntity {
 		this.closeTime = vo.closeTime();
 	}
 
-	public void incrementNumber() {
-		this.latestAssignedNumber += 1;
-	}
-
 	public void startWaiting(int minHeadcount, int maxHeadcount) {
 		// 이미 활성화된 상태라면 예외처리
 		if (this.isWaitingEnabled()) {

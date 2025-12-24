@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -27,17 +26,18 @@ public class QueueService {
 	private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
 	private final CacheStore cacheStore;
 
-	@Value("${queue.sse.timeout}")
-	private Long TIMEOUT;
+	@Value("${queue.sse.ttl}")
+	private long SSE_TTL;
+
+	@Value("${reservation.entry.ttl}")
+	private long ENTRY_TTL;
 
 	@Value("${reservation.available.user.limit}")
 	private int availableUserLimit;
 
 	// 사용자를 대기열에 등록하고 생성한 이미터를 반환
 	public SseEmitter enterQueue(String userId) {
-		long score = Instant.now().toEpochMilli();
-
-		SseEmitter newEmitter = new SseEmitter(TIMEOUT);
+		SseEmitter newEmitter = new SseEmitter(SSE_TTL);
 		this.emitters.put(userId, newEmitter);
 
 		// 서버에서 emitter.complete()을 호출하거나, 클라이언트가 연결을 닫았을 때 실행될 콜백
@@ -48,56 +48,44 @@ public class QueueService {
 		);
 		newEmitter.onTimeout(newEmitter::complete);
 
-		if (cacheStore.getRank(userId) != null) {
-			cacheStore.removeUserFromQueue(userId);
+		Double expireAt = cacheStore.findAvailableUser(userId);
+		if (expireAt != null) {
+			long remainingTime = (long)(expireAt - System.currentTimeMillis());
+			sendEvent(newEmitter, userId, "entry", remainingTime);
+			return newEmitter;
 		}
 
-		cacheStore.addUserToQueue(userId, score);
+		cacheStore.addUserToQueue(userId, SSE_TTL);
 		Long rank = cacheStore.getRank(userId);
-		sendEvent(newEmitter, userId, "connect-rank", rank);
+		sendEvent(newEmitter, userId, "queue", rank);
 
 		return newEmitter;
 	}
 
-	// 유효한 예약 토큰인지 확인합니다.
-	public void validateToken(String userId, String token) {
-		String storedToken = cacheStore.getToken(userId);
+	// 예약 입장 유저인지 확인
+	public void validateAvailableUser(String userId) {
+		Double expireAt = cacheStore.findAvailableUser(userId);
 
-		if (!(storedToken != null && storedToken.equals(token))) {
-			throw new AppException(HotReservationErrorCode.RESERVATION_TOKEN_VALIDATION_FAILED);
+		if (expireAt == null) {
+			throw new AppException(HotReservationErrorCode.AVAILABLE_USER_VALIDATION_FAILED);
 		}
 	}
 
-	// 예약 완료 또는 시간 초과 시 사용자, 토큰, 이미터를 삭제합니다.
+	// 예약 완료 또는 시간 초과 시 사용자, 이미터를 삭제합니다.
 	public void completeReservation(String userId) {
-		cacheStore.removeToken(userId);
 		cacheStore.removeAvailableUser(userId);
+		convertAndSend(userId, "done", "예약이 종료되었습니다.");
 
-		SseEmitter emitter = emitters.get(userId);
-		if (emitter != null) {
-			emitter.complete();
-			emitters.remove(userId);
-		}
 	}
 
 	// 예약 허용 시간 초과 유저 삭제 및 입장 인원 반환
 	public int processExpiredUsers() {
 		long now = Instant.now().toEpochMilli();
 
-		Map<Object, Object> availableUsers = cacheStore.getAvailableUsers();
+		cacheStore.removeExpiredAvailableUsers(now);
+		int availableUserCount = cacheStore.getAvailableUserCount();
 
-		availableUsers.forEach((userIdObj, expirationTimeObj) -> {
-			String userId = userIdObj.toString();
-			long expirationTime = Long.parseLong(expirationTimeObj.toString());
-
-			// 만료 시간 초과 시
-			if (now >= expirationTime) {
-				// Redis에서 상태 삭제 (다음 대기열 사람을 받을 수 있게 됨)
-				completeReservation(userId);
-			}
-		});
-
-		return availableUserLimit - availableUsers.size();
+		return availableUserLimit - availableUserCount;
 
 	}
 
@@ -109,34 +97,56 @@ public class QueueService {
 			if (index < count) {
 
 				// 예약 가능자 처리
-				issueTokenAndRegister(userId);
+				addAvailableUser(userId);
 				index++;
 				continue;
 			}
 
 			// 나머지 사용자 순번 변경 알림. 몇명 입장 했는지 전달
-			SseEmitter emitter = emitters.get(userId);
-			sendEvent(emitter, userId, "update", count);
+			convertAndSend(userId, "update", String.valueOf(count));
 			index++;
 		}
 	}
 
-	// 예약 확정 토큰을 발급하고, AVAILABLE_USERS 리스트에 추가합니다.
-	private void issueTokenAndRegister(String userId) {
-		String token = UUID.randomUUID().toString();
-
-		// 토큰 자체를 String으로 저장 (인증용)
-		cacheStore.saveToken(userId, token);
-
-		// 예약 가능 상태인 사용자 목록에 추가 (만료 시각은 현재 시각 + 토큰 유효 시간)
-		long expirationTime = Instant.now().toEpochMilli();
-		cacheStore.addAvailableUser(userId, expirationTime);
-
+	// 예약 입장. AVAILABLE_USERS 리스트에 추가하고 알림
+	private void addAvailableUser(String userId) {
+		// 예약 가능 상태인 사용자 목록에 추가, 대기열에서 삭제
+		cacheStore.addAvailableUser(userId, ENTRY_TTL);
 		cacheStore.removeUserFromQueue(userId);
 
-		SseEmitter emitter = emitters.get(userId);
-		sendEvent(emitter, userId, "issue-token", token);
+		convertAndSend(userId, "entry", String.valueOf(ENTRY_TTL));
+	}
 
+	public void onMessage(String message) {
+		try {
+			String[] parts = message.split(":");
+			if (parts.length < 3)
+				return;
+
+			String userId = parts[0];
+			String eventName = parts[1];
+			String data = parts[2];
+
+			SseEmitter emitter = emitters.get(userId);
+
+			if (emitter != null) {
+				log.info("내 서버에 연결된 유저 {}에게 {} 이벤트 전송", userId, eventName);
+				sendEvent(emitter, userId, eventName, data);
+
+				if ("done".equals(eventName)) {
+					emitter.complete();
+					emitters.remove(userId);
+				}
+			}
+
+		} catch (Exception e) {
+			log.error("Redis 메시지 처리 중 오류 발생: {}", e.getMessage());
+		}
+	}
+
+	private void convertAndSend(String userId, String eventName, String data) {
+		String message = userId + ":" + eventName + ":" + data;
+		cacheStore.convertAndSend(message);
 	}
 
 	private <T> void sendEvent(SseEmitter emitter, String userId, String eventName, T data) {
