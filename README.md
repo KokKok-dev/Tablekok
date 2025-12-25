@@ -149,6 +149,7 @@
 
 <details>
 <summary><strong>2. 웨이팅 번호 발급 동시성 이슈 해결</strong></summary>
+   
 * **문제:** JMeter 테스트 시 동시 요청에 대해 중복된 웨이팅 번호가 발급되는 현상 발생.
 * **시도 1 (DB Lock):** `PESSIMISTIC_WRITE` 락 적용 → 정합성은 해결되었으나 대기 시간 누적으로 성능 저하 (72ms).
 * **시도 2 (Redis Atomic):** **Redis `INCR` 명령어 사용**.
@@ -157,10 +158,11 @@
 
 <details>
 <summary><strong>3. 리뷰 조회 성능 최적화 (Index & Cursor Paging)</strong></summary>
+   
 * **문제:** 100만 건 데이터 조회 시 Full Table Scan 발생 (61.96ms), Deep Pagination 시 성능 저하.
 * **해결:**
-    1.  복합 인덱스 적용 (`idx_store_created_at`).
-    2.  `Offset` 방식 대신 `Cursor` 기반 페이징(No-Offset) 도입.
+    1. 복합 인덱스 적용 (`idx_store_created_at`).
+    2. `Offset` 방식 대신 `Cursor` 기반 페이징(No-Offset) 도입.
 * **결과:** 쿼리 실행 시간 **32.45ms → 0.025ms (약 1,298배 개선)** 및 일정한 조회 속도 $O(1)$ 보장.
 </details>
 
