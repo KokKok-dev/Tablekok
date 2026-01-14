@@ -27,7 +27,7 @@ import com.tablekok.reservation_service.domain.entity.Reservation;
 import com.tablekok.reservation_service.domain.repository.ReservationRepository;
 import com.tablekok.reservation_service.domain.service.ReservationDomainService;
 import com.tablekok.reservation_service.domain.vo.StoreReservationPolicy;
-import com.tablekok.reservation_service.infrastructure.redis.RedissonLockMapper;
+import com.tablekok.reservation_service.global.annotation.DistributedLock;
 import com.tablekok.util.PageableUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -39,26 +39,23 @@ public class ReservationService {
 	private final ReservationDomainService reservationDomainService;
 	private final StoreClient storeClient;
 	private final StrategyFactory strategyFactory;
-	private final RedissonLockMapper redissonLockMapper;
 
 	// 예약 생성(접수)
+	@Transactional
+	@DistributedLock(key = "'reservation:' + #command.storeId() + ':' + #command.reservationDateTime().getReservationDate()")
 	public CreateReservationResult createReservation(CreateReservationCommand command) {
-		String lockKey = "reservation:" + command.storeId() + ":" + command.reservationDateTime().getReservationDate();
+		validateReservationConstraints(command);
 
-		return redissonLockMapper.executeWithLock(lockKey, 10L, 2L, () -> {
-			validateReservationConstraints(command);
+		Reservation newReservation = Reservation.create(
+			command.userId(),
+			command.storeId(),
+			command.reservationDateTime(),
+			command.headcount(),
+			command.deposit()
+		);
 
-			Reservation newReservation = Reservation.create(
-				command.userId(),
-				command.storeId(),
-				command.reservationDateTime(),
-				command.headcount(),
-				command.deposit()
-			);
-
-			reservationRepository.save(newReservation);
-			return CreateReservationResult.of(newReservation);
-		});
+		reservationRepository.save(newReservation);
+		return CreateReservationResult.of(newReservation);
 	}
 
 	// 생성 전 검증
