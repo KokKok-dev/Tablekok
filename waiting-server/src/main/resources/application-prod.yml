@@ -1,0 +1,61 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: waiting-service
+
+  datasource:
+    url: ${RDS_ENDPOINT_WAITING}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER_WAITING}
+    password: ${DB_PASSWORD_WAITING}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 500
+        use_sql_comments: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    open-in-view: false
+
+  jackson:
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: true
+
+  data:
+    redis:
+      host: ${CACHE_HOST}
+      port: ${CACHE_PORT}
+      ssl:
+        enabled: true
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_PROD_URL}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+waiting:
+  noshow:
+    timeout: ${TIME_OUT}
+
+lb:
+  dns:
+    store: ${LB_DNS_STORE}

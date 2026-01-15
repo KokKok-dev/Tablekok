@@ -4,8 +4,6 @@ server:
 spring:
   application:
     name: review-service
-#  profiles:
-#    active: dev
   datasource:
     url: ${DB_DEV_URL}
     driver-class-name: org.postgresql.Driver
@@ -22,6 +20,12 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     open-in-view: false
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 eureka:
   client:

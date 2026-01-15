@@ -2,6 +2,7 @@ package com.tablekok.reservation_service.infrastructure.repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -26,9 +27,9 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
 	}
 
 	@Override
-	public boolean existsByStoreIdAndReservationDateTimeReservationDateAndReservationDateTimeReservationTime(
+	public boolean existsByStoreIdAndReservationDateTime_ReservationDateAndReservationDateTime_ReservationTime(
 		UUID storeId, LocalDate reservationDate, LocalTime reservationTime) {
-		return reservationJpaRepository.existsByStoreIdAndReservationDateTimeReservationDateAndReservationDateTimeReservationTime(
+		return reservationJpaRepository.existsByStoreIdAndReservationDateTime_ReservationDateAndReservationDateTime_ReservationTime(
 			storeId, reservationDate, reservationTime);
 	}
 
@@ -52,6 +53,11 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
 	@Override
 	public Page<Reservation> findByStoreId(UUID storeId, Pageable pageable) {
 		return reservationJpaRepository.findByStoreId(storeId, pageable);
+	}
+
+	@Override
+	public List<Reservation> findByStoreIdAndReservationDateTime_ReservationDate(UUID storeId, LocalDate date) {
+		return reservationJpaRepository.findByStoreIdAndReservationDateTime_ReservationDate(storeId, date);
 	}
 
 }

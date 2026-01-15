@@ -46,4 +46,37 @@ public class JwtUtil {
 			.compact();
 	}
 
+	public String generateRefreshToken(UUID userId) {
+		Date now = new Date();
+		Date expiryDate = new Date(now.getTime() + refreshTokenExpiration);
+
+		return Jwts.builder()
+			.setSubject(userId.toString())
+			.setIssuedAt(now)
+			.setExpiration(expiryDate)
+			.signWith(getSigningKey(), SignatureAlgorithm.HS256)
+			.compact();
+	}
+
+	public boolean validateRefreshToken(String token) {
+		try {
+			Jwts.parserBuilder()
+				.setSigningKey(getSigningKey())
+				.build()
+				.parseClaimsJws(token);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public UUID getUserIdFromToken(String token) {
+		String subject = Jwts.parserBuilder()
+			.setSigningKey(getSigningKey())
+			.build()
+			.parseClaimsJws(token)
+			.getBody()
+			.getSubject();
+		return UUID.fromString(subject);
+	}
 }

@@ -1,0 +1,11 @@
+### 카테고리별 음식점 목록 조회
+GET http://localhost:19091/v1/search/category/32e96591-2af1-45ae-a4be-6c91311fccd0/stores
+Content-Type: application/json
+
+### 검색 API
+GET http://localhost:19091/v1/search?keyword=맛집
+Content-Type: application/json
+
+### 검색어 자동완성
+GET http://localhost:19091/v1/search/autocomplete?keyword=맛집
+Content-Type: application/json

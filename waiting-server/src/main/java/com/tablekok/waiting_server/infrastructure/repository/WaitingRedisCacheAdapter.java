@@ -57,6 +57,23 @@ public class WaitingRedisCacheAdapter implements WaitingCachePort {
 		return new ArrayList<>(members);
 	}
 
+	@Override
+	public int incrementAndGetLatestNumber(UUID storeId, int dbLastNumber) {
+		String key = "store:" + storeId + ":latest_number";
+
+		// 1. INCR 실행
+		Long result = redisTemplate.opsForValue().increment(key);
+
+		// 2. 만약 결과가 1이라면(키가 없었을 경우), DB 값으로 초기화
+		if (result == 1) {
+			// DB에서 가져온 값으로 다시 세팅 (DB값이 10이었다면 다음 번호는 11이 되어야 함)
+			redisTemplate.opsForValue().set(key, String.valueOf(dbLastNumber + 1));
+			return dbLastNumber + 1;
+		}
+
+		return result.intValue();
+	}
+
 	private String getQueueKey(UUID storeId) {
 		return WAITING_KEY_PREFIX + storeId.toString();
 	}

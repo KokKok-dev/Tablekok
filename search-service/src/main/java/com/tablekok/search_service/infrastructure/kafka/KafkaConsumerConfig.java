@@ -12,12 +12,15 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.converter.JsonMessageConverter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @EnableKafka
 @Configuration
-public class KafkaConfig {
+public class KafkaConsumerConfig {
 
 	@Value("${spring.kafka.bootstrap-servers}")
 	private String bootstrapServers;
@@ -32,18 +35,10 @@ public class KafkaConfig {
 		// 1. 기본 서버 설정
 		config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		config.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+		config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+		config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
-		// 2. 역직렬화(Deserialization) 설정
-		// Key는 String, Value는 JSON으로 처리
-		// ErrorHandlingDeserializer: 역직렬화 실패 시 무한루프 방지 및 에러 로깅용 래퍼
-		return new DefaultKafkaConsumerFactory<>(
-			config,
-			new StringDeserializer(),
-			new ErrorHandlingDeserializer<>(new JsonDeserializer<>(Object.class)
-				.trustedPackages("*") // ★ 중요: 모든 패키지의 DTO를 신뢰함
-				.forKeys() // Key가 아닌 Value에 대한 설정임을 명시하지 않으면 기본값
-			)
-		);
+		return new DefaultKafkaConsumerFactory<>(config);
 	}
 
 	@Bean
@@ -54,6 +49,12 @@ public class KafkaConfig {
 
 		// 필요하다면 에러 핸들러 설정 가능 (예: 재시도 로직 등)
 		// factory.setCommonErrorHandler(...);
+
+		// 핵심 3: JsonMessageConverter를 추가하여 리스너의 파라미터 타입(StoreEvent)으로 최종 변환 유도
+		ObjectMapper objectMapper = new ObjectMapper()
+			.registerModule(new JavaTimeModule())
+			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		factory.setRecordMessageConverter(new JsonMessageConverter(objectMapper));
 
 		return factory;
 	}

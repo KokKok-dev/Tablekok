@@ -82,7 +82,7 @@ public class ReservationDomainService {
 	// 중복 예약인지
 	@Transactional(readOnly = true)
 	public void validateDuplicateReservation(UUID storeId, ReservationDateTime reservationDateTime) {
-		boolean exists = reservationRepository.existsByStoreIdAndReservationDateTimeReservationDateAndReservationDateTimeReservationTime(
+		boolean exists = reservationRepository.existsByStoreIdAndReservationDateTime_ReservationDateAndReservationDateTime_ReservationTime(
 			storeId,
 			reservationDateTime.getReservationDate(),
 			reservationDateTime.getReservationTime()

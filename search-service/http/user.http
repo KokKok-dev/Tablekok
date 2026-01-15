@@ -1,0 +1,72 @@
+### customer 회원 가입
+POST http://localhost:8081/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "customer1@test.com",
+  "password": "Test1234!",
+  "username": "고객이다",
+  "phoneNumber": "01034567890"
+}
+
+
+### master 회원 가입
+POST http://localhost:8081/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "master@test.com",
+  "password": "Test1234!",
+  "username": "마스터다",
+  "phoneNumber": "01034567890"
+}
+
+### owner 회원 가입
+POST http://localhost:8081/v1/auth/signup
+Content-Type: application/json
+
+{
+  "email": "owner1@restaurant.com",
+  "password": "Test1234!",
+  "username": "홍길동",
+  "phoneNumber": "01098765432",
+  "businessNumber": "124-45-67890"
+}
+
+
+### customer 로그인
+POST http://localhost:19091/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "customer1@test.com",
+  "password": "Test1234!"
+}
+
+
+### owner 로그인
+POST http://localhost:19091/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "owner1@restaurant.com",
+  "password": "Test1234!"
+}
+
+### owner2 로그인
+POST http://localhost:19091/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "owner3@restaurant.com",
+  "password": "Test1234!"
+}
+
+### master 로그인
+POST http://localhost:8081/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "master@test.com",
+  "password": "Test1234!"
+}

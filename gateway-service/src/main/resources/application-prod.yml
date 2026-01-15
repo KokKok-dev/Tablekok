@@ -18,6 +18,7 @@ gateway:
     search: ${SEARCH_URI:lb://SEARCH-SERVICE}
     hot-reservation: ${HOT_RESERVATION_URI}
     reservation: ${RESERVATION_URI}
+    waiting: ${WAITING_URI}
 
 
 # Eureka 클라이언트 설정

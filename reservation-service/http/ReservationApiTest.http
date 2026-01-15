@@ -1,21 +1,25 @@
 ### 예약 생성 (예약 접수)
 POST http://localhost:19091/v1/reservations
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4NzYxOTgsImV4cCI6MTc2NTk2MjU5OH0.TiN-AQps4TaqvKt0soaba0qIhxWZ14mcPvWQ-atpObs
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyYTM0YmMwZC0yMWMxLTQzODEtYjg5Mi00YjExMjNiYjk2NGYiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjY1ODc0NjgsImV4cCI6MTc2NjY3Mzg2OH0.J8_5PdyhL1qAQ6i20V1jenJSB4jwLZm470gFBqJ9dEk
 
 {
-  "storeId": "f5bf4f7c-ccfc-4741-a7d4-3b1625fcf70e",
+  "storeId": "a0c33cc2-bafc-4031-8173-c95ad7fb7621",
   "reservationDateTime": "2025-12-29T16:00:00",
   "headcount": 3
 }
 
 
+### 해당 식당, 일자의 예약 목록 조회
+GET http://localhost:8084/v1/reservations/internal/store/a0c33cc2-bafc-4031-8173-c95ad7fb7621?date=2025-12-25
+
+
 ### 단건 예약 조회 (리뷰용)
-GET http://localhost:8084/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8
+GET http://localhost:8084/v1/reservations/internal/review/bee0e997-848a-44a6-b818-f8102cd1f833
 
 
 ### 예약 인원 변경
-PATCH http://localhost:8084/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8
+PATCH http://localhost:19091/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8
 Content-Type: application/json
 
 {
@@ -24,27 +28,26 @@ Content-Type: application/json
 
 
 ### 예약 취소 (고객/오너 전략 적용)
-PATCH http://localhost:8084/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8/cancel
+PATCH http://localhost:19091/v1/reservations/1b35833d-657c-4104-aecf-a13023f779a8/cancel
 
 
 ### 예약 노쇼 처리 (오너)
-PATCH http://localhost:8084/v1/reservations/owner/796b9651-5305-4616-9319-ec8cb440b547/noshow
+PATCH http://localhost:19091/v1/reservations/owner/796b9651-5305-4616-9319-ec8cb440b547/noshow
 
 
 ### 예약 확인(DONE, 오너)
-PATCH http://localhost:8084/v1/reservations/owner/1b35833d-657c-4104-aecf-a13023f779a8/done
+PATCH http://localhost:19091/v1/reservations/owner/1b35833d-657c-4104-aecf-a13023f779a8/done
 
 
 ### 예약 조회 (고객)
 GET http://localhost:19091/v1/reservations
 #GET http://tablekok-gateway-service-lb-1957092183.ap-northeast-2.elb.amazonaws.com/v1/reservations
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwZWY1ODdhMS1kZTkzLTQwZTUtYTRhOC0zZjYzMGFkMGU5OTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjU4NzYxOTgsImV4cCI6MTc2NTk2MjU5OH0.TiN-AQps4TaqvKt0soaba0qIhxWZ14mcPvWQ-atpObs
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyYTM0YmMwZC0yMWMxLTQzODEtYjg5Mi00YjExMjNiYjk2NGYiLCJyb2xlIjoiQ1VTVE9NRVIiLCJpYXQiOjE3NjY1MzEzOTEsImV4cCI6MTc2NjYxNzc5MX0.7GBRlCKTx67UfDlPGUbb_l5B6teZ86UTWT2V8pMLQnc
 
 
 ### 예약 조회 (오너)
-GET http://tablekok-gateway-service-lb-1957092183.ap-northeast-2.elb.amazonaws.com/v1/reservations/owner?
-    storeId=a0c33cc2-bafc-4031-8173-c95ad7fb7621
+GET localhost:19091/v1/reservations/owner?storeId=a0c33cc2-bafc-4031-8173-c95ad7fb7621
 
 
 ### 회원가입
@@ -64,7 +67,7 @@ POST http://localhost:19091/v1/auth/login
 Content-Type: application/json
 
 {
-  "email": "customer5@test.com",
+  "email": "customer2@test.com",
   "password": "Test1234!"
 }
 

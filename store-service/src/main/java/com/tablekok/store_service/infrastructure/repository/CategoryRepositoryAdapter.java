@@ -37,4 +37,9 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
 		return categoryJpaRepository.countByIdIn(categoryIds);
 	}
 
+	@Override
+	public List<Category> findAllByIdIn(List<UUID> ids) {
+		return categoryJpaRepository.findAllByIdIn(ids);
+	}
+
 }

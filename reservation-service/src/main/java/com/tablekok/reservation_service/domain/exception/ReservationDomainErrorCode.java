@@ -12,7 +12,7 @@ import lombok.Getter;
 public enum ReservationDomainErrorCode implements ErrorCode {
 	HOT_STORE_RESERVATION_NOT_ALLOWED(
 		"RESERVATION000",
-		"인기 음식점에서는 일반 예약이 불가능합니다.",
+		"일반 예약에서는 인기 음식점 예약이 불가능합니다.",
 		HttpStatus.BAD_REQUEST),
 
 	STORE_RESERVATION_DISABLED(

@@ -54,8 +54,11 @@ public class WaitingUserService {
 			command.nonMemberPhone()
 		);
 
-		status.incrementNumber();
-		int assignedNumber = status.getLatestAssignedNumber();
+		// 번호표 발급
+		int assignedNumber = waitingCache.incrementAndGetLatestNumber(
+			command.storeId(),
+			status.getLatestAssignedNumber() // Redis가 비었을 때 사용할 초기값
+		);
 
 		// Waiting 엔티티 생성 후 저장
 		Waiting newWaiting = command.toEntity(assignedNumber);
@@ -75,6 +78,9 @@ public class WaitingUserService {
 
 		// ((현재 대기 팀 수) / (테이블 수))* (팀당 평균 소요 시간) 공식을 사용하여 estimatedWaitMinutes를 계산
 		int estimatedTime = waitingUserDomainService.calculateEstimateWaitMinutes(rank, status);
+
+		// status update
+		storeWaitingStatusRepository.updateLatestNumberIfGreater(command.storeId(), assignedNumber);
 
 		// CreateWaitingResult DTO를 반환
 		return CreateWaitingResult.of(

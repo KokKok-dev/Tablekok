@@ -7,6 +7,7 @@ public record LoginResult(
 	String email,
 	String username,
 	String role,
-	String accessToken
+	String accessToken,
+	String refreshToken
 ) {
 }
