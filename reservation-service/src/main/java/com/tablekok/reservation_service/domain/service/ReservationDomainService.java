@@ -105,7 +105,7 @@ public class ReservationDomainService {
 		if (headcount > policy.getMaxHeadcount()) {
 			throw new AppException(ReservationDomainErrorCode.INVALID_RESERVATION_POLICY);
 		}
-		if (headcount < policy.getMinHeadCount()) {
+		if (headcount < policy.getMinHeadcount()) {
 			throw new AppException(ReservationDomainErrorCode.INVALID_RESERVATION_POLICY);
 		}
 	}
