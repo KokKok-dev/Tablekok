@@ -103,7 +103,7 @@ public class ReservationController {
 	}
 
 	// 예약 취소. 고객, 오너 전략패턴 적용
-	@PreAuthorize("hasAnyRole('COSTOMER', 'OWNER')")
+	@PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER')")
 	@PatchMapping("/{reservationId}/cancel")
 	public ResponseEntity<ApiResponse<Void>> cancelReservation(
 		@PathVariable("reservationId") UUID reservationId,
