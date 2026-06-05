@@ -1,9 +1,12 @@
 package com.tablekok.hotreservationservice.infrastructure.Cache;
 
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
 import com.tablekok.hotreservationservice.domain.repository.CacheStore;
@@ -24,9 +27,10 @@ public class CacheStoreImpl implements CacheStore {
 	private String PUB_SUB_CHANNEL;
 
 	@Override
-	public void addUserToQueue(String userId, long sseTtl) {
+	public void addUserToQueueIfAbsent(String userId, long sseTtl) {
 		long expireAt = System.currentTimeMillis() + sseTtl;
-		redisTemplate.opsForZSet().add(QUEUE_KEY, userId, (double)expireAt);
+		// ZADD NX: 큐에 없을 때만 추가 (이미 있으면 점수=순번 유지)
+		redisTemplate.opsForZSet().addIfAbsent(QUEUE_KEY, userId, (double)expireAt);
 	}
 
 	@Override
@@ -35,20 +39,36 @@ public class CacheStoreImpl implements CacheStore {
 	}
 
 	@Override
-	public Set<String> getAllUsers() {
-		// start: 0, end: -1 -> 전체 멤버 조회
-		return redisTemplate.opsForZSet().range(QUEUE_KEY, 0, -1);
+	public Set<String> getTopUsers(long count) {
+		// rank 0 ~ count-1 -> 점수 오름차순 상위 count 명
+		return redisTemplate.opsForZSet().range(QUEUE_KEY, 0, count - 1);
 	}
 
 	@Override
-	public void addAvailableUser(String userId, long entryTtl) {
+	public void addAvailableUsers(Collection<String> userIds, long entryTtl) {
+		if (userIds.isEmpty()) {
+			return;
+		}
 		long expireAt = System.currentTimeMillis() + entryTtl;
-		redisTemplate.opsForZSet().add(AVAILABLE_USERS_KEY, userId, (double)expireAt);
+		Set<ZSetOperations.TypedTuple<String>> tuples = userIds.stream()
+			.map(userId -> ZSetOperations.TypedTuple.of(userId, (double)expireAt))
+			.collect(Collectors.toSet());
+		// 멤버 여러 개를 단일 ZADD 로 추가
+		redisTemplate.opsForZSet().add(AVAILABLE_USERS_KEY, tuples);
 	}
 
 	@Override
 	public void removeUserFromQueue(String userId) {
 		redisTemplate.opsForZSet().remove(QUEUE_KEY, userId);
+	}
+
+	@Override
+	public void removeUsersFromQueue(Collection<String> userIds) {
+		if (userIds.isEmpty()) {
+			return;
+		}
+		// 멤버 여러 개를 단일 ZREM 으로 삭제
+		redisTemplate.opsForZSet().remove(QUEUE_KEY, userIds.toArray());
 	}
 
 	@Override
