@@ -5,6 +5,9 @@ spring:
   application:
     name: hot-reservation-service
 
+  config:
+    import: optional:file:.env[.properties]
+    
   data:
     redis:
       host: localhost
@@ -13,9 +16,9 @@ spring:
       password: systempass
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/tk-reservation
-    username: postgres
-    password: 1234
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
