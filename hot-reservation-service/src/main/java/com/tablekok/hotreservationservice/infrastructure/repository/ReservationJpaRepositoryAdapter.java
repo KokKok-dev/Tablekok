@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 import com.tablekok.hotreservationservice.domain.entity.Reservation;
+import com.tablekok.hotreservationservice.domain.entity.ReservationStatus;
 import com.tablekok.hotreservationservice.domain.repository.ReservationRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,10 +23,10 @@ public class ReservationJpaRepositoryAdapter implements ReservationRepository {
 	}
 
 	@Override
-	public boolean existsByStoreIdAndReservationDateTimeReservationDateAndReservationDateTimeReservationTime(
+	public boolean existsActiveReservation(
 		UUID storeId, LocalDate reservationDate, LocalTime reservationTime) {
-		return reservationJpaRepository.existsByStoreIdAndReservationDateTimeReservationDateAndReservationDateTimeReservationTime(
-			storeId, reservationDate, reservationTime);
+		return reservationJpaRepository.existsActiveReservation(
+			storeId, reservationDate, reservationTime, ReservationStatus.SLOT_FREEING);
 	}
 
 }
