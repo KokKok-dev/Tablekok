@@ -4,17 +4,13 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.tablekok.hotreservationservice.application.client.StoreClient;
 import com.tablekok.hotreservationservice.application.client.dto.GetStoreReservationPolicyResponse;
 import com.tablekok.hotreservationservice.application.dto.command.CreateReservationCommand;
 import com.tablekok.hotreservationservice.application.dto.result.CreateReservationResult;
-import com.tablekok.hotreservationservice.domain.entity.Reservation;
-import com.tablekok.hotreservationservice.domain.repository.ReservationRepository;
 import com.tablekok.hotreservationservice.domain.service.ReservationDomainService;
 import com.tablekok.hotreservationservice.domain.vo.StoreReservationPolicy;
-import com.tablekok.hotreservationservice.global.annotation.DistributedLock;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,40 +19,24 @@ import lombok.RequiredArgsConstructor;
 public class HotReservationService {
 	private final ReservationDomainService reservationDomainService;
 	private final StoreClient storeClient;
-	private final ReservationRepository reservationRepository;
+	private final ReservationCommitter reservationCommitter;
 
 	// 예약 생성(접수)
-	@Transactional
-	@DistributedLock(key = "'reservation:' + #command.storeId() + ':' + #command.reservationDateTime().getReservationDate()")
 	public CreateReservationResult createReservation(CreateReservationCommand command) {
-		validateReservationConstraints(command);
+		// 락 밖: 외부 호출이 필요한 사전 검증 (락 보유시간 최소화)
+		validateBeforeLock(command);
 
-		Reservation newReservation = Reservation.create(
-			command.userId(),
-			command.storeId(),
-			command.reservationDateTime(),
-			command.headcount(),
-			command.deposit()
-		);
-
-		reservationRepository.save(newReservation);
-		return CreateReservationResult.of(newReservation);
+		// 락 안: 중복 검증 + 저장 (분산락 + 트랜잭션)
+		return reservationCommitter.commit(command);
 	}
 
-	// 생성 전 검증
-	private void validateReservationConstraints(CreateReservationCommand command) {
-		// 도메인 서비스에서 검증하는게 맞나
+	// 락 밖 사전 검증 (인기 음식점 여부 / 예약 정책) — 외부(store-service) 호출
+	private void validateBeforeLock(CreateReservationCommand command) {
 		// 인기 음식점의 요청인지 확인
 		List<UUID> hotStores = storeClient.getHotStores();
 		reservationDomainService.validateHotStore(
 			hotStores,
 			command.storeId()
-		);
-
-		// 그 시간대 예약이 있는지
-		reservationDomainService.validateDuplicateReservation(
-			command.storeId(),
-			command.reservationDateTime()
 		);
 
 		// 예약할 음식점의 예약 정책에 준수하는지
