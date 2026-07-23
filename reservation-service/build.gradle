@@ -57,6 +57,8 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly 'com.h2database:h2'                                       // 리포지토리 슬라이스 테스트용 임베디드 DB
+    testImplementation 'org.testcontainers:junit-jupiter'                     // 동시성 락 테스트용 Redis 컨테이너
 }
 
 dependencyManagement {

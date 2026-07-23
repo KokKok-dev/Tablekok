@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.tablekok.exception.AppException;
 import com.tablekok.reservation_service.application.exception.ReservationErrorCode;
 import com.tablekok.reservation_service.domain.entity.Reservation;
+import com.tablekok.reservation_service.domain.entity.ReservationStatus;
 import com.tablekok.reservation_service.domain.repository.ReservationRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,10 +28,10 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
 	}
 
 	@Override
-	public boolean existsByStoreIdAndReservationDateTime_ReservationDateAndReservationDateTime_ReservationTime(
+	public boolean existsActiveReservation(
 		UUID storeId, LocalDate reservationDate, LocalTime reservationTime) {
-		return reservationJpaRepository.existsByStoreIdAndReservationDateTime_ReservationDateAndReservationDateTime_ReservationTime(
-			storeId, reservationDate, reservationTime);
+		return reservationJpaRepository.existsActiveReservation(
+			storeId, reservationDate, reservationTime, ReservationStatus.SLOT_FREEING);
 	}
 
 	@Override
