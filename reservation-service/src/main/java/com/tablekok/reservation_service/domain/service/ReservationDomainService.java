@@ -79,10 +79,10 @@ public class ReservationDomainService {
 		}
 	}
 
-	// 중복 예약인지
+	// 중복 예약인지 (취소/거절/삭제된 예약은 슬롯을 비우므로 판정에서 제외)
 	@Transactional(readOnly = true)
 	public void validateDuplicateReservation(UUID storeId, ReservationDateTime reservationDateTime) {
-		boolean exists = reservationRepository.existsByStoreIdAndReservationDateTime_ReservationDateAndReservationDateTime_ReservationTime(
+		boolean exists = reservationRepository.existsActiveReservation(
 			storeId,
 			reservationDateTime.getReservationDate(),
 			reservationDateTime.getReservationTime()

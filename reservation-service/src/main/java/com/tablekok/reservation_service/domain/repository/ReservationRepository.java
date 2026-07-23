@@ -14,8 +14,8 @@ public interface ReservationRepository {
 	// 예약 저장
 	void save(Reservation newReservation);
 
-	// 이미 그 시간대 예약이 있는지 확인용
-	boolean existsByStoreIdAndReservationDateTime_ReservationDateAndReservationDateTime_ReservationTime(
+	// 활성 예약(취소/거절/삭제 제외) 중 동일 슬롯이 있는지 확인용
+	boolean existsActiveReservation(
 		UUID storeId, LocalDate reservationDate, LocalTime reservationTime);
 
 	// 고객 본인의 예약을 가져옴
