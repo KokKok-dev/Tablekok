@@ -32,6 +32,10 @@ import com.tablekok.hotreservationservice.infrastructure.Cache.CacheStoreImpl;
  *   <li>B. PUBLISH 호출 수: CacheStore.convertAndSend 호출 횟수 (Mockito spy 로 카운트)</li>
  * </ul>
  *
+ * <p>큐 사이즈마다 {@value #REPEAT} 회 반복 측정하고, 회차별 수치와 평균/최소/최대를 함께 남긴다.
+ * 매 회차 시작 전 큐를 다시 시드하므로 각 회차는 동일 조건에서 측정된다.
+ * (1회차는 JIT·커넥션 워밍업이 섞이므로 평균과 별개로 표시된다)
+ *
  * <p>전제: 로컬 Redis 가 떠 있어야 한다(기본 localhost:6379 / pw systempass — dev 설정 기준).
  * 환경변수 REDIS_HOST / REDIS_PORT / REDIS_PASSWORD 로 덮어쓸 수 있다.
  *
@@ -51,6 +55,7 @@ class QueueServicePublishPerfTest {
 
 	private static final long ENTRY_TTL = 30_000L;
 	private static final int ENTRY_COUNT = 50; // 한 틱에 입장시키는 인원 (availableUserLimit 기준)
+	static final int REPEAT = 10;              // 큐 사이즈당 반복 측정 횟수
 
 	private LettuceConnectionFactory connectionFactory;
 	private RedisTemplate<String, String> redisTemplate;
@@ -88,48 +93,100 @@ class QueueServicePublishPerfTest {
 	@ParameterizedTest
 	@ValueSource(ints = {1_000, 5_000, 10_000})
 	void measurePublishCost(int queueSize) {
-		// 1) 큐 초기화 후 N명 시드
-		redisTemplate.delete(List.of(QUEUE_KEY, AVAILABLE_USERS_KEY));
-		for (int i = 0; i < queueSize; i++) {
-			redisTemplate.opsForZSet().add(QUEUE_KEY, "user-" + i, i);
+		double[] elapsedMs = new double[REPEAT];
+		long[] publishCalls = new long[REPEAT];
+
+		for (int round = 0; round < REPEAT; round++) {
+			// 1) 매 회차 큐 초기화 후 N명 재시드 (앞 회차의 입장 처리로 줄어든 큐를 원복)
+			seedQueue(queueSize);
+
+			// 2) 실제 Redis 를 쓰는 CacheStore + PUBLISH 카운트용 spy (회차별 카운트를 위해 매번 새로 생성)
+			CacheStore store = Mockito.spy(newCacheStore());
+			QueueService service = new QueueService(store, new ObjectMapper());
+			ReflectionTestUtils.setField(service, "ENTRY_TTL", ENTRY_TTL);
+
+			// 3) 측정: 틱 소요시간(A)
+			long start = System.nanoTime();
+			service.processAllUsers(ENTRY_COUNT);
+			elapsedMs[round] = (System.nanoTime() - start) / 1_000_000.0;
+
+			// 4) 측정: PUBLISH 호출 수(B)
+			publishCalls[round] = Mockito.mockingDetails(store).getInvocations().stream()
+				.filter(inv -> "convertAndSend".equals(inv.getMethod().getName()))
+				.count();
 		}
-
-		// 2) 실제 Redis 를 쓰는 CacheStore + PUBLISH 카운트용 spy
-		CacheStoreImpl realStore = new CacheStoreImpl(redisTemplate);
-		ReflectionTestUtils.setField(realStore, "QUEUE_KEY", QUEUE_KEY);
-		ReflectionTestUtils.setField(realStore, "AVAILABLE_USERS_KEY", AVAILABLE_USERS_KEY);
-		ReflectionTestUtils.setField(realStore, "PUB_SUB_CHANNEL", PUB_SUB_CHANNEL);
-		CacheStore store = Mockito.spy(realStore);
-
-		QueueService service = new QueueService(store, new ObjectMapper());
-		ReflectionTestUtils.setField(service, "ENTRY_TTL", ENTRY_TTL);
-
-		// 3) 측정: 틱 소요시간(A)
-		long start = System.nanoTime();
-		service.processAllUsers(ENTRY_COUNT);
-		long elapsedMs = (System.nanoTime() - start) / 1_000_000;
-
-		// 4) 측정: PUBLISH 호출 수(B)
-		long publishCalls = Mockito.mockingDetails(store).getInvocations().stream()
-			.filter(inv -> "convertAndSend".equals(inv.getMethod().getName()))
-			.count();
 
 		record(queueSize, elapsedMs, publishCalls);
 	}
 
-	private void record(int queueSize, long elapsedMs, long publishCalls) {
-		String line = String.format(
-			"[QUEUE-PERF] queueSize=%d  entryCount=%d  elapsedMs=%d  publishCalls=%d",
-			queueSize, ENTRY_COUNT, elapsedMs, publishCalls);
-		System.out.println(line);
+	// 큐를 비우고 queueSize 명을 점수 오름차순으로 다시 채운다
+	private void seedQueue(int queueSize) {
+		redisTemplate.delete(List.of(QUEUE_KEY, AVAILABLE_USERS_KEY));
+		for (int i = 0; i < queueSize; i++) {
+			redisTemplate.opsForZSet().add(QUEUE_KEY, "user-" + i, i);
+		}
+	}
+
+	private CacheStoreImpl newCacheStore() {
+		CacheStoreImpl realStore = new CacheStoreImpl(redisTemplate);
+		ReflectionTestUtils.setField(realStore, "QUEUE_KEY", QUEUE_KEY);
+		ReflectionTestUtils.setField(realStore, "AVAILABLE_USERS_KEY", AVAILABLE_USERS_KEY);
+		ReflectionTestUtils.setField(realStore, "PUB_SUB_CHANNEL", PUB_SUB_CHANNEL);
+		return realStore;
+	}
+
+	private void record(int queueSize, double[] elapsedMs, long[] publishCalls) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(String.format("[QUEUE-PERF] queueSize=%d  entryCount=%d  repeat=%d%n",
+			queueSize, ENTRY_COUNT, REPEAT));
+
+		// 회차별 수치
+		for (int round = 0; round < REPEAT; round++) {
+			sb.append(String.format("  round %2d: elapsedMs=%7.2f  publishCalls=%d%n",
+				round + 1, elapsedMs[round], publishCalls[round]));
+		}
+
+		// 요약: 평균 / 최소 / 최대 (1회차는 워밍업이 섞이므로 제외한 평균도 함께)
+		sb.append(String.format(
+			"  ==> avg=%.2fms  min=%.2fms  max=%.2fms  avg(2~%d회차)=%.2fms  publishCalls=%d(고정)%n",
+			average(elapsedMs, 0), min(elapsedMs), max(elapsedMs),
+			REPEAT, average(elapsedMs, 1), publishCalls[0]));
+
+		String report = sb.toString();
+		System.out.print(report);
 		try {
 			Path out = Path.of("build", "queue-perf-result.txt");
 			Files.createDirectories(out.getParent());
-			Files.writeString(out, line + System.lineSeparator(),
+			Files.writeString(out, report,
 				StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			System.out.println("[QUEUE-PERF] 결과 파일 기록 실패: " + e.getMessage());
 		}
+	}
+
+	// fromIndex 회차부터의 평균 (0 이면 전체 평균, 1 이면 워밍업 1회차 제외)
+	private static double average(double[] values, int fromIndex) {
+		double sum = 0;
+		for (int i = fromIndex; i < values.length; i++) {
+			sum += values[i];
+		}
+		return sum / (values.length - fromIndex);
+	}
+
+	private static double min(double[] values) {
+		double m = values[0];
+		for (double v : values) {
+			m = Math.min(m, v);
+		}
+		return m;
+	}
+
+	private static double max(double[] values) {
+		double m = values[0];
+		for (double v : values) {
+			m = Math.max(m, v);
+		}
+		return m;
 	}
 
 	private static String envOrDefault(String key, String def) {
