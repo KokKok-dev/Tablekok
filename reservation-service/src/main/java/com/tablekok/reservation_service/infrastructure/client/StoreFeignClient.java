@@ -14,7 +14,7 @@ import com.tablekok.dto.ApiResponse;
 import com.tablekok.reservation_service.application.client.dto.request.OwnerVerificationRequest;
 import com.tablekok.reservation_service.application.client.dto.response.GetStoreReservationPolicyResponse;
 
-@FeignClient(name = "store-service", url = "${lb.dns.store}")
+@FeignClient(name = "store-service")
 public interface StoreFeignClient {
 
 	@GetMapping("/v1/stores/{storeId}/reservation-policy")
