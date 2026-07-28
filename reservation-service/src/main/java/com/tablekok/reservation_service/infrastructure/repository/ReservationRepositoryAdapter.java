@@ -57,8 +57,9 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
 	}
 
 	@Override
-	public List<Reservation> findByStoreIdAndReservationDateTime_ReservationDate(UUID storeId, LocalDate date) {
-		return reservationJpaRepository.findByStoreIdAndReservationDateTime_ReservationDate(storeId, date);
+	public List<Reservation> findActiveByStoreIdAndDate(UUID storeId, LocalDate date) {
+		return reservationJpaRepository.findActiveByStoreIdAndDate(
+			storeId, date, ReservationStatus.SLOT_FREEING);
 	}
 
 }

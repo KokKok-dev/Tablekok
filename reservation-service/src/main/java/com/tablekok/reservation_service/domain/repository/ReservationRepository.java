@@ -30,6 +30,6 @@ public interface ReservationRepository {
 	// 해당 음식점의 모든 예약 조회
 	Page<Reservation> findByStoreId(UUID storeId, Pageable normalizedPageable);
 
-	// 해당 식당의 특정 일 예약 목록 조회
-	List<Reservation> findByStoreIdAndReservationDateTime_ReservationDate(UUID storeId, LocalDate date);
+	// 해당 식당의 특정 일 활성 예약 목록 조회 (취소/거절/삭제 제외 — 예약 가능 시간 표시용)
+	List<Reservation> findActiveByStoreIdAndDate(UUID storeId, LocalDate date);
 }

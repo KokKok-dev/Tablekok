@@ -71,8 +71,7 @@ public class ReservationService {
 	// 특정 식당의 선택 일자의 예약 목록 조회(프론트에서 예약 가능 시간 선택 표시를 위해)
 	@Transactional(readOnly = true)
 	public GetReservedTimeResult getReservedTime(UUID storeId, LocalDate date) {
-		List<Reservation> findReservations = reservationRepository.findByStoreIdAndReservationDateTime_ReservationDate(
-			storeId, date);
+		List<Reservation> findReservations = reservationRepository.findActiveByStoreIdAndDate(storeId, date);
 		return GetReservedTimeResult.of(findReservations);
 	}
 

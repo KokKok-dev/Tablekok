@@ -39,5 +39,16 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, UUI
 
 	Page<Reservation> findByStoreId(UUID storeId, Pageable pageable);
 
-	List<Reservation> findByStoreIdAndReservationDateTime_ReservationDate(UUID storeId, LocalDate date);
+	@Query("""
+		select r from Reservation r
+		 where r.storeId = :storeId
+		   and r.reservationDateTime.reservationDate = :reservationDate
+		   and r.reservationStatus not in :excludedStatuses
+		   and r.deletedAt is null
+		""")
+	List<Reservation> findActiveByStoreIdAndDate(
+		@Param("storeId") UUID storeId,
+		@Param("reservationDate") LocalDate reservationDate,
+		@Param("excludedStatuses") Collection<ReservationStatus> excludedStatuses
+	);
 }
